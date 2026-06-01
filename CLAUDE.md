@@ -75,3 +75,12 @@ For multi-step tasks, state a brief plan:
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
 ---
+
+## Design System
+
+**Rule: Use Shadcn UI components exclusively.**
+
+- All UI components must be added via `pnpm dlx shadcn@latest add <component>`.
+- Custom components are only permitted when Shadcn has no equivalent.
+- Never install third-party component libraries (MUI, Ant Design, Chakra, etc.).
+- Icon library: `lucide-react` (already configured in `components.json`).
