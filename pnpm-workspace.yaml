@@ -4,3 +4,7 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
   msw: false
+  esbuild: true
+
+overrides:
+  kysely: "0.28.17"
