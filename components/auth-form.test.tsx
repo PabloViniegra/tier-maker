@@ -74,7 +74,7 @@ describe('AuthForm — login mode', () => {
     })
   })
 
-  it('redirects to home on successful login', async () => {
+  it('redirects to dashboard on successful login', async () => {
     mockSignInEmail.mockResolvedValue({ data: { session: {} }, error: null } as never)
 
     render(<AuthForm mode="login" />)
@@ -83,7 +83,7 @@ describe('AuthForm — login mode', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/')
+      expect(mockPush).toHaveBeenCalledWith('/dashboard')
     })
   })
 
@@ -171,7 +171,7 @@ describe('AuthForm — register mode', () => {
     })
   })
 
-  it('redirects to home on successful registration', async () => {
+  it('redirects to dashboard on successful registration', async () => {
     mockSignUpEmail.mockResolvedValue({ data: { user: {} }, error: null } as never)
 
     render(<AuthForm mode="register" />)
@@ -182,7 +182,7 @@ describe('AuthForm — register mode', () => {
     await user.click(screen.getByRole('button', { name: /sign up/i }))
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/')
+      expect(mockPush).toHaveBeenCalledWith('/dashboard')
     })
   })
 
