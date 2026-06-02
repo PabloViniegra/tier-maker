@@ -2,7 +2,6 @@
 
 import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
-import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierRows, tierTemplates } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
@@ -91,20 +90,20 @@ export async function createTierListAction(
     ...data.rows.flatMap((r) => r.items),
   ]
 
-  const [tpl] = await db
-    .insert(tierTemplates)
-    .values({
-      title: data.title,
-      description: data.description ?? null,
-      category: data.category,
-      creatorId: session.user.id,
-      sidebarItems,
-    })
-    .returning({ id: tierTemplates.id })
+  const { id } = await db.transaction(async (tx) => {
+    const [tpl] = await tx
+      .insert(tierTemplates)
+      .values({
+        title: data.title,
+        description: data.description ?? null,
+        category: data.category,
+        creatorId: session.user.id,
+        sidebarItems,
+      })
+      .returning({ id: tierTemplates.id })
 
-  try {
     if (data.rows.length > 0) {
-      await db.insert(tierRows).values(
+      await tx.insert(tierRows).values(
         data.rows.map((row, index) => ({
           templateId: tpl.id,
           label: row.label,
@@ -113,13 +112,12 @@ export async function createTierListAction(
         }))
       )
     }
-  } catch {
-    await db.delete(tierTemplates).where(eq(tierTemplates.id, tpl.id))
-    throw new Error('Could not save tier rows')
-  }
+
+    return tpl
+  })
 
   revalidatePath('/dashboard')
-  return { id: tpl.id }
+  return { id }
 }
 
 export async function getCategoryPresets(): Promise<string[]> {

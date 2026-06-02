@@ -1,13 +1,13 @@
 import { z } from 'zod'
 
-export const MIN_ROW_COUNT = 5
+export const MIN_ROW_COUNT = 1
 export const MAX_ROW_COUNT = 10
 export const MIN_ITEM_COUNT = 0
 export const MAX_ITEM_COUNT = 30
 export const MAX_TITLE_LENGTH = 80
 export const MAX_DESCRIPTION_LENGTH = 500
 export const MAX_CATEGORY_LENGTH = 40
-export const MAX_LABEL_LENGTH = 4
+export const MAX_LABEL_LENGTH = 20
 
 export const TIER_COLORS = {
   S: 'oklch(0.65 0.22 250)',
