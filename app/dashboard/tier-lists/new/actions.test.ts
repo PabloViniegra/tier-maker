@@ -28,7 +28,7 @@ vi.mock('@/lib/db', () => ({
   },
 }))
 
-import { uploadImagesAction, createTierListAction } from './actions'
+import { uploadImagesAction, createTierListAction, getCategoryPresets } from './actions'
 import { defaultTierRows } from '@/lib/validators/tier-list'
 
 function makeFile(name: string, type: string, size: number): File {
@@ -171,5 +171,17 @@ describe('createTierListAction', () => {
     await expect(
       createTierListAction({ ...validInput, bankItems: tooMany })
     ).rejects.toThrow()
+  })
+})
+
+describe('getCategoryPresets', () => {
+  it('returns exactly 15 presets', async () => {
+    const presets = await getCategoryPresets()
+    expect(presets).toHaveLength(15)
+  })
+
+  it('returns only non-empty strings', async () => {
+    const presets = await getCategoryPresets()
+    expect(presets.every((p) => typeof p === 'string' && p.length > 0)).toBe(true)
   })
 })

@@ -2,14 +2,17 @@
 
 import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
+import { and, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { tierRows, tierTemplates } from '@/lib/db/schema'
+import { tierRows, tierTemplates, userCategoryPresets } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
 import {
   createTierListSchema,
   imageUploadSchema,
+  MAX_CATEGORY_LENGTH,
   type CreateTierListInput,
 } from '@/lib/validators/tier-list'
+import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 const EXT_BY_MIME: Record<string, string> = {
@@ -129,5 +132,47 @@ export async function getCategoryPresets(): Promise<string[]> {
     'TV',
     'Deportes',
     'Comida',
+    'Libros',
+    'Tecnología',
+    'Política',
+    'Moda',
+    'Arte',
+    'Ciencia',
+    'Naturaleza',
+    'Historia',
   ]
+}
+
+export async function saveUserCategoryPresetAction(
+  name: string
+): Promise<UserCategoryPreset | null> {
+  const session = await getSession()
+  if (!session) throw new Error('Unauthenticated')
+
+  const trimmed = name.trim()
+  if (!trimmed || trimmed.length > MAX_CATEGORY_LENGTH) {
+    throw new Error(`Category name must be between 1 and ${MAX_CATEGORY_LENGTH} characters`)
+  }
+
+  const [row] = await db
+    .insert(userCategoryPresets)
+    .values({ userId: session.user.id, name: trimmed })
+    .onConflictDoNothing()
+    .returning({ id: userCategoryPresets.id, name: userCategoryPresets.name })
+
+  return row ?? null
+}
+
+export async function deleteUserCategoryPresetAction(id: string): Promise<void> {
+  const session = await getSession()
+  if (!session) throw new Error('Unauthenticated')
+
+  await db
+    .delete(userCategoryPresets)
+    .where(
+      and(
+        eq(userCategoryPresets.id, id),
+        eq(userCategoryPresets.userId, session.user.id)
+      )
+    )
 }

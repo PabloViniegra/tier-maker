@@ -15,11 +15,14 @@ import { uploadImagesAction, createTierListAction } from '../actions'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { BANK_DROPPABLE, rowIdFromDroppableId } from './constants'
+import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
 
 export function TierListCreator({
   categoryPresets,
+  userCategoryPresets,
 }: {
   categoryPresets: string[]
+  userCategoryPresets: UserCategoryPreset[]
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -175,7 +178,7 @@ export function TierListCreator({
         <SaveBar onSave={handleSave} isSaving={isPending} />
       </header>
 
-      <MetadataPanel categoryPresets={categoryPresets} />
+      <MetadataPanel categoryPresets={categoryPresets} userPresets={userCategoryPresets} />
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className='grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]'>

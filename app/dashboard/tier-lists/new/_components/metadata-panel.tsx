@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { useState, useTransition } from 'react'
+import { Check, ChevronsUpDown, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Command,
@@ -10,6 +11,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from '@/components/ui/command'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -17,15 +19,69 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { cn } from '@/lib/utils'
+import {
+  saveUserCategoryPresetAction,
+  deleteUserCategoryPresetAction,
+} from '../actions'
+import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
 
 export function MetadataPanel({
   categoryPresets,
+  userPresets: initialUserPresets,
 }: {
   categoryPresets: string[]
+  userPresets: UserCategoryPreset[]
 }) {
   const { metadata, setMetadata } = useTierEditor()
   const [categoryOpen, setCategoryOpen] = useState(false)
   const [categoryInput, setCategoryInput] = useState(metadata.category)
+  const [userPresets, setUserPresets] = useState(initialUserPresets)
+  const [isPending, startTransition] = useTransition()
+
+  const filteredDefaults = categoryPresets.filter((p) =>
+    p.toLowerCase().includes(categoryInput.toLowerCase().trim())
+  )
+  const filteredUser = userPresets.filter((p) =>
+    p.name.toLowerCase().includes(categoryInput.toLowerCase().trim())
+  )
+  const inputTrimmed = categoryInput.trim()
+  const isAlreadyPreset =
+    categoryPresets.some((p) => p.toLowerCase() === inputTrimmed.toLowerCase()) ||
+    userPresets.some((p) => p.name.toLowerCase() === inputTrimmed.toLowerCase())
+
+  function selectCategory(value: string) {
+    setMetadata({ category: value })
+    setCategoryInput(value)
+    setCategoryOpen(false)
+  }
+
+  function handleSaveAndUse() {
+    if (!inputTrimmed) return
+    startTransition(async () => {
+      try {
+        const saved = await saveUserCategoryPresetAction(inputTrimmed)
+        if (saved) {
+          setUserPresets((prev) => [saved, ...prev])
+          toast.success(`"${inputTrimmed}" guardado como preset`)
+        }
+        selectCategory(inputTrimmed)
+      } catch {
+        toast.error('No se pudo guardar el preset')
+      }
+    })
+  }
+
+  function handleDeletePreset(preset: UserCategoryPreset) {
+    setUserPresets((prev) => prev.filter((p) => p.id !== preset.id))
+    startTransition(async () => {
+      try {
+        await deleteUserCategoryPresetAction(preset.id)
+      } catch {
+        setUserPresets((prev) => [preset, ...prev])
+        toast.error('No se pudo eliminar el preset')
+      }
+    })
+  }
 
   return (
     <section className='grid grid-cols-1 gap-3 rounded-lg border border-border bg-surface p-4 md:grid-cols-3'>
@@ -74,35 +130,38 @@ export function MetadataPanel({
               <CommandInput
                 value={categoryInput}
                 onValueChange={setCategoryInput}
-                placeholder='Search or type a custom one...'
+                placeholder='Buscar o escribir una categoría...'
               />
               <CommandList>
                 <CommandEmpty>
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setMetadata({ category: categoryInput.trim() })
-                      setCategoryOpen(false)
-                    }}
-                    className='text-primary hover:underline'
-                  >
-                    Use &quot;{categoryInput.trim()}&quot;
-                  </button>
+                  <div className='flex flex-col gap-1 p-1'>
+                    <button
+                      type='button'
+                      onClick={() => selectCategory(inputTrimmed)}
+                      className='rounded px-2 py-1.5 text-sm text-primary hover:bg-accent hover:text-accent-foreground text-left'
+                    >
+                      Usar &quot;{inputTrimmed}&quot;
+                    </button>
+                    {inputTrimmed && !isAlreadyPreset && (
+                      <button
+                        type='button'
+                        disabled={isPending}
+                        onClick={handleSaveAndUse}
+                        className='rounded px-2 py-1.5 text-sm font-medium text-primary hover:bg-accent hover:text-accent-foreground text-left disabled:opacity-50'
+                      >
+                        Guardar y usar &quot;{inputTrimmed}&quot;
+                      </button>
+                    )}
+                  </div>
                 </CommandEmpty>
-                <CommandGroup heading='Presets'>
-                  {categoryPresets
-                    .filter((p) =>
-                      p.toLowerCase().includes(categoryInput.toLowerCase().trim())
-                    )
-                    .map((preset) => (
+
+                {filteredDefaults.length > 0 && (
+                  <CommandGroup heading='Presets'>
+                    {filteredDefaults.map((preset) => (
                       <CommandItem
                         key={preset}
                         value={preset}
-                        onSelect={(value) => {
-                          setMetadata({ category: value })
-                          setCategoryInput(value)
-                          setCategoryOpen(false)
-                        }}
+                        onSelect={selectCategory}
                       >
                         {preset}
                         <Check
@@ -113,7 +172,43 @@ export function MetadataPanel({
                         />
                       </CommandItem>
                     ))}
-                </CommandGroup>
+                  </CommandGroup>
+                )}
+
+                {filteredUser.length > 0 && (
+                  <>
+                    {filteredDefaults.length > 0 && <CommandSeparator />}
+                    <CommandGroup heading='Mis categorías'>
+                      {filteredUser.map((preset) => (
+                        <CommandItem
+                          key={preset.id}
+                          value={preset.name}
+                          onSelect={selectCategory}
+                          className='group'
+                        >
+                          <span className='flex-1'>{preset.name}</span>
+                          <Check
+                            className={cn(
+                              'opacity-0 shrink-0',
+                              metadata.category === preset.name && 'opacity-100'
+                            )}
+                          />
+                          <button
+                            type='button'
+                            aria-label={`Eliminar preset ${preset.name}`}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeletePreset(preset)
+                            }}
+                            className='ml-1 shrink-0 rounded opacity-0 group-hover:opacity-100 hover:text-destructive'
+                          >
+                            <X size={12} />
+                          </button>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </>
+                )}
               </CommandList>
             </Command>
           </PopoverContent>
