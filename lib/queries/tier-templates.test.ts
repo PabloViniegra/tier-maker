@@ -6,7 +6,11 @@ vi.mock('@/lib/db', () => ({
   },
 }))
 
-import { getUserTierListStats, getRecentTierLists } from './tier-templates'
+import {
+  getUserTierListStats,
+  getRecentTierLists,
+  getAllUserTierLists,
+} from './tier-templates'
 import { db } from '@/lib/db'
 
 const mockDb = db as unknown as {
@@ -180,5 +184,107 @@ describe('getRecentTierLists', () => {
     await getRecentTierLists('user-1', 5)
 
     expect(limitMock).toHaveBeenCalledWith(5)
+  })
+})
+
+describe('getAllUserTierLists', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns all tier lists for the given user without a limit', async () => {
+    const rows = [
+      {
+        id: 'a',
+        title: 'Anime',
+        category: 'anime',
+        sidebarItems: ['Naruto', 'Bleach'],
+        createdAt: new Date('2026-06-01'),
+      },
+      {
+        id: 'b',
+        title: 'Movies',
+        category: 'cine',
+        sidebarItems: ['Inception'],
+        createdAt: new Date('2026-05-15'),
+      },
+    ]
+    const orderBy = vi.fn().mockResolvedValue(rows)
+    const where = vi.fn().mockReturnValue({ orderBy })
+    const from = vi.fn().mockReturnValue({ where })
+    mockDb.select.mockReturnValue({ from })
+
+    const result = await getAllUserTierLists('user-1')
+
+    expect(result).toHaveLength(2)
+    expect(result.map((r) => r.id)).toEqual(['a', 'b'])
+    expect(orderBy).toHaveBeenCalledTimes(1)
+  })
+
+  it('pre-computes itemCount from sidebarItems length', async () => {
+    const rows = [
+      {
+        id: 'a',
+        title: 'Anime',
+        category: 'anime',
+        sidebarItems: ['Naruto', 'Bleach', 'One Piece'],
+        createdAt: new Date('2026-06-01'),
+      },
+    ]
+    mockDb.select.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockResolvedValue(rows),
+        }),
+      }),
+    })
+
+    const result = await getAllUserTierLists('user-1')
+
+    expect(result[0].itemCount).toBe(3)
+  })
+
+  it('returns an empty array when the user has no tier lists', async () => {
+    mockDb.select.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockResolvedValue([]),
+        }),
+      }),
+    })
+
+    const result = await getAllUserTierLists('user-empty')
+
+    expect(result).toEqual([])
+  })
+
+  it('maps the row shape to the TierListSummary contract', async () => {
+    const date = new Date('2026-06-01')
+    const rows = [
+      {
+        id: 'x',
+        title: 'Best Albums',
+        category: 'música',
+        sidebarItems: ['a', 'b', 'c', 'd'],
+        createdAt: date,
+      },
+    ]
+    mockDb.select.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockResolvedValue(rows),
+        }),
+      }),
+    })
+
+    const result = await getAllUserTierLists('user-1')
+
+    expect(result[0]).toEqual({
+      id: 'x',
+      title: 'Best Albums',
+      category: 'música',
+      itemCount: 4,
+      createdAt: date,
+    })
   })
 })

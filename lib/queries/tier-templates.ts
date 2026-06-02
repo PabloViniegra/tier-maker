@@ -57,3 +57,27 @@ export async function getRecentTierLists(
     createdAt: r.createdAt,
   }))
 }
+
+export async function getAllUserTierLists(
+  userId: string
+): Promise<TierListSummary[]> {
+  const rows = await db
+    .select({
+      id: tierTemplates.id,
+      title: tierTemplates.title,
+      category: tierTemplates.category,
+      sidebarItems: tierTemplates.sidebarItems,
+      createdAt: tierTemplates.createdAt,
+    })
+    .from(tierTemplates)
+    .where(eq(tierTemplates.creatorId, userId))
+    .orderBy(desc(tierTemplates.createdAt))
+
+  return rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    category: r.category,
+    itemCount: r.sidebarItems.length,
+    createdAt: r.createdAt,
+  }))
+}
