@@ -128,7 +128,7 @@ function LoginForm() {
         return
       }
 
-      router.push('/')
+      router.push('/dashboard')
     } catch {
       toast.error('Something went wrong. Please try again.')
     }
@@ -201,7 +201,7 @@ function RegisterForm() {
         return
       }
 
-      router.push('/')
+      router.push('/dashboard')
     } catch {
       toast.error('Something went wrong. Please try again.')
     }
