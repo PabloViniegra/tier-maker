@@ -40,7 +40,7 @@ async function generateSchema() {
     return true
   } catch (error) {
     console.error('❌ Migration generation failed')
-    console.error((error as any).message)
+    console.error(error instanceof Error ? error.message : String(error))
 
     console.log('\n💡 Troubleshooting:')
     console.log('   • Ensure drizzle.config.ts is in your project root')
@@ -49,7 +49,7 @@ async function generateSchema() {
     console.log('   • Review guides/troubleshooting.md for common issues')
     console.log('   • See references/migrations.md for migration patterns')
 
-    const errorMessage = (error as any).message.toLowerCase()
+    const errorMessage = error instanceof Error ? error.message.toLowerCase() : ''
 
     if (errorMessage.includes('url') || errorMessage.includes('undefined')) {
       console.log('\n⚠️  Environment variable issue detected:')

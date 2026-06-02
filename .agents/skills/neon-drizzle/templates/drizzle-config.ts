@@ -25,9 +25,9 @@ if (!dbUrl) {
   throw new Error('DATABASE_URL environment variable is not set')
 }
 
-// Determine connection type based on environment
-const isServerless =
-  process.env.RUNTIME === 'edge' || process.env.VERCEL_ENV === 'production'
+// Determine connection type based on environment (used in edge environments)
+// const isServerless =
+//   process.env.RUNTIME === 'edge' || process.env.VERCEL_ENV === 'production'
 
 export default {
   schema: './src/db/schema.ts', // Path to your schema file

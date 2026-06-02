@@ -48,7 +48,7 @@ async function runMigrations() {
     return true
   } catch (error) {
     console.error('❌ Migration failed')
-    console.error((error as any).message)
+    console.error(error instanceof Error ? error.message : String(error))
 
     console.log('\n💡 Troubleshooting:')
     console.log('   • Ensure ./src/db/migrations directory exists')
@@ -62,7 +62,7 @@ async function runMigrations() {
       '   • See references/migrations.md for detailed migration guide'
     )
 
-    const errorMessage = (error as any).message.toLowerCase()
+    const errorMessage = error instanceof Error ? error.message.toLowerCase() : ''
 
     if (
       errorMessage.includes('connect') ||

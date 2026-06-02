@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type UseFormRegisterReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -46,11 +46,10 @@ function GoogleIcon() {
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function PasswordInput({ id, placeholder, registration, error }: {
   id: string
   placeholder: string
-  registration: any
+  registration: UseFormRegisterReturn
   error?: string
 }) {
   const [show, setShow] = useState(false)
@@ -113,6 +112,7 @@ function LoginForm() {
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     // Zod v4 type compat: @hookform/resolvers expects Zod v3 internals
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(loginSchema as any),
   })
 
@@ -184,6 +184,7 @@ function RegisterForm() {
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     // Zod v4 type compat: @hookform/resolvers expects Zod v3 internals
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(registerSchema as any),
   })
 
