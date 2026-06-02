@@ -111,7 +111,7 @@ function LoginForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
-    // Zod v4 type compat: @hookform/resolvers expects Zod v3 internals
+    // Zod v4 / @hookform/resolvers compat: zodResolver overloads don't infer from v4 classic types
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(loginSchema as any),
   })
@@ -183,7 +183,7 @@ function RegisterForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
-    // Zod v4 type compat: @hookform/resolvers expects Zod v3 internals
+    // Zod v4 / @hookform/resolvers compat: zodResolver overloads don't infer from v4 classic types
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(registerSchema as any),
   })

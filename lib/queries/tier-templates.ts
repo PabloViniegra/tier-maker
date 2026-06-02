@@ -1,5 +1,5 @@
 import 'server-only'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, count, countDistinct, max } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierTemplates } from '@/lib/db/schema'
 
@@ -16,29 +16,19 @@ export async function getUserTierListStats(userId: string): Promise<{
   categories: number
   lastActivity: Date | null
 }> {
-  const rows = await db
+  const [row] = await db
     .select({
-      id: tierTemplates.id,
-      category: tierTemplates.category,
-      createdAt: tierTemplates.createdAt,
+      total: count(),
+      categories: countDistinct(tierTemplates.category),
+      lastActivity: max(tierTemplates.createdAt),
     })
     .from(tierTemplates)
     .where(eq(tierTemplates.creatorId, userId))
 
-  if (rows.length === 0) {
-    return { total: 0, categories: 0, lastActivity: null }
-  }
-
-  const distinctCategories = new Set(rows.map((r) => r.category)).size
-  const lastActivity = rows.reduce(
-    (max, r) => (r.createdAt > max ? r.createdAt : max),
-    rows[0].createdAt
-  )
-
   return {
-    total: rows.length,
-    categories: distinctCategories,
-    lastActivity,
+    total: row?.total ?? 0,
+    categories: row?.categories ?? 0,
+    lastActivity: row?.lastActivity ?? null,
   }
 }
 

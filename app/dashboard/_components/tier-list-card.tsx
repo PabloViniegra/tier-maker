@@ -24,9 +24,18 @@ export function TierListCard({
   category,
   itemCount,
   createdAt,
-}: TierListCardProps) {
+  className,
+  style,
+}: TierListCardProps & { className?: string; style?: React.CSSProperties }) {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-[1px] hover:border-primary/20 hover:bg-overlay cursor-pointer">
+    <Link
+      href={`/dashboard/tier-lists/${id}`}
+      className={cn(
+        'flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-[1px] hover:border-primary/20 hover:bg-overlay',
+        className
+      )}
+      style={style}
+    >
       <div className="flex items-center justify-between gap-2">
         <Badge
           variant="secondary"
@@ -47,17 +56,16 @@ export function TierListCard({
         <span className="text-xs text-muted-foreground">
           {itemCount} {itemCount === 1 ? 'item' : 'items'}
         </span>
-        <Link
-          href={`/dashboard/tier-lists/${id}`}
+        <span
           className={cn(
             buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'h-6 text-xs gap-1 px-2'
+            'pointer-events-none h-6 gap-1 px-2 text-xs'
           )}
         >
           Open
           <ArrowRight size={12} />
-        </Link>
+        </span>
       </div>
-    </div>
+    </Link>
   )
 }

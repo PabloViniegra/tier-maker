@@ -36,9 +36,7 @@ describe('getUserTierListStats', () => {
     mockDb.select.mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue([
-          { id: '1', category: 'games', createdAt: new Date('2026-06-01') },
-          { id: '2', category: 'anime', createdAt: new Date('2026-06-02') },
-          { id: '3', category: 'games', createdAt: new Date('2026-05-15') },
+          { total: 3, categories: 2, lastActivity: new Date('2026-06-02') },
         ]),
       }),
     })
@@ -52,9 +50,7 @@ describe('getUserTierListStats', () => {
     mockDb.select.mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue([
-          { id: '1', category: 'games', createdAt: new Date('2026-06-01') },
-          { id: '2', category: 'anime', createdAt: new Date('2026-06-02') },
-          { id: '3', category: 'games', createdAt: new Date('2026-05-15') },
+          { total: 3, categories: 2, lastActivity: new Date('2026-06-02') },
         ]),
       }),
     })
@@ -69,9 +65,7 @@ describe('getUserTierListStats', () => {
     mockDb.select.mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue([
-          { id: '1', category: 'games', createdAt: new Date('2026-05-01') },
-          { id: '2', category: 'anime', createdAt: latest },
-          { id: '3', category: 'games', createdAt: new Date('2026-01-10') },
+          { total: 3, categories: 2, lastActivity: latest },
         ]),
       }),
     })
