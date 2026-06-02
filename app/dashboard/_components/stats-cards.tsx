@@ -1,5 +1,9 @@
+'use client'
+
+import { motion } from 'motion/react'
 import { formatRelativeDate } from '@/lib/utils/format-date'
 import { Skeleton } from '@/components/ui/skeleton'
+import { fadeUpVariants, STAGGER_DELAY } from '@/lib/motion-variants'
 
 type Stats = {
   total: number
@@ -47,12 +51,17 @@ export function StatsCards({ stats }: { stats: Stats }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.5fr_1fr_1fr]">
+    <motion.div
+      className="grid grid-cols-1 gap-3 sm:grid-cols-[1.5fr_1fr_1fr]"
+      initial="hidden"
+      animate="visible"
+    >
       {statDefs.map(({ label, sublabel, key }, i) => (
-        <div
+        <motion.div
           key={key}
-          className="animate-fade-in-up rounded-lg border border-border bg-surface p-4"
-          style={{ '--delay': `${i * 80}ms` } as React.CSSProperties}
+          variants={fadeUpVariants}
+          custom={i * STAGGER_DELAY}
+          className="rounded-lg border border-border bg-surface p-4"
         >
           <p className="text-xs text-muted-foreground">{label}</p>
           <p className="mt-1 font-mono text-2xl font-semibold text-foreground tabular-nums">
@@ -61,8 +70,8 @@ export function StatsCards({ stats }: { stats: Stats }) {
           {sublabel && (
             <p className="mt-0.5 text-xs text-muted-foreground">{sublabel}</p>
           )}
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   )
 }

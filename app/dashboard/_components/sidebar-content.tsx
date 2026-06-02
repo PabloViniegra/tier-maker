@@ -1,10 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { motion } from 'motion/react'
 import { Layers, LayoutDashboard, List, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { springTransition } from '@/lib/motion-variants'
 import { SignOutButton } from './sign-out-button'
 
 export type SidebarUser = {
@@ -60,14 +62,23 @@ export function SidebarNav({ pathname }: { pathname: string }) {
             key={href}
             href={href}
             className={cn(
-              'flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-all duration-150',
+              'relative flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors duration-150',
               isActive
-                ? 'border-l-2 border-primary bg-muted pl-[10px] text-foreground'
-                : 'text-muted-foreground hover:bg-muted/50 hover:translate-x-0.5 hover:text-foreground'
+                ? 'text-foreground'
+                : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
             )}
           >
-            <Icon size={14} strokeWidth={1.5} />
-            {label}
+            {isActive && (
+              <motion.span
+                layoutId="sidebar-active-bg"
+                className="absolute inset-0 rounded-md bg-muted"
+                transition={springTransition}
+              />
+            )}
+            <span className="relative flex items-center gap-2">
+              <Icon size={14} strokeWidth={1.5} />
+              {label}
+            </span>
           </Link>
         )
       })}

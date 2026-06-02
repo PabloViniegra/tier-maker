@@ -2,10 +2,12 @@
 
 import { useRef, useState } from 'react'
 import { Droppable, Draggable } from '@hello-pangea/dnd'
+import { motion } from 'motion/react'
 import { X, Loader2, Plus } from 'lucide-react'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { droppableIdForRow } from './constants'
 import { cn } from '@/lib/utils'
+import { dragActiveVariants } from '@/lib/motion-variants'
 import { Button } from '@/components/ui/button'
 
 type TierRowChipProps = {
@@ -151,39 +153,42 @@ export function TierBoard() {
                         ref={dragProvided.innerRef}
                         {...dragProvided.draggableProps}
                         {...dragProvided.dragHandleProps}
-                        className={cn(
-                          'group relative h-12 w-12 shrink-0 overflow-hidden rounded border border-border bg-background',
-                          dragSnapshot.isDragging && 'shadow-overlay'
-                        )}
+                        className='group/item relative h-12 w-12 shrink-0'
                         data-testid='row-item'
                       >
-                        {item.status === 'uploaded' && item.url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={item.url}
-                            alt={item.name ?? ''}
-                            className='h-full w-full object-cover'
-                            draggable={false}
-                          />
-                        ) : item.status === 'uploading' ? (
-                          <div className='flex h-full w-full items-center justify-center text-muted-foreground'>
-                            <Loader2 size={12} className='animate-spin' />
-                          </div>
-                        ) : (
-                          <div className='flex h-full w-full items-center justify-center bg-destructive/20 text-destructive'>
-                            <X size={12} />
-                          </div>
-                        )}
-                        <button
-                          type='button'
-                          onClick={() =>
-                            removeItem({ source: 'row', id: item.id, rowId: row.id })
-                          }
-                          className='absolute right-0 top-0 hidden rounded bg-background/80 p-0.5 text-muted-foreground group-hover:block hover:text-foreground'
-                          aria-label='Remove'
+                        <motion.div
+                          variants={dragActiveVariants}
+                          animate={dragSnapshot.isDragging ? 'dragging' : 'idle'}
+                          className='relative h-full w-full overflow-hidden rounded border border-border bg-background'
                         >
-                          <X size={10} />
-                        </button>
+                          {item.status === 'uploaded' && item.url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={item.url}
+                              alt={item.name ?? ''}
+                              className='h-full w-full object-cover'
+                              draggable={false}
+                            />
+                          ) : item.status === 'uploading' ? (
+                            <div className='flex h-full w-full items-center justify-center text-muted-foreground'>
+                              <Loader2 size={12} className='animate-spin' />
+                            </div>
+                          ) : (
+                            <div className='flex h-full w-full items-center justify-center bg-destructive/20 text-destructive'>
+                              <X size={12} />
+                            </div>
+                          )}
+                          <button
+                            type='button'
+                            onClick={() =>
+                              removeItem({ source: 'row', id: item.id, rowId: row.id })
+                            }
+                            className='absolute right-0 top-0 hidden rounded bg-background/80 p-0.5 text-muted-foreground group-hover/item:block hover:text-foreground'
+                            aria-label='Remove'
+                          >
+                            <X size={10} />
+                          </button>
+                        </motion.div>
                       </div>
                     )}
                   </Draggable>

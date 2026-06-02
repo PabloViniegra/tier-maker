@@ -1,8 +1,10 @@
 'use client'
 
 import { useCallback } from 'react'
+import { motion } from 'motion/react'
 import { MousePointerClick, Link2, Layers } from 'lucide-react'
 import { BentoCell } from '@/components/bento-grid'
+import { fadeUpVariants, STAGGER_DELAY } from '@/lib/motion-variants'
 
 const SPOTLIGHT_BG =
   'radial-gradient(250px circle at var(--spotlight-x, 50%) var(--spotlight-y, 0%), oklch(0.62 0.22 250 / 0.07), transparent 70%)'
@@ -13,21 +15,18 @@ const features = [
     iconDelay: '',
     title: 'Build in seconds',
     description: 'Drag items into your tier list. No friction, no account needed to start.',
-    animDelay: '80ms',
   },
   {
     icon: Link2,
     iconDelay: '0.5s',
     title: 'Share with a link',
     description: 'One URL. Works on any device. No downloads, no installs required.',
-    animDelay: '160ms',
   },
   {
     icon: Layers,
     iconDelay: '1s',
     title: 'Any category',
     description: 'Movies, games, albums, food—if it can be ranked, tier-maker handles it.',
-    animDelay: '240ms',
   },
 ] as const
 
@@ -40,15 +39,16 @@ export function BentoFeatureCells() {
 
   return (
     <>
-      {features.map(({ icon: Icon, iconDelay, title, description, animDelay }) => (
-        <BentoCell
-          key={title}
-          colSpan={4}
-          className={`flex animate-in fade-in slide-in-from-bottom-4 duration-700 [animation-delay:${animDelay}]`}
-        >
-          <div
+      {features.map(({ icon: Icon, iconDelay, title, description }, i) => (
+        <BentoCell key={title} colSpan={4} className="flex">
+          <motion.div
+            variants={fadeUpVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-40px' }}
+            custom={i * STAGGER_DELAY}
             onMouseMove={handleSpotlight}
-            className="relative flex flex-col justify-between p-6"
+            className="relative flex w-full flex-col justify-between p-6"
           >
             <div
               className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -69,7 +69,7 @@ export function BentoFeatureCells() {
                 {description}
               </p>
             </div>
-          </div>
+          </motion.div>
         </BentoCell>
       ))}
     </>

@@ -31,7 +31,7 @@ export function TierListCard({
     <Link
       href={`/dashboard/tier-lists/${id}`}
       className={cn(
-        'flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-[1px] hover:border-primary/20 hover:bg-overlay',
+        'flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 transition-colors duration-200 hover:border-primary/20 hover:bg-overlay',
         className
       )}
       style={style}
