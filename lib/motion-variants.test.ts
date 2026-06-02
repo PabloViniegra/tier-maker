@@ -1,0 +1,112 @@
+import { describe, it, expect } from 'vitest'
+import type { TargetAndTransition } from 'motion/react'
+import {
+  STAGGER_DELAY,
+  MAX_STAGGER,
+  staggerIndex,
+  fadeUpVariants,
+  staggerContainerVariants,
+  pageTransitionVariants,
+  dragActiveVariants,
+} from './motion-variants'
+
+describe('constants', () => {
+  it('STAGGER_DELAY is 0.06', () => {
+    expect(STAGGER_DELAY).toBe(0.06)
+  })
+
+  it('MAX_STAGGER is 4', () => {
+    expect(MAX_STAGGER).toBe(4)
+  })
+})
+
+describe('staggerIndex', () => {
+  it('returns index for i < MAX_STAGGER', () => {
+    expect(staggerIndex(0)).toBe(0)
+    expect(staggerIndex(2)).toBe(2)
+    expect(staggerIndex(3)).toBe(3)
+  })
+
+  it('caps at MAX_STAGGER - 1 for large indexes', () => {
+    expect(staggerIndex(4)).toBe(3)
+    expect(staggerIndex(10)).toBe(3)
+  })
+})
+
+describe('fadeUpVariants', () => {
+  it('hidden state has opacity 0 and positive y offset', () => {
+    const hidden = fadeUpVariants.hidden as TargetAndTransition
+    expect(hidden.opacity).toBe(0)
+    expect(hidden.y as number).toBeGreaterThan(0)
+  })
+
+  it('visible factory returns opacity 1 and y 0', () => {
+    const visible = (fadeUpVariants.visible as (d: number) => TargetAndTransition)(0)
+    expect(visible.opacity).toBe(1)
+    expect(visible.y).toBe(0)
+  })
+
+  it('visible transition duration is within design spec (≤ 0.3s)', () => {
+    const visible = (fadeUpVariants.visible as (d: number) => TargetAndTransition)(0)
+    const transition = visible.transition as { duration: number }
+    expect(transition.duration).toBeLessThanOrEqual(0.3)
+    expect(transition.duration).toBeGreaterThan(0)
+  })
+
+  it('visible factory threads delay into transition', () => {
+    const visible = (fadeUpVariants.visible as (d: number) => TargetAndTransition)(0.12)
+    const transition = visible.transition as { delay: number }
+    expect(transition.delay).toBe(0.12)
+  })
+
+  it('visible factory defaults delay to 0', () => {
+    const visible = (fadeUpVariants.visible as (d?: number) => TargetAndTransition)()
+    const transition = visible.transition as { delay: number }
+    expect(transition.delay).toBe(0)
+  })
+})
+
+describe('staggerContainerVariants', () => {
+  it('visible staggers children by STAGGER_DELAY', () => {
+    const visible = staggerContainerVariants.visible as TargetAndTransition
+    const transition = visible.transition as { staggerChildren: number }
+    expect(transition.staggerChildren).toBe(STAGGER_DELAY)
+  })
+})
+
+describe('pageTransitionVariants', () => {
+  it('hidden state is fully transparent', () => {
+    const hidden = pageTransitionVariants.hidden as TargetAndTransition
+    expect(hidden.opacity).toBe(0)
+  })
+
+  it('visible state is fully opaque', () => {
+    const visible = pageTransitionVariants.visible as TargetAndTransition
+    expect(visible.opacity).toBe(1)
+  })
+
+  it('exit state is fully transparent', () => {
+    const exit = pageTransitionVariants.exit as TargetAndTransition
+    expect(exit.opacity).toBe(0)
+  })
+
+  it('transition duration is fast (≤ 0.2s)', () => {
+    const visible = pageTransitionVariants.visible as TargetAndTransition
+    const transition = visible.transition as { duration: number }
+    expect(transition.duration).toBeLessThanOrEqual(0.2)
+  })
+})
+
+describe('dragActiveVariants', () => {
+  it('dragging state scales up slightly', () => {
+    const dragging = dragActiveVariants.dragging as TargetAndTransition
+    expect(dragging.scale as number).toBeGreaterThan(1)
+    expect(dragging.scale as number).toBeLessThanOrEqual(1.1)
+  })
+
+  it('idle state has scale 1 and full opacity', () => {
+    const idle = dragActiveVariants.idle as TargetAndTransition
+    expect(idle.scale).toBe(1)
+    expect(idle.opacity).toBe(1)
+  })
+})

@@ -5,6 +5,7 @@ import { BentoGrid, BentoCell } from '@/components/bento-grid'
 import { TierRowsBackground } from '@/components/tier-rows-background'
 import { TierListMockup } from '@/components/tier-list-mockup'
 import { BentoFeatureCells } from '@/components/bento-feature-cells'
+import { FadeUp } from '@/components/ui/fade-up'
 import { cn } from '@/lib/utils'
 
 export default function HomePage() {
@@ -42,11 +43,11 @@ export default function HomePage() {
           <BentoCell
             colSpan={8}
             rowSpan={2}
-            className='relative min-h-[340px] animate-in fade-in slide-in-from-bottom-4 duration-700'
+            className='relative min-h-[340px]'
           >
             <TierRowsBackground />
             <div className='absolute inset-0 bg-[radial-gradient(ellipse_at_30%_65%,oklch(0.62_0.22_250/0.14)_0%,transparent_68%)]' />
-            <div className='relative flex h-full flex-col justify-end p-7 lg:p-10'>
+            <FadeUp className='relative flex h-full flex-col justify-end p-7 lg:p-10'>
               <div className='mb-4'>
                 <span className='rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary'>
                   Now in beta
@@ -77,23 +78,20 @@ export default function HomePage() {
                   Sign in
                 </Link>
               </div>
-            </div>
+            </FadeUp>
           </BentoCell>
 
           {/* ── Feature cells — interactive, client component ── */}
           <BentoFeatureCells />
 
           {/* ── Social proof — tier list mockup ── */}
-          <BentoCell
-            colSpan={8}
-            className='animate-in fade-in slide-in-from-bottom-4 duration-700 [animation-delay:320ms]'
-          >
-            <div className='p-6'>
+          <BentoCell colSpan={8}>
+            <FadeUp delay={0.08} className='p-6'>
               <p className='mb-4 text-xs font-medium uppercase tracking-widest text-muted-foreground'>
                 See it in action
               </p>
               <TierListMockup />
-            </div>
+            </FadeUp>
           </BentoCell>
         </BentoGrid>
       </main>

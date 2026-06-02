@@ -2,11 +2,13 @@
 
 import { useRef } from 'react'
 import { Droppable, Draggable } from '@hello-pangea/dnd'
+import { motion } from 'motion/react'
 import { ImagePlus, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { BANK_DROPPABLE } from './constants'
 import { cn } from '@/lib/utils'
+import { dragActiveVariants } from '@/lib/motion-variants'
 
 export function ItemBank({ onPickFiles }: { onPickFiles: (files: File[]) => void }) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -79,37 +81,40 @@ export function ItemBank({ onPickFiles }: { onPickFiles: (files: File[]) => void
                         ref={dragProvided.innerRef}
                         {...dragProvided.draggableProps}
                         {...dragProvided.dragHandleProps}
-                        className={cn(
-                          'group relative aspect-square overflow-hidden rounded-md border border-border bg-background',
-                          dragSnapshot.isDragging && 'shadow-overlay'
-                        )}
+                        className='group/item relative aspect-square'
                         data-testid='bank-item'
                       >
-                        {item.status === 'uploaded' && item.url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={item.url}
-                            alt={item.name ?? ''}
-                            className='h-full w-full object-cover'
-                            draggable={false}
-                          />
-                        ) : item.status === 'uploading' ? (
-                          <div className='flex h-full w-full items-center justify-center text-muted-foreground'>
-                            <Loader2 size={16} className='animate-spin' />
-                          </div>
-                        ) : (
-                          <div className='flex h-full w-full flex-col items-center justify-center gap-1 bg-destructive/10 p-1 text-center text-[10px] text-destructive'>
-                            <span>Failed</span>
-                          </div>
-                        )}
-                        <button
-                          type='button'
-                          onClick={() => removeItem({ source: 'bank', id: item.id })}
-                          className='absolute right-1 top-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground'
-                          aria-label='Remove'
+                        <motion.div
+                          variants={dragActiveVariants}
+                          animate={dragSnapshot.isDragging ? 'dragging' : 'idle'}
+                          className='relative h-full w-full overflow-hidden rounded-md border border-border bg-background'
                         >
-                          <X size={12} />
-                        </button>
+                          {item.status === 'uploaded' && item.url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={item.url}
+                              alt={item.name ?? ''}
+                              className='h-full w-full object-cover'
+                              draggable={false}
+                            />
+                          ) : item.status === 'uploading' ? (
+                            <div className='flex h-full w-full items-center justify-center text-muted-foreground'>
+                              <Loader2 size={16} className='animate-spin' />
+                            </div>
+                          ) : (
+                            <div className='flex h-full w-full flex-col items-center justify-center gap-1 bg-destructive/10 p-1 text-center text-[10px] text-destructive'>
+                              <span>Failed</span>
+                            </div>
+                          )}
+                          <button
+                            type='button'
+                            onClick={() => removeItem({ source: 'bank', id: item.id })}
+                            className='absolute right-1 top-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-foreground'
+                            aria-label='Remove'
+                          >
+                            <X size={12} />
+                          </button>
+                        </motion.div>
                       </li>
                     )}
                   </Draggable>

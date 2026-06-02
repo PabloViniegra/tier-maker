@@ -1,4 +1,5 @@
 import { TierRowsBackground } from '@/components/tier-rows-background'
+import { FadeUp } from '@/components/ui/fade-up'
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -31,9 +32,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               Create and share tier lists with the community
             </p>
           </div>
-          <div className='animate-in fade-in slide-in-from-bottom-4 duration-300 rounded-xl border border-border bg-card p-6 shadow-overlay'>
+          <FadeUp onMount className='rounded-xl border border-border bg-card p-6 shadow-overlay'>
             {children}
-          </div>
+          </FadeUp>
         </div>
       </div>
     </div>

@@ -89,3 +89,17 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Custom components are only permitted when Shadcn has no equivalent.
 - Never install third-party component libraries (MUI, Ant Design, Chakra, etc.).
 - Icon library: `lucide-react` (already configured in `components.json`).
+
+## Animations
+
+**Rule: Use Motion (`motion/react`) for all animations.**
+
+- Import from `motion/react`, never `framer-motion`.
+- All animation variants live in `lib/motion-variants.ts`. Add new ones there; never hardcode transition values inline.
+- Entrance animations use `fadeUpVariants` + `whileInView` (scroll) or `onMount` via the `<FadeUp>` component (immediate mount).
+- Stagger lists use `staggerIndex(i) * STAGGER_DELAY` per child — not a stagger container.
+- Drag feedback uses `dragActiveVariants`. For `@hello-pangea/dnd` items: keep the outer `ref`/props div plain, animate an inner `motion.div`.
+- Page transitions use `<PageTransition>` in the root layout (already wired).
+- `<MotionConfig reducedMotion="user">` is set at the root — do not override it per component.
+- CSS `transition-*` Tailwind utilities are allowed only for color/border changes on hover. Never use them for `transform` or `opacity` — those belong to Motion.
+- `tw-animate-css` is retained exclusively for Shadcn UI component internals (`data-open:animate-in` etc.). Do not use its classes in custom components.
