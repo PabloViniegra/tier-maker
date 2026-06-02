@@ -54,6 +54,9 @@ type Actions = {
   markItemError: (id: string) => void
   removeItem: (input: RemoveItem) => void
   moveItem: (input: MoveItem) => void
+  updateRow: (id: string, patch: Partial<Pick<EditorTierRow, 'label' | 'color'>>) => void
+  addRow: () => void
+  removeRow: (id: string) => void
   reset: () => void
 }
 
@@ -164,7 +167,31 @@ export const useTierEditor = create<State & Actions>((set) => ({
         }),
       }
     }),
-  reset: () => set(() => ({ ...initialState, rows: initialState.rows })),
+  updateRow: (id, patch) =>
+    set((s) => ({
+      rows: s.rows.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+    })),
+  addRow: () =>
+    set((s) => {
+      if (s.rows.length >= 10) return s
+      return {
+        rows: [
+          ...s.rows,
+          { id: newId(), label: '?', color: '#6b7280', items: [] },
+        ],
+      }
+    }),
+  removeRow: (id) =>
+    set((s) => {
+      if (s.rows.length <= 1) return s
+      const row = s.rows.find((r) => r.id === id)
+      const rescued = row ? row.items : []
+      return {
+        rows: s.rows.filter((r) => r.id !== id),
+        bankItems: [...s.bankItems, ...rescued],
+      }
+    }),
+  reset: () => set(initialState),
 }))
 
 export function collectSavedItemUrls(state: State): string[] {

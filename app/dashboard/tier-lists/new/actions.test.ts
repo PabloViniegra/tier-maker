@@ -2,13 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('server-only', () => ({}))
 
-const { mockPut, mockRevalidatePath, mockGetSession, mockDbInsert, mockDbDelete } =
+const { mockPut, mockRevalidatePath, mockGetSession, mockTransaction } =
   vi.hoisted(() => ({
     mockPut: vi.fn(),
     mockRevalidatePath: vi.fn(),
     mockGetSession: vi.fn(),
-    mockDbInsert: vi.fn(),
-    mockDbDelete: vi.fn(),
+    mockTransaction: vi.fn(),
   }))
 
 vi.mock('@vercel/blob', () => ({
@@ -23,17 +22,11 @@ vi.mock('@/lib/session', () => ({
   getSession: mockGetSession,
 }))
 
-vi.mock('@/lib/db', () => {
-  const insertReturning = vi.fn()
-  mockDbInsert.mockReturnValue({ values: () => ({ returning: insertReturning }) })
-  mockDbDelete.mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) })
-  return {
-    db: {
-      insert: mockDbInsert,
-      delete: mockDbDelete,
-    },
-  }
-})
+vi.mock('@/lib/db', () => ({
+  db: {
+    transaction: mockTransaction,
+  },
+}))
 
 import { uploadImagesAction, createTierListAction } from './actions'
 import { defaultTierRows } from '@/lib/validators/tier-list'
@@ -50,9 +43,17 @@ function anonSession() {
   mockGetSession.mockResolvedValue(null)
 }
 
-function setupDbInsert(result: { id: string }[]) {
-  const insertReturning = vi.fn().mockResolvedValue(result)
-  mockDbInsert.mockReturnValue({ values: () => ({ returning: insertReturning }) })
+function setupTransaction(templateId = 'tpl-1') {
+  mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
+    const tx = {
+      insert: vi.fn().mockReturnValue({
+        values: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([{ id: templateId }]),
+        }),
+      }),
+    }
+    return cb(tx)
+  })
 }
 
 describe('uploadImagesAction', () => {
@@ -140,24 +141,28 @@ describe('createTierListAction', () => {
     ).rejects.toThrow()
   })
 
-  it('persists the template and rows and revalidates the dashboard', async () => {
+  it('wraps inserts in a transaction and revalidates the dashboard', async () => {
     authedSession()
-    const templateId = 'tpl-1'
-    setupDbInsert([{ id: templateId }])
+    setupTransaction('tpl-1')
 
     const result = await createTierListAction({
       ...validInput,
       bankItems: ['https://blob/a.png'],
       rows: validInput.rows.map((r, i) =>
-        i === 0
-          ? { ...r, items: ['https://blob/b.png'] }
-          : r
+        i === 0 ? { ...r, items: ['https://blob/b.png'] } : r
       ),
     })
 
-    expect(result.id).toBe(templateId)
-    expect(mockDbInsert).toHaveBeenCalledTimes(2) // template + rows
+    expect(result.id).toBe('tpl-1')
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
     expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard')
+  })
+
+  it('propagates transaction errors without orphaned data', async () => {
+    authedSession()
+    mockTransaction.mockRejectedValue(new Error('db failure'))
+
+    await expect(createTierListAction(validInput)).rejects.toThrow(/db failure/i)
   })
 
   it('rejects payloads with too many items', async () => {

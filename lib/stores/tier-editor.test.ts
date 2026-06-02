@@ -9,7 +9,7 @@ function snapshot() {
   const s = useTierEditor.getState()
   return {
     metadata: s.metadata,
-    rows: s.rows.map((r) => ({ id: r.id, label: r.label, items: [...r.items] })),
+    rows: s.rows.map((r) => ({ id: r.id, label: r.label, color: r.color, items: [...r.items] })),
     bankItems: [...s.bankItems],
   }
 }
@@ -179,6 +179,86 @@ describe('useTierEditor — move / reorder', () => {
     const id = snapshot().rows[0].items[0].id
     useTierEditor.getState().removeItem({ source: 'row', id, rowId })
     expect(snapshot().rows[0].items).toEqual([])
+  })
+})
+
+describe('useTierEditor — updateRow', () => {
+  beforeEach(() => reset())
+
+  it('patches the label of an existing row', () => {
+    const rowId = snapshot().rows[0].id
+    useTierEditor.getState().updateRow(rowId, { label: 'Z' })
+    expect(snapshot().rows[0].label).toBe('Z')
+  })
+
+  it('patches the color of an existing row', () => {
+    const rowId = snapshot().rows[0].id
+    useTierEditor.getState().updateRow(rowId, { color: '#ff0000' })
+    expect(snapshot().rows[0]).toMatchObject({ color: '#ff0000' })
+  })
+
+  it('does not affect other rows', () => {
+    const rowId = snapshot().rows[0].id
+    useTierEditor.getState().updateRow(rowId, { label: 'Z' })
+    const labels = snapshot().rows.map((r) => r.label)
+    expect(labels.slice(1)).toEqual(['A', 'B', 'C', 'D', 'F'])
+  })
+})
+
+describe('useTierEditor — addRow', () => {
+  beforeEach(() => reset())
+
+  it('appends a row with default label "?" and color "#6b7280"', () => {
+    useTierEditor.getState().addRow()
+    const rows = snapshot().rows
+    expect(rows).toHaveLength(7)
+    expect(rows[6]).toMatchObject({ label: '?', color: '#6b7280' })
+  })
+
+  it('does nothing when rows.length is already 10', () => {
+    for (let i = 0; i < 4; i++) useTierEditor.getState().addRow()
+    expect(snapshot().rows).toHaveLength(10)
+    useTierEditor.getState().addRow()
+    expect(snapshot().rows).toHaveLength(10)
+  })
+})
+
+describe('useTierEditor — removeRow', () => {
+  beforeEach(() => reset())
+
+  it('removes the target row', () => {
+    const rowId = snapshot().rows[0].id
+    useTierEditor.getState().removeRow(rowId)
+    const ids = snapshot().rows.map((r) => r.id)
+    expect(ids).not.toContain(rowId)
+    expect(snapshot().rows).toHaveLength(5)
+  })
+
+  it('moves items from the removed row back to bankItems', () => {
+    const rowId = snapshot().rows[0].id
+    const itemId = useTierEditor.getState().addUploadingItem('a.png')
+    useTierEditor.getState().markItemUploaded(itemId, 'https://blob/a.png')
+    useTierEditor.getState().moveItem({
+      source: 'bank', sourceIndex: 0,
+      target: 'row', targetId: rowId, targetIndex: 0,
+    })
+    expect(snapshot().rows[0].items).toHaveLength(1)
+    useTierEditor.getState().removeRow(rowId)
+    expect(snapshot().bankItems).toHaveLength(1)
+    expect(snapshot().bankItems[0]).toMatchObject({ url: 'https://blob/a.png' })
+  })
+
+  it('does nothing when only one row remains', () => {
+    const s = useTierEditor.getState()
+    // remove until 1 remains
+    for (let i = 0; i < 5; i++) {
+      const id = snapshot().rows[0].id
+      s.removeRow(id)
+    }
+    expect(snapshot().rows).toHaveLength(1)
+    const lastId = snapshot().rows[0].id
+    s.removeRow(lastId)
+    expect(snapshot().rows).toHaveLength(1)
   })
 })
 

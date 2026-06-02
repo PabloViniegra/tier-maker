@@ -144,6 +144,7 @@ export function TierListCreator({
     startTransition(async () => {
       try {
         await createTierListAction(buildSavePayload(current))
+        useTierEditor.getState().reset()
         toast.success('Tier list created')
         router.push('/dashboard')
         router.refresh()
