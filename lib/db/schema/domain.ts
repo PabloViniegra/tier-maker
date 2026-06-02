@@ -4,6 +4,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core'
 import { user } from './auth'
@@ -29,3 +30,16 @@ export const tierRows = pgTable('tier_rows', {
   color: text('color').notNull(),
   order: integer('order').notNull(),
 })
+
+export const userCategoryPresets = pgTable(
+  'user_category_presets',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => [unique().on(t.userId, t.name)]
+)
