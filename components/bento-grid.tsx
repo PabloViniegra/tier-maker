@@ -29,7 +29,10 @@ export function BentoCell({
       className={cn(
         COL_SPAN[colSpan],
         ROW_SPAN[rowSpan],
-        'overflow-hidden rounded-xl border border-border bg-card',
+        'group relative overflow-hidden rounded-xl border border-border bg-card',
+        'transition-[border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+        'hover:border-primary/25 hover:shadow-[inset_0_1px_0_oklch(0.62_0.22_250/0.08)]',
+        'active:scale-[0.99] active:transition-transform active:duration-100',
         className
       )}
     >
