@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Zap, Share2, LayoutGrid } from 'lucide-react'
 
