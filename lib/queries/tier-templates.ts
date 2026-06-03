@@ -1,7 +1,8 @@
 import 'server-only'
-import { eq, desc, count, countDistinct, max, and, asc } from 'drizzle-orm'
+import { eq, desc, count, countDistinct, max, and, asc, or, ilike } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierRows, tierTemplates } from '@/lib/db/schema'
+import { user } from '@/lib/db/schema/auth'
 
 export type TierListSummary = {
   id: string
@@ -96,6 +97,122 @@ export type TierListDetail = {
     order: number
     items: string[]
   }[]
+}
+
+export type PublicTierListSummary = TierListSummary & {
+  creatorName: string | null
+}
+
+export type ExploreSort = 'newest' | 'oldest' | 'a-z'
+
+export type PublicTierListsParams = {
+  q?: string
+  category?: string
+  sort?: ExploreSort
+  page: number
+  pageSize: number
+}
+
+export async function getPublicTierListById(
+  id: string
+): Promise<TierListDetail | null> {
+  const [tpl] = await db
+    .select()
+    .from(tierTemplates)
+    .where(and(eq(tierTemplates.id, id), eq(tierTemplates.isPublic, true)))
+
+  if (!tpl) return null
+
+  const rows = await db
+    .select()
+    .from(tierRows)
+    .where(eq(tierRows.templateId, id))
+    .orderBy(asc(tierRows.order))
+
+  return {
+    id: tpl.id,
+    title: tpl.title,
+    description: tpl.description,
+    category: tpl.category,
+    sidebarItems: tpl.sidebarItems,
+    createdAt: tpl.createdAt,
+    rows: rows.map((r) => ({
+      id: r.id,
+      label: r.label,
+      color: r.color,
+      order: r.order,
+      items: r.items ?? [],
+    })),
+  }
+}
+
+export async function getDistinctPublicCategories(): Promise<string[]> {
+  const rows = await db
+    .select({ category: tierTemplates.category })
+    .from(tierTemplates)
+    .where(eq(tierTemplates.isPublic, true))
+    .groupBy(tierTemplates.category)
+    .orderBy(asc(tierTemplates.category))
+
+  return rows.map((r) => r.category)
+}
+
+export async function getPublicTierLists(
+  params: PublicTierListsParams
+): Promise<{ items: PublicTierListSummary[]; total: number }> {
+  const { q, category, sort = 'newest', page, pageSize } = params
+
+  const conditions = and(
+    eq(tierTemplates.isPublic, true),
+    q
+      ? or(
+          ilike(tierTemplates.title, `%${q}%`),
+          ilike(tierTemplates.description, `%${q}%`)
+        )
+      : undefined,
+    category ? eq(tierTemplates.category, category) : undefined
+  )
+
+  const orderCol =
+    sort === 'oldest'
+      ? asc(tierTemplates.createdAt)
+      : sort === 'a-z'
+        ? asc(tierTemplates.title)
+        : desc(tierTemplates.createdAt)
+
+  const [rows, [countRow]] = await Promise.all([
+    db
+      .select({
+        id: tierTemplates.id,
+        title: tierTemplates.title,
+        category: tierTemplates.category,
+        sidebarItems: tierTemplates.sidebarItems,
+        createdAt: tierTemplates.createdAt,
+        creatorName: user.name,
+      })
+      .from(tierTemplates)
+      .leftJoin(user, eq(tierTemplates.creatorId, user.id))
+      .where(conditions)
+      .orderBy(orderCol)
+      .limit(pageSize)
+      .offset((page - 1) * pageSize),
+    db
+      .select({ count: count() })
+      .from(tierTemplates)
+      .where(conditions),
+  ])
+
+  return {
+    items: rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      category: r.category,
+      itemCount: r.sidebarItems.length,
+      createdAt: r.createdAt,
+      creatorName: r.creatorName ?? null,
+    })),
+    total: countRow?.count ?? 0,
+  }
 }
 
 export async function getTierListById(
