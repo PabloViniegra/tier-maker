@@ -8,6 +8,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { springTransition } from '@/lib/motion-variants'
 import { SignOutButton } from './sign-out-button'
+import { ThemeToggleButton } from './theme-toggle-button'
 
 export type SidebarUser = {
   name: string | null
@@ -117,8 +118,9 @@ export function SidebarUserProfile({ user }: { user: SidebarUser }) {
           <p className="truncate text-xs text-muted-foreground">{user.email}</p>
         </div>
       </div>
-      <div className="mt-2">
-        <SignOutButton />
+      <div className="mt-2 flex items-center gap-1">
+        <ThemeToggleButton />
+        <SignOutButton className="flex-1 w-full" />
       </div>
     </div>
   )

@@ -5,7 +5,7 @@ import { LogOut } from 'lucide-react'
 import { signOut } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 
-export function SignOutButton() {
+export function SignOutButton({ className }: { className?: string }) {
   const router = useRouter()
 
   async function handleSignOut() {
@@ -15,7 +15,7 @@ export function SignOutButton() {
   }
 
   return (
-    <Button variant='outline' size='sm' onClick={handleSignOut}>
+    <Button variant='outline' size='sm' className={className} onClick={handleSignOut}>
       <LogOut size={14} strokeWidth={1.5} />
       Sign out
     </Button>
