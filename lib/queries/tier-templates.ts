@@ -1,7 +1,7 @@
 import 'server-only'
-import { eq, desc, count, countDistinct, max } from 'drizzle-orm'
+import { eq, desc, count, countDistinct, max, and, asc } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { tierTemplates } from '@/lib/db/schema'
+import { tierRows, tierTemplates } from '@/lib/db/schema'
 
 export type TierListSummary = {
   id: string
@@ -80,4 +80,54 @@ export async function getAllUserTierLists(
     itemCount: r.sidebarItems.length,
     createdAt: r.createdAt,
   }))
+}
+
+export type TierListDetail = {
+  id: string
+  title: string
+  description: string | null
+  category: string
+  sidebarItems: string[]
+  createdAt: Date
+  rows: {
+    id: string
+    label: string
+    color: string
+    order: number
+    items: string[]
+  }[]
+}
+
+export async function getTierListById(
+  id: string,
+  userId: string
+): Promise<TierListDetail | null> {
+  const [tpl] = await db
+    .select()
+    .from(tierTemplates)
+    .where(and(eq(tierTemplates.id, id), eq(tierTemplates.creatorId, userId)))
+
+  if (!tpl) return null
+
+  const rows = await db
+    .select()
+    .from(tierRows)
+    .where(eq(tierRows.templateId, id))
+    .orderBy(asc(tierRows.order))
+
+  return {
+    id: tpl.id,
+    title: tpl.title,
+    description: tpl.description,
+    category: tpl.category,
+    sidebarItems: tpl.sidebarItems,
+    createdAt: tpl.createdAt,
+    rows: rows.map((r) => ({
+      id: r.id,
+      label: r.label,
+      color: r.color,
+      order: r.order,
+      items: r.items ?? [],
+    })),
+  }
 }

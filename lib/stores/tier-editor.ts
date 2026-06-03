@@ -25,6 +25,20 @@ export type EditorMetadata = {
   category: string
 }
 
+export type TierListDetailSeed = {
+  title: string
+  description?: string | null
+  category: string
+  sidebarItems: string[]
+  rows: {
+    id: string
+    label: string
+    color: string
+    order: number
+    items: string[]
+  }[]
+}
+
 type Source = 'bank' | 'row'
 type Target = 'bank' | 'row'
 
@@ -58,6 +72,7 @@ type Actions = {
   addRow: () => void
   removeRow: (id: string) => void
   reset: () => void
+  initFromDb: (data: TierListDetailSeed) => void
 }
 
 const initialState: State = (() => {
@@ -192,6 +207,29 @@ export const useTierEditor = create<State & Actions>((set) => ({
       }
     }),
   reset: () => set(initialState),
+  initFromDb: (data) =>
+    set({
+      metadata: {
+        title: data.title,
+        description: data.description ?? '',
+        category: data.category,
+      },
+      bankItems: data.sidebarItems.map((url) => ({
+        id: newId(),
+        url,
+        status: 'uploaded' as TierItemStatus,
+      })),
+      rows: data.rows.map((r) => ({
+        id: r.id,
+        label: r.label,
+        color: r.color,
+        items: r.items.map((url) => ({
+          id: newId(),
+          url,
+          status: 'uploaded' as TierItemStatus,
+        })),
+      })),
+    }),
 }))
 
 export function collectSavedItemUrls(state: State): string[] {

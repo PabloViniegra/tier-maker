@@ -1,0 +1,1 @@
+ALTER TABLE "tier_rows" ADD COLUMN "items" jsonb DEFAULT '[]'::jsonb NOT NULL;

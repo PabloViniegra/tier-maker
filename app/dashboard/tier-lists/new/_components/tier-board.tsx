@@ -14,12 +14,13 @@ type TierRowChipProps = {
   label: string
   color: string
   canRemove: boolean
+  height?: '16' | '24'
   onLabelChange: (label: string) => void
   onColorChange: (color: string) => void
   onRemove: () => void
 }
 
-function TierRowChip({ label, color, canRemove, onLabelChange, onColorChange, onRemove }: TierRowChipProps) {
+function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, onColorChange, onRemove }: TierRowChipProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(label)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -42,9 +43,11 @@ function TierRowChip({ label, color, canRemove, onLabelChange, onColorChange, on
     setEditing(false)
   }
 
+  const chipCls = height === '24' ? 'h-24 w-24' : 'h-16 w-20'
+
   return (
     <div
-      className='group/chip relative flex h-16 w-20 shrink-0 items-center justify-center rounded font-heading text-sm font-bold text-white'
+      className={cn('group/chip relative flex shrink-0 items-center justify-center rounded font-heading text-sm font-bold text-white', chipCls)}
       style={{ background: color }}
       aria-label={`Tier ${label}`}
     >
@@ -107,15 +110,24 @@ function TierRowChip({ label, color, canRemove, onLabelChange, onColorChange, on
   )
 }
 
-export function TierBoard() {
+type TierBoardProps = {
+  rowMinHeight?: '16' | '24'
+  boardRef?: React.RefObject<HTMLElement | null>
+}
+
+export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
   const rows = useTierEditor((s) => s.rows)
   const removeItem = useTierEditor((s) => s.removeItem)
   const addRow = useTierEditor((s) => s.addRow)
   const updateRow = useTierEditor((s) => s.updateRow)
   const removeRow = useTierEditor((s) => s.removeRow)
 
+  const lg = rowMinHeight === '24'
+  const itemCls = lg ? 'h-20 w-20' : 'h-12 w-12'
+  const rowHeightCls = lg ? 'min-h-24' : 'min-h-16'
+
   return (
-    <section className='flex flex-col gap-1.5'>
+    <section ref={boardRef as React.RefObject<HTMLElement>} className='flex flex-col gap-1.5'>
       {rows.map((row) => (
         <div
           key={row.id}
@@ -125,6 +137,7 @@ export function TierBoard() {
           <TierRowChip
             label={row.label}
             color={row.color}
+            height={rowMinHeight}
             canRemove={rows.length > 1}
             onLabelChange={(label) => updateRow(row.id, { label })}
             onColorChange={(color) => updateRow(row.id, { color })}
@@ -136,7 +149,7 @@ export function TierBoard() {
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 className={cn(
-                  'flex min-h-16 flex-1 flex-wrap items-center gap-1.5 rounded border border-border bg-surface px-2 py-1.5 transition-colors',
+                  `flex ${rowHeightCls} flex-1 flex-wrap items-center gap-1.5 rounded border border-border bg-surface px-2 py-1.5 transition-colors`,
                   snapshot.isDraggingOver && 'border-primary/40 bg-primary/5'
                 )}
                 data-testid='tier-row-droppable'
@@ -153,10 +166,11 @@ export function TierBoard() {
                         ref={dragProvided.innerRef}
                         {...dragProvided.draggableProps}
                         {...dragProvided.dragHandleProps}
-                        className='group/item relative h-12 w-12 shrink-0'
+                        className={cn('group/item relative shrink-0', itemCls)}
                         data-testid='row-item'
                       >
                         <motion.div
+                          initial={false}
                           variants={dragActiveVariants}
                           animate={dragSnapshot.isDragging ? 'dragging' : 'idle'}
                           className='relative h-full w-full overflow-hidden rounded border border-border bg-background'

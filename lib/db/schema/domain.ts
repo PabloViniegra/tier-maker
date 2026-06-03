@@ -29,6 +29,7 @@ export const tierRows = pgTable('tier_rows', {
   label: text('label').notNull(),
   color: text('color').notNull(),
   order: integer('order').notNull(),
+  items: jsonb('items').$type<string[]>().default([]).notNull(),
 })
 
 export const userCategoryPresets = pgTable(

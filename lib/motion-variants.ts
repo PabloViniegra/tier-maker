@@ -42,11 +42,12 @@ export const springTransition = {
 }
 
 export const dragActiveVariants: Variants = {
-  idle: { scale: 1, opacity: 1, boxShadow: 'none' },
+  idle: { scale: 1, opacity: 1, boxShadow: 'none', zIndex: 0 },
   dragging: {
-    scale: 1.05,
-    opacity: 0.85,
-    boxShadow: '0 8px 24px oklch(0 0 0 / 40%)',
-    transition: { duration: 0.15, ease: 'easeOut' },
+    scale: 1.08,
+    opacity: 1,
+    boxShadow: '0 12px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)',
+    zIndex: 50,
+    transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] },
   },
 }
