@@ -1,13 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
+import { useEffect, useRef, useState } from 'react'
+import { DragDropContext } from '@hello-pangea/dnd'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { useTierEditor } from '@/lib/stores/tier-editor'
+import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
 import { TierBoard } from '@/app/dashboard/tier-lists/new/_components/tier-board'
-import { BANK_DROPPABLE, rowIdFromDroppableId } from '@/app/dashboard/tier-lists/new/_components/constants'
 import { updateTierListAction, type UpdateTierListPayload } from '../actions'
 import { ItemBankStrip } from './item-bank-strip'
 import { SaveIndicator, type SaveState } from './save-indicator'
@@ -80,27 +80,7 @@ export function TierListEditor({ id, data }: Props) {
     }
   }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onDragEnd = useCallback((result: DropResult) => {
-    const { source, destination } = result
-    if (!destination) return
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    )
-      return
-
-    const fromBank = source.droppableId === BANK_DROPPABLE
-    const toBank = destination.droppableId === BANK_DROPPABLE
-
-    useTierEditor.getState().moveItem({
-      source: fromBank ? 'bank' : 'row',
-      sourceId: fromBank ? undefined : rowIdFromDroppableId(source.droppableId),
-      sourceIndex: source.index,
-      target: toBank ? 'bank' : 'row',
-      targetId: toBank ? undefined : rowIdFromDroppableId(destination.droppableId),
-      targetIndex: destination.index,
-    })
-  }, [])
+  const { onDragEnd } = useTierDnd()
 
   return (
     <div className='flex h-[calc(100vh-4rem)] flex-col'>

@@ -1,0 +1,1 @@
+ALTER TABLE "tier_templates" ADD COLUMN "is_public" boolean DEFAULT true NOT NULL;

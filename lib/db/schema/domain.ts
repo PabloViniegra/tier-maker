@@ -1,4 +1,5 @@
 import {
+  boolean,
   integer,
   jsonb,
   pgTable,
@@ -18,6 +19,7 @@ export const tierTemplates = pgTable('tier_templates', {
     onDelete: 'cascade',
   }),
   sidebarItems: jsonb('sidebar_items').$type<string[]>().notNull(),
+  isPublic: boolean('is_public').notNull().default(true),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
