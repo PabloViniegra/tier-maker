@@ -3,12 +3,22 @@
 import { useRef, useState } from 'react'
 import { Droppable, Draggable } from '@hello-pangea/dnd'
 import { motion } from 'motion/react'
-import { X, Loader2, Plus } from 'lucide-react'
+import { X, Loader2, Plus, Palette } from 'lucide-react'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { droppableIdForRow } from './constants'
 import { cn } from '@/lib/utils'
 import { dragActiveVariants } from '@/lib/motion-variants'
 import { Button } from '@/components/ui/button'
+import {
+  ColorPicker,
+  ColorPickerAlpha,
+  ColorPickerEyeDropper,
+  ColorPickerFormat,
+  ColorPickerHue,
+  ColorPickerOutput,
+  ColorPickerSelection,
+} from '@/components/ui/color-picker'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 type TierRowChipProps = {
   label: string
@@ -24,7 +34,6 @@ function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, on
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(label)
   const inputRef = useRef<HTMLInputElement>(null)
-  const colorRef = useRef<HTMLInputElement>(null)
 
   function startEdit() {
     setDraft(label)
@@ -76,22 +85,36 @@ function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, on
       )}
 
       {/* color picker trigger */}
-      <button
-        type='button'
-        onClick={() => colorRef.current?.click()}
-        className='absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-sm border border-white/30 opacity-0 transition-opacity group-hover/chip:opacity-100'
-        style={{ background: color }}
-        aria-label='Change tier color'
-      />
-      <input
-        ref={colorRef}
-        type='color'
-        defaultValue={color}
-        onChange={(e) => onColorChange(e.target.value)}
-        className='absolute h-0 w-0 opacity-0'
-        tabIndex={-1}
-        aria-hidden
-      />
+      <Popover>
+        <PopoverTrigger
+          aria-label='Change tier color'
+          className='absolute bottom-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-sm border border-white/30 bg-black/20 text-white opacity-0 transition-opacity group-hover/chip:opacity-100 hover:bg-black/40 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60'
+        >
+          <Palette size={9} aria-hidden />
+        </PopoverTrigger>
+        <PopoverContent
+          side='right'
+          sideOffset={8}
+          align='start'
+          className='w-64 p-3'
+          initialFocus={false}
+        >
+          <ColorPicker value={color} onChange={onColorChange}>
+            <ColorPickerSelection />
+            <div className='flex items-center gap-2'>
+              <ColorPickerEyeDropper />
+              <div className='flex w-full flex-col gap-2'>
+                <ColorPickerHue />
+                <ColorPickerAlpha />
+              </div>
+            </div>
+            <div className='flex flex-col gap-1.5'>
+              <ColorPickerOutput />
+              <ColorPickerFormat />
+            </div>
+          </ColorPicker>
+        </PopoverContent>
+      </Popover>
 
       {/* remove row */}
       <button
