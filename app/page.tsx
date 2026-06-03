@@ -62,7 +62,7 @@ export default function HomePage() {
                 Build tier lists for any topic in seconds. Movies, games,
                 albums&mdash;drag, rank, and share with one link.
               </p>
-              <div className='mt-7 flex items-center gap-2.5'>
+              <div className='mt-7 flex flex-wrap items-center gap-2.5'>
                 <Link
                   href='/register'
                   className={cn(buttonVariants({ size: 'default' }))}
@@ -76,6 +76,14 @@ export default function HomePage() {
                   )}
                 >
                   Sign in
+                </Link>
+                <Link
+                  href='/explore'
+                  className={cn(
+                    'text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline'
+                  )}
+                >
+                  Browse tier lists →
                 </Link>
               </div>
             </FadeUp>
@@ -91,6 +99,27 @@ export default function HomePage() {
                 See it in action
               </p>
               <TierListMockup />
+            </FadeUp>
+          </BentoCell>
+
+          {/* ── Explore CTA ── */}
+          <BentoCell colSpan={8} className='relative overflow-hidden'>
+            <div className='absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,oklch(0.62_0.20_145/0.10)_0%,transparent_60%)]' />
+            <FadeUp delay={0.10} className='relative flex flex-col items-center gap-3 p-6 text-center md:flex-row md:justify-between md:text-left'>
+              <div>
+                <h2 className='font-heading text-lg font-semibold tracking-tight text-foreground'>
+                  Browse community tier lists
+                </h2>
+                <p className='mt-1 text-sm text-muted-foreground'>
+                  Discover tier lists made by other users. No account required.
+                </p>
+              </div>
+              <Link
+                href='/explore'
+                className={cn(buttonVariants({ size: 'default' }), 'shrink-0')}
+              >
+                Explore tier lists
+              </Link>
             </FadeUp>
           </BentoCell>
         </BentoGrid>
