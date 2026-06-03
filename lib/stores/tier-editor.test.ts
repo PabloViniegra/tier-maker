@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { useTierEditor, hasPendingUploads, buildSavePayload } from './tier-editor'
+import { useTierEditor, hasPendingUploads, buildSavePayload, type TierListDetailSeed } from './tier-editor'
 
 function reset() {
   useTierEditor.getState().reset()
@@ -306,5 +306,62 @@ describe('useTierEditor — selectors', () => {
     expect(payload.category).toBe('Cinema')
     expect(payload.bankItems).toEqual([])
     expect(payload.rows[0].items).toEqual(['https://blob/a.png'])
+  })
+})
+
+describe('useTierEditor — initFromDb', () => {
+  beforeEach(() => reset())
+
+  const seed: TierListDetailSeed = {
+    title: 'Anime Tier List',
+    description: 'My picks',
+    category: 'anime',
+    sidebarItems: ['https://blob/bank1.png', 'https://blob/bank2.png'],
+    rows: [
+      { id: 'row-s', label: 'S', color: '#ff0', order: 0, items: ['https://blob/placed.png'] },
+      { id: 'row-a', label: 'A', color: '#0ff', order: 1, items: [] },
+    ],
+  }
+
+  it('seeds metadata from the DB payload', () => {
+    useTierEditor.getState().initFromDb(seed)
+    expect(snapshot().metadata).toEqual({
+      title: 'Anime Tier List',
+      description: 'My picks',
+      category: 'anime',
+    })
+  })
+
+  it('seeds rows with correct labels, colors, and placed items', () => {
+    useTierEditor.getState().initFromDb(seed)
+    const rows = snapshot().rows
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toMatchObject({ id: 'row-s', label: 'S', color: '#ff0' })
+    expect(rows[0].items[0]).toMatchObject({ url: 'https://blob/placed.png', status: 'uploaded' })
+  })
+
+  it('seeds bankItems from sidebarItems as uploaded items', () => {
+    useTierEditor.getState().initFromDb(seed)
+    const bank = snapshot().bankItems
+    expect(bank).toHaveLength(2)
+    expect(bank[0]).toMatchObject({ url: 'https://blob/bank1.png', status: 'uploaded' })
+    expect(bank[1]).toMatchObject({ url: 'https://blob/bank2.png', status: 'uploaded' })
+  })
+
+  it('calling initFromDb twice replaces state completely (idempotent seed)', () => {
+    useTierEditor.getState().initFromDb(seed)
+    useTierEditor.getState().initFromDb({ ...seed, title: 'Updated', sidebarItems: [] })
+    const s = snapshot()
+    expect(s.metadata.title).toBe('Updated')
+    expect(s.bankItems).toHaveLength(0)
+  })
+
+  it('replaces prior state from /new so no leftover items remain', () => {
+    useTierEditor.getState().addUploadingItem('stale.png')
+    useTierEditor.getState().setMetadata({ title: 'Old' })
+    useTierEditor.getState().initFromDb(seed)
+    const s = snapshot()
+    expect(s.metadata.title).toBe('Anime Tier List')
+    expect(s.bankItems).toHaveLength(2)
   })
 })

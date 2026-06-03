@@ -10,6 +10,7 @@ import {
   getUserTierListStats,
   getRecentTierLists,
   getAllUserTierLists,
+  getTierListById,
 } from './tier-templates'
 import { db } from '@/lib/db'
 
@@ -286,5 +287,88 @@ describe('getAllUserTierLists', () => {
       itemCount: 4,
       createdAt: date,
     })
+  })
+})
+
+describe('getTierListById', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  function mockTemplate(tpl: object) {
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([tpl]),
+      }),
+    })
+  }
+
+  function mockNoTemplate() {
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([]),
+      }),
+    })
+  }
+
+  function mockRows(rows: object[]) {
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockResolvedValue(rows),
+        }),
+      }),
+    })
+  }
+
+  const baseTpl = {
+    id: 'tpl-1',
+    title: 'Best Anime',
+    description: null,
+    category: 'anime',
+    sidebarItems: ['https://blob/a.png'],
+    createdAt: new Date('2026-06-01'),
+    creatorId: 'user-1',
+  }
+
+  it('returns full detail with ordered rows when id and userId match', async () => {
+    mockTemplate(baseTpl)
+    mockRows([
+      { id: 'row-1', label: 'S', color: '#ff0', order: 0, items: ['https://blob/x.png'] },
+      { id: 'row-2', label: 'A', color: '#0ff', order: 1, items: [] },
+    ])
+
+    const result = await getTierListById('tpl-1', 'user-1')
+
+    expect(result).not.toBeNull()
+    expect(result!.id).toBe('tpl-1')
+    expect(result!.title).toBe('Best Anime')
+    expect(result!.rows).toHaveLength(2)
+    expect(result!.rows[0]).toMatchObject({ id: 'row-1', label: 'S', items: ['https://blob/x.png'] })
+  })
+
+  it('returns null when the id does not exist', async () => {
+    mockNoTemplate()
+
+    const result = await getTierListById('nonexistent', 'user-1')
+
+    expect(result).toBeNull()
+  })
+
+  it('returns null when the tier list belongs to a different user', async () => {
+    mockNoTemplate()
+
+    const result = await getTierListById('tpl-1', 'user-other')
+
+    expect(result).toBeNull()
+  })
+
+  it('exposes sidebarItems as the bank', async () => {
+    mockTemplate({ ...baseTpl, sidebarItems: ['https://blob/a.png', 'https://blob/b.png'] })
+    mockRows([])
+
+    const result = await getTierListById('tpl-1', 'user-1')
+
+    expect(result!.sidebarItems).toEqual(['https://blob/a.png', 'https://blob/b.png'])
   })
 })
