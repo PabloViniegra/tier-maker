@@ -4,13 +4,9 @@ import { getSession } from '@/lib/session'
 import {
   getPublicTierLists,
   getDistinctPublicCategories,
-  type ExploreSort,
 } from '@/lib/queries/tier-templates'
 
-const VALID_SORTS = new Set<ExploreSort>(['newest', 'oldest', 'a-z'])
-function toSort(raw: string | undefined): ExploreSort {
-  return VALID_SORTS.has(raw as ExploreSort) ? (raw as ExploreSort) : 'newest'
-}
+import { PAGE_SIZE, toSort } from '@/lib/explore-params'
 import { ExploreHeader } from './_components/explore-header'
 import { ExploreSearchInput } from './_components/explore-search-input'
 import { ExploreCategoryFilter } from './_components/explore-category-filter'
@@ -22,8 +18,6 @@ export const metadata: Metadata = {
   title: 'Explore Tier Lists — Tier Maker',
   description: 'Browse and fill community-created tier lists. No account required.',
 }
-
-const PAGE_SIZE = 12
 
 type Props = {
   searchParams: Promise<{

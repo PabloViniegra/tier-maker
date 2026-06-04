@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'motion/react'
-import { Layers, LayoutDashboard, List, Plus } from 'lucide-react'
+import { Compass, Layers, LayoutDashboard, List, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -25,6 +25,7 @@ type NavItem = {
 export const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Tier Lists', href: '/dashboard/tier-lists', icon: List },
+  { label: 'Explore', href: '/dashboard/explore', icon: Compass },
 ]
 
 export function getInitials(name: string | null, email: string): string {
