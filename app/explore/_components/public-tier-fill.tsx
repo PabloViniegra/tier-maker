@@ -15,9 +15,10 @@ import type { TierListDetailSeed } from '@/lib/stores/tier-editor'
 
 type Props = {
   data: TierListDetailSeed
+  backHref?: string
 }
 
-export function PublicTierFill({ data }: Props) {
+export function PublicTierFill({ data, backHref = '/explore' }: Props) {
   const boardRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export function PublicTierFill({ data }: Props) {
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-background/90 px-4 py-2 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <Link
-            href="/explore"
+            href={backHref}
             className={cn(
               buttonVariants({ variant: 'ghost', size: 'sm' }),
               'gap-1.5 text-muted-foreground hover:text-foreground'
