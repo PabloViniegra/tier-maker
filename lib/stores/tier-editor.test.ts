@@ -385,3 +385,39 @@ describe('useTierEditor — initFromDb', () => {
     expect(s.bankItems).toHaveLength(2)
   })
 })
+
+describe('useTierEditor — removeItemEverywhere', () => {
+  beforeEach(() => reset())
+
+  it('removes an item from the bank when it only exists in the bank', () => {
+    const id = useTierEditor.getState().addUploadingItem('Solo bank item')
+    useTierEditor.getState().markItemUploaded(id, 'https://blob/a.png')
+    useTierEditor.getState().removeItemEverywhere(id)
+    expect(snapshot().bankItems).toHaveLength(0)
+  })
+
+  it('removes an item from the bank AND from every row it was placed in', () => {
+    const id = useTierEditor.getState().addUploadingItem('Placed item')
+    useTierEditor.getState().markItemUploaded(id, 'https://blob/b.png')
+    const rowId = snapshot().rows[0].id
+    useTierEditor.getState().moveItem({
+      source: 'bank', sourceIndex: 0,
+      target: 'row', targetId: rowId, targetIndex: 0,
+    })
+    expect(snapshot().rows[0].items).toHaveLength(1)
+    useTierEditor.getState().removeItemEverywhere(id)
+    expect(snapshot().bankItems).toHaveLength(0)
+    expect(snapshot().rows[0].items).toHaveLength(0)
+  })
+
+  it('does not affect other items in the bank or rows', () => {
+    const keep = useTierEditor.getState().addUploadingItem('Keep me')
+    useTierEditor.getState().markItemUploaded(keep, 'https://blob/keep.png')
+    const remove = useTierEditor.getState().addUploadingItem('Remove me')
+    useTierEditor.getState().markItemUploaded(remove, 'https://blob/remove.png')
+    useTierEditor.getState().removeItemEverywhere(remove)
+    const bank = snapshot().bankItems
+    expect(bank).toHaveLength(1)
+    expect(bank[0].id).toBe(keep)
+  })
+})

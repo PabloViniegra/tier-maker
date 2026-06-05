@@ -19,7 +19,7 @@ import { dragActiveVariants } from '@/lib/motion-variants'
 export function ItemBank({ onPickFiles }: { onPickFiles: (files: File[]) => void }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const bankItems = useTierEditor((s) => s.bankItems)
-  const removeItem = useTierEditor((s) => s.removeItem)
+  const removeItemEverywhere = useTierEditor((s) => s.removeItemEverywhere)
 
   return (
     <aside className='flex flex-col gap-3 rounded-lg border border-border bg-surface p-4'>
@@ -120,7 +120,7 @@ export function ItemBank({ onPickFiles }: { onPickFiles: (files: File[]) => void
                             )}
                             <button
                               type='button'
-                              onClick={() => removeItem({ source: 'bank', id: item.id })}
+                              onClick={() => removeItemEverywhere(item.id)}
                               className='absolute right-1 top-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-foreground'
                               aria-label='Remove'
                             >

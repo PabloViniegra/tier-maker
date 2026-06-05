@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { getSession } from '@/lib/session'
-import { getCategoryPresets } from './actions'
+import { getCategoryPresets } from '@/lib/queries/category-presets'
 import { getUserCategoryPresets } from '@/lib/queries/user-category-presets'
 import { TierListCreator } from './_components/tier-list-creator'
 
