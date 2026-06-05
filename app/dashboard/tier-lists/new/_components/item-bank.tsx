@@ -98,11 +98,13 @@ export function ItemBank({ onPickFiles }: { onPickFiles: (files: File[]) => void
                           >
                             {item.status === 'uploaded' && item.url ? (
                               <Tooltip>
-                                <TooltipTrigger className='h-full w-full'>
+                                <TooltipTrigger aria-label={item.label} className='h-full w-full'>
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={item.url}
                                     alt={item.label}
+                                    width={80}
+                                    height={80}
                                     className='h-full w-full object-cover'
                                     draggable={false}
                                   />
@@ -121,8 +123,8 @@ export function ItemBank({ onPickFiles }: { onPickFiles: (files: File[]) => void
                             <button
                               type='button'
                               onClick={() => removeItemEverywhere(item.id)}
-                              className='absolute right-1 top-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-foreground'
-                              aria-label='Remove'
+                              className='absolute right-1 top-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 focus-visible:opacity-100 hover:text-foreground'
+                              aria-label={`Remove ${item.label}`}
                             >
                               <X size={12} />
                             </button>

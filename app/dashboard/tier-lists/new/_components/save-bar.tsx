@@ -20,7 +20,7 @@ export function SaveBar({
       data-testid='save-button'
     >
       <Save size={14} />
-      {isSaving ? 'Saving...' : 'Save tier list'}
+      {isSaving ? 'Saving…' : 'Save tier list'}
     </Button>
   )
 }
