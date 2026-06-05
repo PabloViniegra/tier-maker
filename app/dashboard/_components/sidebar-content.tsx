@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { motion } from 'motion/react'
-import { Compass, Layers, LayoutDashboard, List, Plus } from 'lucide-react'
+import { Compass, LayoutDashboard, List, Plus } from 'lucide-react'
+import { TierMakerIcon } from '@/components/tier-maker-icon'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -41,14 +42,7 @@ export function getInitials(name: string | null, email: string): string {
 }
 
 export function SidebarLogo() {
-  return (
-    <div className="flex items-center gap-2">
-      <Layers size={16} strokeWidth={1.5} className="text-primary" />
-      <span className="font-heading text-sm font-semibold tracking-tight">
-        tier-maker
-      </span>
-    </div>
-  )
+  return <TierMakerIcon size={20} aria-hidden="true" />
 }
 
 export function SidebarNav({ pathname }: { pathname: string }) {
