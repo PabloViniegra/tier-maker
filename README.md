@@ -87,8 +87,8 @@ The application follows the Next.js App Router conventions with server component
 
 ### Prerequisites
 
-- Node.js >= 18
-- pnpm >= 9
+- Node.js >= 20
+- pnpm = 11
 - A Neon PostgreSQL database (or any PostgreSQL instance)
 - A Vercel Blob storage token (for image uploads)
 
