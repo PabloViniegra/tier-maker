@@ -22,6 +22,7 @@ export default async function TierListDetailPage({ params }: Props) {
         title: data.title,
         description: data.description,
         category: data.category,
+        coverImageUrl: data.coverImageUrl,
         sidebarItems: data.sidebarItems,
         rows: data.rows,
       }}

@@ -101,6 +101,7 @@ export async function createTierListAction(
         description: data.description ?? null,
         category: data.category,
         creatorId: session.user.id,
+        coverImageUrl: data.coverImageUrl ?? null,
         sidebarItems,
       })
       .returning({ id: tierTemplates.id })
@@ -112,6 +113,7 @@ export async function createTierListAction(
           label: row.label,
           color: row.color,
           order: index,
+          items: row.items,
         }))
       )
     }

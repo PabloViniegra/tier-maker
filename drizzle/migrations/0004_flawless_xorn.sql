@@ -1,0 +1,1 @@
+ALTER TABLE "tier_templates" ADD COLUMN "cover_image_url" text;

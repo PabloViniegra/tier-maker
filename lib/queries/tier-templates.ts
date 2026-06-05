@@ -1,8 +1,9 @@
 import 'server-only'
-import { eq, desc, count, countDistinct, max, and, asc, or, ilike } from 'drizzle-orm'
+import { eq, desc, count, countDistinct, max, and, asc, or, ilike, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierRows, tierTemplates } from '@/lib/db/schema'
 import { user } from '@/lib/db/schema/auth'
+import type { ImageItem } from '@/lib/validators/tier-list'
 
 export type TierListSummary = {
   id: string
@@ -10,6 +11,8 @@ export type TierListSummary = {
   category: string
   itemCount: number
   createdAt: Date
+  coverImageUrl: string | null
+  firstItemUrl: string | null
 }
 
 export async function getUserTierListStats(userId: string): Promise<{
@@ -33,6 +36,20 @@ export async function getUserTierListStats(userId: string): Promise<{
   }
 }
 
+const firstItemUrlExpr = sql<string | null>`
+  COALESCE(
+    (${tierTemplates.sidebarItems} -> 0 ->> 'url'),
+    (
+      SELECT items -> 0 ->> 'url'
+      FROM tier_rows
+      WHERE template_id = ${tierTemplates.id}
+        AND jsonb_array_length(items) > 0
+      ORDER BY "order" ASC
+      LIMIT 1
+    )
+  )
+`
+
 export async function getRecentTierLists(
   userId: string,
   limit = 12
@@ -43,7 +60,9 @@ export async function getRecentTierLists(
       title: tierTemplates.title,
       category: tierTemplates.category,
       sidebarItems: tierTemplates.sidebarItems,
+      coverImageUrl: tierTemplates.coverImageUrl,
       createdAt: tierTemplates.createdAt,
+      firstItemUrl: firstItemUrlExpr,
     })
     .from(tierTemplates)
     .where(eq(tierTemplates.creatorId, userId))
@@ -56,6 +75,8 @@ export async function getRecentTierLists(
     category: r.category,
     itemCount: r.sidebarItems.length,
     createdAt: r.createdAt,
+    coverImageUrl: r.coverImageUrl ?? null,
+    firstItemUrl: r.firstItemUrl ?? null,
   }))
 }
 
@@ -68,7 +89,9 @@ export async function getAllUserTierLists(
       title: tierTemplates.title,
       category: tierTemplates.category,
       sidebarItems: tierTemplates.sidebarItems,
+      coverImageUrl: tierTemplates.coverImageUrl,
       createdAt: tierTemplates.createdAt,
+      firstItemUrl: firstItemUrlExpr,
     })
     .from(tierTemplates)
     .where(eq(tierTemplates.creatorId, userId))
@@ -80,6 +103,8 @@ export async function getAllUserTierLists(
     category: r.category,
     itemCount: r.sidebarItems.length,
     createdAt: r.createdAt,
+    coverImageUrl: r.coverImageUrl ?? null,
+    firstItemUrl: r.firstItemUrl ?? null,
   }))
 }
 
@@ -88,14 +113,15 @@ export type TierListDetail = {
   title: string
   description: string | null
   category: string
-  sidebarItems: string[]
+  coverImageUrl: string | null
+  sidebarItems: ImageItem[]
   createdAt: Date
   rows: {
     id: string
     label: string
     color: string
     order: number
-    items: string[]
+    items: ImageItem[]
   }[]
 }
 
@@ -134,6 +160,7 @@ export async function getPublicTierListById(
     title: tpl.title,
     description: tpl.description,
     category: tpl.category,
+    coverImageUrl: tpl.coverImageUrl ?? null,
     sidebarItems: tpl.sidebarItems,
     createdAt: tpl.createdAt,
     rows: rows.map((r) => ({
@@ -187,8 +214,10 @@ export async function getPublicTierLists(
         title: tierTemplates.title,
         category: tierTemplates.category,
         sidebarItems: tierTemplates.sidebarItems,
+        coverImageUrl: tierTemplates.coverImageUrl,
         createdAt: tierTemplates.createdAt,
         creatorName: user.name,
+        firstItemUrl: firstItemUrlExpr,
       })
       .from(tierTemplates)
       .leftJoin(user, eq(tierTemplates.creatorId, user.id))
@@ -209,6 +238,8 @@ export async function getPublicTierLists(
       category: r.category,
       itemCount: r.sidebarItems.length,
       createdAt: r.createdAt,
+      coverImageUrl: r.coverImageUrl ?? null,
+      firstItemUrl: r.firstItemUrl ?? null,
       creatorName: r.creatorName ?? null,
     })),
     total: countRow?.count ?? 0,
@@ -237,6 +268,7 @@ export async function getTierListById(
     title: tpl.title,
     description: tpl.description,
     category: tpl.category,
+    coverImageUrl: tpl.coverImageUrl ?? null,
     sidebarItems: tpl.sidebarItems,
     createdAt: tpl.createdAt,
     rows: rows.map((r) => ({

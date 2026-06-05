@@ -11,6 +11,7 @@ import { MetadataPanel } from './metadata-panel'
 import { ItemBank } from './item-bank'
 import { TierBoard } from './tier-board'
 import { SaveBar } from './save-bar'
+import { ImageLabelModal, type LabeledFile } from './image-label-modal'
 import { uploadImagesAction, createTierListAction } from '../actions'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -27,14 +28,11 @@ export function TierListCreator({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [isDraggingFile, setIsDraggingFile] = useState(false)
+  const [pendingFiles, setPendingFiles] = useState<File[] | null>(null)
 
-  const handleFiles = useCallback(async (files: File[]) => {
-    const { addUploadingItem, markItemUploaded, markItemError, bankItems } =
-      useTierEditor.getState()
-    if (bankItems.length + files.length > 30) {
-      toast.error('You can upload at most 30 images per tier list')
-      return
-    }
+  function openModal(files: File[]) {
+    const { bankItems } = useTierEditor.getState()
+    const filtered: File[] = []
     for (const file of files) {
       if (!file.type.startsWith('image/')) {
         toast.error(`${file.name} is not an image`)
@@ -44,7 +42,20 @@ export function TierListCreator({
         toast.error(`${file.name} is larger than 5 MB`)
         continue
       }
-      const id = addUploadingItem(file.name)
+      filtered.push(file)
+    }
+    if (bankItems.length + filtered.length > 30) {
+      toast.error('You can upload at most 30 images per tier list')
+      return
+    }
+    if (filtered.length > 0) setPendingFiles(filtered)
+  }
+
+  const handleModalConfirm = useCallback(async (labeled: LabeledFile[]) => {
+    setPendingFiles(null)
+    const { addUploadingItem, markItemUploaded, markItemError } = useTierEditor.getState()
+    for (const { file, label } of labeled) {
+      const id = addUploadingItem(label)
       try {
         const fd = new FormData()
         fd.append('file', file)
@@ -70,11 +81,11 @@ export function TierListCreator({
       }
       if (files.length === 0) return
       e.preventDefault()
-      void handleFiles(files)
+      openModal(files)
     }
     window.addEventListener('paste', onPaste)
     return () => window.removeEventListener('paste', onPaste)
-  }, [handleFiles])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     function onDragOver(e: DragEvent) {
@@ -92,8 +103,7 @@ export function TierListCreator({
       if (!e.dataTransfer?.files?.length) return
       e.preventDefault()
       setIsDraggingFile(false)
-      const files = Array.from(e.dataTransfer.files)
-      void handleFiles(files)
+      openModal(Array.from(e.dataTransfer.files))
     }
     window.addEventListener('dragover', onDragOver)
     window.addEventListener('dragleave', onDragLeave)
@@ -103,7 +113,7 @@ export function TierListCreator({
       window.removeEventListener('dragleave', onDragLeave)
       window.removeEventListener('drop', onDrop)
     }
-  }, [handleFiles])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const onDragEnd = useCallback((result: DropResult) => {
     const { source, destination } = result
@@ -183,11 +193,19 @@ export function TierListCreator({
       <DragDropContext onDragEnd={onDragEnd}>
         <div className='grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]'>
           <TierBoard />
-          <ItemBank onPickFiles={handleFiles} />
+          <ItemBank onPickFiles={openModal} />
         </div>
       </DragDropContext>
 
       {isDraggingFile && <PageDropOverlay />}
+
+      {pendingFiles && (
+        <ImageLabelModal
+          files={pendingFiles}
+          onConfirm={handleModalConfirm}
+          onCancel={() => setPendingFiles(null)}
+        />
+      )}
     </div>
   )
 }

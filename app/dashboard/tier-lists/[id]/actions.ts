@@ -5,14 +5,16 @@ import { and, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierRows, tierTemplates } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
+import type { ImageItem } from '@/lib/validators/tier-list'
 
 export type UpdateTierListPayload = {
-  bankItems: string[]
+  coverImageUrl?: string
+  bankItems: ImageItem[]
   rows: Array<{
     id: string
     label: string
     color: string
-    items: string[]
+    items: ImageItem[]
   }>
 }
 
@@ -33,7 +35,10 @@ export async function updateTierListAction(
   await db.transaction(async (tx) => {
     await tx
       .update(tierTemplates)
-      .set({ sidebarItems: payload.bankItems })
+      .set({
+        sidebarItems: payload.bankItems,
+        coverImageUrl: payload.coverImageUrl ?? null,
+      })
       .where(eq(tierTemplates.id, id))
 
     await tx.delete(tierRows).where(eq(tierRows.templateId, id))

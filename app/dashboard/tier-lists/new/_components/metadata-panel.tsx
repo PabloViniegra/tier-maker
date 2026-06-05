@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { Check, ChevronsUpDown, X } from 'lucide-react'
+import { useRef, useState, useTransition } from 'react'
+import { Check, ChevronsUpDown, ImagePlus, Loader2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils'
 import {
   saveUserCategoryPresetAction,
   deleteUserCategoryPresetAction,
+  uploadImagesAction,
 } from '../actions'
 import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
 
@@ -37,6 +38,8 @@ export function MetadataPanel({
   const [categoryInput, setCategoryInput] = useState(metadata.category)
   const [userPresets, setUserPresets] = useState(initialUserPresets)
   const [isPending, startTransition] = useTransition()
+  const [isUploadingCover, setIsUploadingCover] = useState(false)
+  const coverInputRef = useRef<HTMLInputElement>(null)
 
   const filteredDefaults = categoryPresets.filter((p) =>
     p.toLowerCase().includes(categoryInput.toLowerCase().trim())
@@ -83,8 +86,34 @@ export function MetadataPanel({
     })
   }
 
+  async function handleCoverFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    if (!file.type.startsWith('image/')) {
+      toast.error('Cover must be an image')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Cover image must be 5 MB or smaller')
+      return
+    }
+    setIsUploadingCover(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const { url } = await uploadImagesAction(fd)
+      setMetadata({ coverImageUrl: url })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Upload failed'
+      toast.error(message)
+    } finally {
+      setIsUploadingCover(false)
+    }
+  }
+
   return (
-    <section className='grid grid-cols-1 gap-3 rounded-lg border border-border bg-surface p-4 md:grid-cols-3'>
+    <section className='grid grid-cols-1 gap-3 rounded-lg border border-border bg-surface p-4 md:grid-cols-4 md:items-start'>
       <div className='flex flex-col gap-1.5'>
         <Label htmlFor='title'>Title</Label>
         <Input
@@ -226,6 +255,52 @@ export function MetadataPanel({
           className='min-h-9 resize-none'
           rows={1}
         />
+      </div>
+
+      <div className='flex flex-col gap-1.5'>
+        <Label>Cover image (optional)</Label>
+        <input
+          ref={coverInputRef}
+          type='file'
+          accept='image/jpeg,image/png,image/webp,image/gif'
+          className='sr-only'
+          onChange={handleCoverFileChange}
+          data-testid='cover-file-input'
+        />
+        {metadata.coverImageUrl ? (
+          <div className='group/cover relative aspect-video w-full overflow-hidden rounded-md border border-border'>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={metadata.coverImageUrl}
+              alt='cover preview'
+              className='h-full w-full object-cover'
+            />
+            <button
+              type='button'
+              onClick={() => setMetadata({ coverImageUrl: undefined })}
+              className='absolute right-1 top-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/cover:opacity-100 hover:text-foreground'
+              aria-label='Remove cover'
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ) : (
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            className='w-full gap-2'
+            onClick={() => coverInputRef.current?.click()}
+            disabled={isUploadingCover}
+          >
+            {isUploadingCover ? (
+              <Loader2 size={14} className='animate-spin' />
+            ) : (
+              <ImagePlus size={14} />
+            )}
+            {isUploadingCover ? 'Uploading…' : 'Upload cover'}
+          </Button>
+        )}
       </div>
     </section>
   )

@@ -1,13 +1,13 @@
 'use client'
 
 import { create } from 'zustand'
-import { defaultTierRows } from '@/lib/validators/tier-list'
+import { defaultTierRows, type ImageItem } from '@/lib/validators/tier-list'
 
 export type TierItemStatus = 'uploading' | 'uploaded' | 'error'
 
 export type TierItem = {
   id: string
-  name?: string
+  label: string
   url?: string
   status: TierItemStatus
 }
@@ -23,19 +23,21 @@ export type EditorMetadata = {
   title: string
   description: string
   category: string
+  coverImageUrl?: string
 }
 
 export type TierListDetailSeed = {
   title: string
   description?: string | null
   category: string
-  sidebarItems: string[]
+  coverImageUrl?: string | null
+  sidebarItems: ImageItem[]
   rows: {
     id: string
     label: string
     color: string
     order: number
-    items: string[]
+    items: ImageItem[]
   }[]
 }
 
@@ -63,7 +65,7 @@ type State = {
 
 type Actions = {
   setMetadata: (patch: Partial<EditorMetadata>) => void
-  addUploadingItem: (name?: string) => string
+  addUploadingItem: (label: string) => string
   markItemUploaded: (id: string, url: string) => void
   markItemError: (id: string) => void
   removeItem: (input: RemoveItem) => void
@@ -112,10 +114,10 @@ export const useTierEditor = create<State & Actions>((set) => ({
   ...initialState,
   setMetadata: (patch) =>
     set((s) => ({ metadata: { ...s.metadata, ...patch } })),
-  addUploadingItem: (name) => {
+  addUploadingItem: (label) => {
     const id = newId()
     set((s) => ({
-      bankItems: [...s.bankItems, { id, name, status: 'uploading' }],
+      bankItems: [...s.bankItems, { id, label, status: 'uploading' }],
     }))
     return id
   },
@@ -213,19 +215,22 @@ export const useTierEditor = create<State & Actions>((set) => ({
         title: data.title,
         description: data.description ?? '',
         category: data.category,
+        coverImageUrl: data.coverImageUrl ?? undefined,
       },
-      bankItems: data.sidebarItems.map((url) => ({
+      bankItems: data.sidebarItems.map((item) => ({
         id: newId(),
-        url,
+        url: item.url,
+        label: item.label,
         status: 'uploaded' as TierItemStatus,
       })),
       rows: data.rows.map((r) => ({
         id: r.id,
         label: r.label,
         color: r.color,
-        items: r.items.map((url) => ({
+        items: r.items.map((item) => ({
           id: newId(),
-          url,
+          url: item.url,
+          label: item.label,
           status: 'uploaded' as TierItemStatus,
         })),
       })),
@@ -256,23 +261,25 @@ export function buildSavePayload(state: State): {
   title: string
   description?: string
   category: string
-  rows: { id: string; label: string; color: string; items: string[] }[]
-  bankItems: string[]
+  coverImageUrl?: string
+  rows: { id: string; label: string; color: string; items: ImageItem[] }[]
+  bankItems: ImageItem[]
 } {
   return {
     title: state.metadata.title.trim(),
     description: state.metadata.description.trim() || undefined,
     category: state.metadata.category.trim(),
+    coverImageUrl: state.metadata.coverImageUrl || undefined,
     rows: state.rows.map((r) => ({
       id: r.id,
       label: r.label,
       color: r.color,
       items: r.items
         .filter((i) => i.status === 'uploaded' && i.url)
-        .map((i) => i.url as string),
+        .map((i) => ({ url: i.url as string, label: i.label })),
     })),
     bankItems: state.bankItems
       .filter((i) => i.status === 'uploaded' && i.url)
-      .map((i) => i.url as string),
+      .map((i) => ({ url: i.url as string, label: i.label })),
   }
 }
