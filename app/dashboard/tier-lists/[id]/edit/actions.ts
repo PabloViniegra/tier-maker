@@ -6,38 +6,35 @@ import { db } from '@/lib/db'
 import { tierTemplates } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
 import { assertOwned, replaceTierRows } from '@/lib/db/tier-list-mutations'
-import type { ImageItem } from '@/lib/validators/tier-list'
+import { createTierListSchema, type CreateTierListInput } from '@/lib/validators/tier-list'
 
-export type UpdateTierListPayload = {
-  coverImageUrl?: string
-  bankItems: ImageItem[]
-  rows: Array<{
-    id: string
-    label: string
-    color: string
-    items: ImageItem[]
-  }>
-}
-
-export async function updateTierListAction(
+export async function updateTierListStructureAction(
   id: string,
-  payload: UpdateTierListPayload
+  input: CreateTierListInput
 ): Promise<{ ok: true }> {
   const session = await getSession()
   if (!session) throw new Error('Unauthenticated')
 
+  const parsed = createTierListSchema.safeParse(input)
+  if (!parsed.success) throw new Error('Invalid input')
+
   await assertOwned(id, session.user.id)
+
+  const { title, description, category, coverImageUrl, bankItems, rows } = parsed.data
 
   await db.transaction(async (tx) => {
     await tx
       .update(tierTemplates)
       .set({
-        sidebarItems: payload.bankItems,
-        coverImageUrl: payload.coverImageUrl ?? null,
+        title,
+        description: description ?? null,
+        category,
+        coverImageUrl: coverImageUrl ?? null,
+        sidebarItems: bankItems,
       })
       .where(eq(tierTemplates.id, id))
 
-    await replaceTierRows(tx, id, payload.rows)
+    await replaceTierRows(tx, id, rows)
   })
 
   revalidatePath(`/dashboard/tier-lists/${id}`)

@@ -125,25 +125,6 @@ export async function createTierListAction(
   return { id }
 }
 
-export async function getCategoryPresets(): Promise<string[]> {
-  return [
-    'Videojuegos',
-    'Cine',
-    'Música',
-    'Anime',
-    'TV',
-    'Deportes',
-    'Comida',
-    'Libros',
-    'Tecnología',
-    'Política',
-    'Moda',
-    'Arte',
-    'Ciencia',
-    'Naturaleza',
-    'Historia',
-  ]
-}
 
 export async function saveUserCategoryPresetAction(
   name: string

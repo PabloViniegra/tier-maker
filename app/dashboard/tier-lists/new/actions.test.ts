@@ -28,7 +28,8 @@ vi.mock('@/lib/db', () => ({
   },
 }))
 
-import { uploadImagesAction, createTierListAction, getCategoryPresets } from './actions'
+import { uploadImagesAction, createTierListAction } from './actions'
+import { getCategoryPresets } from '@/lib/queries/category-presets'
 import { defaultTierRows } from '@/lib/validators/tier-list'
 
 function makeFile(name: string, type: string, size: number): File {

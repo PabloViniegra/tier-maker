@@ -6,31 +6,46 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
 import { ArrowLeft, Plus } from 'lucide-react'
-import { useTierEditor, buildSavePayload, hasPendingUploads } from '@/lib/stores/tier-editor'
+import { useTierEditor, buildSavePayload, hasPendingUploads, type TierListDetailSeed } from '@/lib/stores/tier-editor'
 import { MetadataPanel } from './metadata-panel'
 import { ItemBank } from './item-bank'
 import { TierBoard } from './tier-board'
 import { SaveBar } from './save-bar'
 import { ImageLabelModal, type LabeledFile } from './image-label-modal'
 import { uploadImagesAction, createTierListAction } from '../actions'
+import { updateTierListStructureAction } from '../../[id]/edit/actions'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { BANK_DROPPABLE, rowIdFromDroppableId } from './constants'
 import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
 
+type TierListCreatorProps = {
+  categoryPresets: string[]
+  userCategoryPresets: UserCategoryPreset[]
+} & (
+  | { initialData: TierListDetailSeed; editId: string }
+  | { initialData?: never; editId?: never }
+)
+
 export function TierListCreator({
   categoryPresets,
   userCategoryPresets,
-}: {
-  categoryPresets: string[]
-  userCategoryPresets: UserCategoryPreset[]
-}) {
+  initialData,
+  editId,
+}: TierListCreatorProps) {
+  const isEditMode = Boolean(initialData && editId)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [isDraggingFile, setIsDraggingFile] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<File[] | null>(null)
 
-  function openModal(files: File[]) {
+  useEffect(() => {
+    if (initialData) {
+      useTierEditor.getState().initFromDb(initialData)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openModal = useCallback((files: File[]) => {
     const { bankItems } = useTierEditor.getState()
     const filtered: File[] = []
     for (const file of files) {
@@ -49,7 +64,7 @@ export function TierListCreator({
       return
     }
     if (filtered.length > 0) setPendingFiles(filtered)
-  }
+  }, [setPendingFiles])
 
   const handleModalConfirm = useCallback(async (labeled: LabeledFile[]) => {
     setPendingFiles(null)
@@ -150,16 +165,24 @@ export function TierListCreator({
       toast.error('Wait for uploads to finish')
       return
     }
-    if (current.bankItems.length === 0 && current.rows.every((r) => r.items.length === 0)) {
+    if (!isEditMode && current.bankItems.length === 0 && current.rows.every((r) => r.items.length === 0)) {
       toast.error('Upload at least one image')
       return
     }
     startTransition(async () => {
       try {
-        await createTierListAction(buildSavePayload(current))
-        useTierEditor.getState().reset()
-        toast.success('Tier list created')
-        router.push('/dashboard')
+        const payload = buildSavePayload(current)
+        if (isEditMode && editId) {
+          await updateTierListStructureAction(editId, payload)
+          useTierEditor.getState().reset()
+          toast.success('Tier list updated')
+          router.push('/dashboard/tier-lists')
+        } else {
+          await createTierListAction(payload)
+          useTierEditor.getState().reset()
+          toast.success('Tier list created')
+          router.push('/dashboard')
+        }
         router.refresh()
       } catch (err) {
         const message =
@@ -167,14 +190,14 @@ export function TierListCreator({
         toast.error(message)
       }
     })
-  }, [router])
+  }, [router, isEditMode, editId])
 
   return (
     <div className='flex flex-col gap-6'>
       <header className='flex items-center justify-between gap-3'>
         <div className='flex items-center gap-3'>
           <Link
-            href='/dashboard'
+            href={isEditMode ? '/dashboard/tier-lists' : '/dashboard'}
             className={cn(
               buttonVariants({ variant: 'ghost', size: 'sm' }),
               'gap-1.5 text-muted-foreground hover:text-foreground'
@@ -183,7 +206,7 @@ export function TierListCreator({
             <ArrowLeft size={14} />
             Back
           </Link>
-          <h1 className='font-heading text-xl'>New tier list</h1>
+          <h1 className='font-heading text-xl'>{isEditMode ? 'Edit tier list' : 'New tier list'}</h1>
         </div>
         <SaveBar onSave={handleSave} isSaving={isPending} />
       </header>

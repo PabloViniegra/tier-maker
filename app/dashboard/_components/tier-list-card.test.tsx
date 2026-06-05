@@ -1,5 +1,15 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+
+vi.mock('@/components/ui/dropdown-menu', () => ({
+  DropdownMenu: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  DropdownMenuTrigger: ({ children, ...props }: React.HTMLAttributes<HTMLButtonElement> & { children: React.ReactNode }) => (
+    <button type="button" {...props}>{children}</button>
+  ),
+  DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DropdownMenuItem: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}))
+
 import { TierListCard } from './tier-list-card'
 
 const baseProps = {
@@ -84,5 +94,21 @@ describe('TierListCard', () => {
   it('shows a placeholder element when neither cover nor firstItemUrl is set', () => {
     render(<TierListCard {...baseProps} />)
     expect(screen.getByTestId('card-cover-placeholder')).toBeInTheDocument()
+  })
+
+  it('renders a context menu trigger button', () => {
+    render(<TierListCard {...baseProps} />)
+    expect(screen.getByRole('button', { name: /options/i })).toBeInTheDocument()
+  })
+
+  it('renders "Edit" link in the card menu', () => {
+    render(<TierListCard {...baseProps} />)
+    expect(screen.getByRole('link', { name: /^edit$/i })).toBeInTheDocument()
+  })
+
+  it('"Edit" links to the edit route', () => {
+    render(<TierListCard {...baseProps} />)
+    const editLink = screen.getByRole('link', { name: /^edit$/i })
+    expect(editLink).toHaveAttribute('href', '/dashboard/tier-lists/abc-123/edit')
   })
 })

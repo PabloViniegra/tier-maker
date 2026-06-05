@@ -69,6 +69,7 @@ type Actions = {
   markItemUploaded: (id: string, url: string) => void
   markItemError: (id: string) => void
   removeItem: (input: RemoveItem) => void
+  removeItemEverywhere: (id: string) => void
   moveItem: (input: MoveItem) => void
   updateRow: (id: string, patch: Partial<Pick<EditorTierRow, 'label' | 'color'>>) => void
   addRow: () => void
@@ -146,6 +147,11 @@ export const useTierEditor = create<State & Actions>((set) => ({
         ),
       }
     }),
+  removeItemEverywhere: (id) =>
+    set((s) => ({
+      bankItems: s.bankItems.filter((i) => i.id !== id),
+      rows: s.rows.map((r) => ({ ...r, items: r.items.filter((i) => i.id !== id) })),
+    })),
   moveItem: (input) =>
     set((s) => {
       const { source, sourceId, sourceIndex, target, targetId, targetIndex } = input
