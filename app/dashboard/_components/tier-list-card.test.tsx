@@ -54,7 +54,35 @@ describe('TierListCard', () => {
         category="this-is-a-very-long-category-name-that-exceeds-limit"
       />
     )
-    const badge = screen.getByText(/this-is-a-very-long/)
-    expect(badge).toBeInTheDocument()
+    expect(screen.getByText(/this-is-a-very-long/)).toBeInTheDocument()
+  })
+
+  it('renders the cover image when coverImageUrl is provided', () => {
+    render(<TierListCard {...baseProps} coverImageUrl="https://blob/cover.png" />)
+    const img = screen.getByRole('img', { name: /cover/i })
+    expect(img).toHaveAttribute('src', 'https://blob/cover.png')
+  })
+
+  it('renders the first item image as fallback when no cover but firstItemUrl exists', () => {
+    render(<TierListCard {...baseProps} firstItemUrl="https://blob/item.png" />)
+    const img = screen.getByRole('img')
+    expect(img).toHaveAttribute('src', 'https://blob/item.png')
+  })
+
+  it('cover image takes precedence over firstItemUrl', () => {
+    render(
+      <TierListCard
+        {...baseProps}
+        coverImageUrl="https://blob/cover.png"
+        firstItemUrl="https://blob/item.png"
+      />
+    )
+    const img = screen.getByRole('img')
+    expect(img).toHaveAttribute('src', 'https://blob/cover.png')
+  })
+
+  it('shows a placeholder element when neither cover nor firstItemUrl is set', () => {
+    render(<TierListCard {...baseProps} />)
+    expect(screen.getByTestId('card-cover-placeholder')).toBeInTheDocument()
   })
 })

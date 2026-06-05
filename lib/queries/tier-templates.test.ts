@@ -266,7 +266,14 @@ describe('getAllUserTierLists', () => {
         id: 'x',
         title: 'Best Albums',
         category: 'música',
-        sidebarItems: ['a', 'b', 'c', 'd'],
+        sidebarItems: [
+          { url: 'https://blob/a.png', label: 'A' },
+          { url: 'https://blob/b.png', label: 'B' },
+          { url: 'https://blob/c.png', label: 'C' },
+          { url: 'https://blob/d.png', label: 'D' },
+        ],
+        coverImageUrl: null,
+        firstItemUrl: 'https://blob/a.png',
         createdAt: date,
       },
     ]
@@ -286,6 +293,8 @@ describe('getAllUserTierLists', () => {
       category: 'música',
       itemCount: 4,
       createdAt: date,
+      coverImageUrl: null,
+      firstItemUrl: 'https://blob/a.png',
     })
   })
 })

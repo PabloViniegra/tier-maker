@@ -147,9 +147,9 @@ describe('createTierListAction', () => {
 
     const result = await createTierListAction({
       ...validInput,
-      bankItems: ['https://blob/a.png'],
+      bankItems: [{ url: 'https://blob/a.png', label: 'A cake' }],
       rows: validInput.rows.map((r, i) =>
-        i === 0 ? { ...r, items: ['https://blob/b.png'] } : r
+        i === 0 ? { ...r, items: [{ url: 'https://blob/b.png', label: 'B cake' }] } : r
       ),
     })
 
@@ -167,7 +167,10 @@ describe('createTierListAction', () => {
 
   it('rejects payloads with too many items', async () => {
     authedSession()
-    const tooMany = Array.from({ length: 31 }, (_, i) => `https://blob/${i}.png`)
+    const tooMany = Array.from({ length: 31 }, (_, i) => ({
+      url: `https://blob/${i}.png`,
+      label: `Item ${i}`,
+    }))
     await expect(
       createTierListAction({ ...validInput, bankItems: tooMany })
     ).rejects.toThrow()

@@ -10,6 +10,12 @@ import { cn } from '@/lib/utils'
 import { dragActiveVariants } from '@/lib/motion-variants'
 import { Button } from '@/components/ui/button'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
   ColorPicker,
   ColorPickerAlpha,
   ColorPickerEyeDropper,
@@ -84,7 +90,6 @@ function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, on
         </span>
       )}
 
-      {/* color picker trigger */}
       <Popover>
         <PopoverTrigger
           aria-label='Change tier color'
@@ -116,7 +121,6 @@ function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, on
         </PopoverContent>
       </Popover>
 
-      {/* remove row */}
       <button
         type='button'
         onClick={onRemove}
@@ -182,54 +186,61 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
                     Drag items here
                   </span>
                 )}
-                {row.items.map((item, index) => (
-                  <Draggable key={item.id} draggableId={item.id} index={index}>
-                    {(dragProvided, dragSnapshot) => (
-                      <div
-                        ref={dragProvided.innerRef}
-                        {...dragProvided.draggableProps}
-                        {...dragProvided.dragHandleProps}
-                        className={cn('group/item relative shrink-0', itemCls)}
-                        data-testid='row-item'
-                      >
-                        <motion.div
-                          initial={false}
-                          variants={dragActiveVariants}
-                          animate={dragSnapshot.isDragging ? 'dragging' : 'idle'}
-                          className='relative h-full w-full overflow-hidden rounded border border-border bg-background'
+                <TooltipProvider>
+                  {row.items.map((item, index) => (
+                    <Draggable key={item.id} draggableId={item.id} index={index}>
+                      {(dragProvided, dragSnapshot) => (
+                        <div
+                          ref={dragProvided.innerRef}
+                          {...dragProvided.draggableProps}
+                          {...dragProvided.dragHandleProps}
+                          className={cn('group/item relative shrink-0', itemCls)}
+                          data-testid='row-item'
                         >
-                          {item.status === 'uploaded' && item.url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={item.url}
-                              alt={item.name ?? ''}
-                              className='h-full w-full object-cover'
-                              draggable={false}
-                            />
-                          ) : item.status === 'uploading' ? (
-                            <div className='flex h-full w-full items-center justify-center text-muted-foreground'>
-                              <Loader2 size={12} className='animate-spin' />
-                            </div>
-                          ) : (
-                            <div className='flex h-full w-full items-center justify-center bg-destructive/20 text-destructive'>
-                              <X size={12} />
-                            </div>
-                          )}
-                          <button
-                            type='button'
-                            onClick={() =>
-                              removeItem({ source: 'row', id: item.id, rowId: row.id })
-                            }
-                            className='absolute right-0 top-0 hidden rounded bg-background/80 p-0.5 text-muted-foreground group-hover/item:block hover:text-foreground'
-                            aria-label='Remove'
+                          <motion.div
+                            initial={false}
+                            variants={dragActiveVariants}
+                            animate={dragSnapshot.isDragging ? 'dragging' : 'idle'}
+                            className='relative h-full w-full overflow-hidden rounded border border-border bg-background'
                           >
-                            <X size={10} />
-                          </button>
-                        </motion.div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
+                            {item.status === 'uploaded' && item.url ? (
+                              <Tooltip>
+                                <TooltipTrigger className='h-full w-full'>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={item.url}
+                                    alt={item.label}
+                                    className='h-full w-full object-cover'
+                                    draggable={false}
+                                  />
+                                </TooltipTrigger>
+                                <TooltipContent>{item.label}</TooltipContent>
+                              </Tooltip>
+                            ) : item.status === 'uploading' ? (
+                              <div className='flex h-full w-full items-center justify-center text-muted-foreground'>
+                                <Loader2 size={12} className='animate-spin' />
+                              </div>
+                            ) : (
+                              <div className='flex h-full w-full items-center justify-center bg-destructive/20 text-destructive'>
+                                <X size={12} />
+                              </div>
+                            )}
+                            <button
+                              type='button'
+                              onClick={() =>
+                                removeItem({ source: 'row', id: item.id, rowId: row.id })
+                              }
+                              className='absolute right-0 top-0 hidden rounded bg-background/80 p-0.5 text-muted-foreground group-hover/item:block hover:text-foreground'
+                              aria-label='Remove'
+                            >
+                              <X size={10} />
+                            </button>
+                          </motion.div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                </TooltipProvider>
                 {provided.placeholder}
               </div>
             )}

@@ -18,7 +18,7 @@ describe('useTierEditor — initial state', () => {
   beforeEach(() => reset())
 
   it('starts with empty metadata', () => {
-    expect(snapshot().metadata).toEqual({
+    expect(snapshot().metadata).toMatchObject({
       title: '',
       description: '',
       category: '',
@@ -51,7 +51,7 @@ describe('useTierEditor — setMetadata', () => {
       description: 'My picks',
       category: 'Cinema',
     })
-    expect(snapshot().metadata).toEqual({
+    expect(snapshot().metadata).toMatchObject({
       title: 'Best Movies',
       description: 'My picks',
       category: 'Cinema',
@@ -61,48 +61,53 @@ describe('useTierEditor — setMetadata', () => {
   it('merges partial updates', () => {
     useTierEditor.getState().setMetadata({ title: 'X' })
     useTierEditor.getState().setMetadata({ category: 'Anime' })
-    expect(snapshot().metadata).toEqual({
+    expect(snapshot().metadata).toMatchObject({
       title: 'X',
       description: '',
       category: 'Anime',
     })
+  })
+
+  it('stores coverImageUrl in metadata', () => {
+    useTierEditor.getState().setMetadata({ coverImageUrl: 'https://blob/cover.png' })
+    expect(snapshot().metadata.coverImageUrl).toBe('https://blob/cover.png')
   })
 })
 
 describe('useTierEditor — bank item lifecycle', () => {
   beforeEach(() => reset())
 
-  it('adds an uploading placeholder and returns its id', () => {
-    const id = useTierEditor.getState().addUploadingItem('photo.png')
+  it('adds an uploading placeholder with label and returns its id', () => {
+    const id = useTierEditor.getState().addUploadingItem('Chocolate cake')
     const bank = snapshot().bankItems
     expect(bank).toHaveLength(1)
-    expect(bank[0]).toMatchObject({ id, name: 'photo.png', status: 'uploading' })
+    expect(bank[0]).toMatchObject({ id, label: 'Chocolate cake', status: 'uploading' })
   })
 
   it('marks an item as uploaded and stores its url', () => {
-    const id = useTierEditor.getState().addUploadingItem('photo.png')
+    const id = useTierEditor.getState().addUploadingItem('Cheese tart')
     useTierEditor.getState().markItemUploaded(id, 'https://blob/x.png')
     const bank = snapshot().bankItems
     expect(bank[0]).toMatchObject({
       id,
       status: 'uploaded',
       url: 'https://blob/x.png',
+      label: 'Cheese tart',
     })
   })
 
   it('marks an item as errored', () => {
-    const id = useTierEditor.getState().addUploadingItem('photo.png')
+    const id = useTierEditor.getState().addUploadingItem('Tiramisu')
     useTierEditor.getState().markItemError(id)
-    const bank = snapshot().bankItems
-    expect(bank[0]).toMatchObject({ id, status: 'error' })
+    expect(snapshot().bankItems[0]).toMatchObject({ id, status: 'error' })
   })
 
   it('removes a bank item by id', () => {
-    const a = useTierEditor.getState().addUploadingItem('a.png')
-    useTierEditor.getState().addUploadingItem('b.png')
+    const a = useTierEditor.getState().addUploadingItem('Apple pie')
+    useTierEditor.getState().addUploadingItem('Banana bread')
     useTierEditor.getState().removeItem({ source: 'bank', id: a })
-    const names = snapshot().bankItems.map((i) => i.name)
-    expect(names).toEqual(['b.png'])
+    const labels = snapshot().bankItems.map((i) => i.label)
+    expect(labels).toEqual(['Banana bread'])
   })
 })
 
@@ -110,8 +115,8 @@ describe('useTierEditor — move / reorder', () => {
   beforeEach(() => reset())
 
   function seed() {
-    const a = useTierEditor.getState().addUploadingItem('a.png')
-    const b = useTierEditor.getState().addUploadingItem('b.png')
+    const a = useTierEditor.getState().addUploadingItem('Item A')
+    const b = useTierEditor.getState().addUploadingItem('Item B')
     useTierEditor.getState().markItemUploaded(a, 'https://blob/a.png')
     useTierEditor.getState().markItemUploaded(b, 'https://blob/b.png')
     return { a, b }
@@ -236,7 +241,7 @@ describe('useTierEditor — removeRow', () => {
 
   it('moves items from the removed row back to bankItems', () => {
     const rowId = snapshot().rows[0].id
-    const itemId = useTierEditor.getState().addUploadingItem('a.png')
+    const itemId = useTierEditor.getState().addUploadingItem('Croissant')
     useTierEditor.getState().markItemUploaded(itemId, 'https://blob/a.png')
     useTierEditor.getState().moveItem({
       source: 'bank', sourceIndex: 0,
@@ -250,7 +255,6 @@ describe('useTierEditor — removeRow', () => {
 
   it('does nothing when only one row remains', () => {
     const s = useTierEditor.getState()
-    // remove until 1 remains
     for (let i = 0; i < 5; i++) {
       const id = snapshot().rows[0].id
       s.removeRow(id)
@@ -265,7 +269,7 @@ describe('useTierEditor — removeRow', () => {
 describe('useTierEditor — reset', () => {
   it('returns to the initial state', () => {
     useTierEditor.getState().setMetadata({ title: 'X' })
-    useTierEditor.getState().addUploadingItem('a.png')
+    useTierEditor.getState().addUploadingItem('Some item')
     useTierEditor.getState().reset()
     const s = snapshot()
     expect(s.metadata.title).toBe('')
@@ -278,20 +282,20 @@ describe('useTierEditor — selectors', () => {
   beforeEach(() => reset())
 
   it('hasPendingUploads returns true while any item is uploading', () => {
-    const id = useTierEditor.getState().addUploadingItem('a.png')
+    const id = useTierEditor.getState().addUploadingItem('Eclair')
     expect(hasPendingUploads(useTierEditor.getState())).toBe(true)
     useTierEditor.getState().markItemUploaded(id, 'https://blob/a.png')
     expect(hasPendingUploads(useTierEditor.getState())).toBe(false)
   })
 
-  it('buildSavePayload trims strings, drops non-uploaded items, returns URL strings', () => {
+  it('buildSavePayload emits {url, label} objects for items, drops non-uploaded', () => {
     useTierEditor.getState().setMetadata({
       title: '  Best Movies  ',
       description: '  My picks  ',
       category: '  Cinema  ',
     })
-    const a = useTierEditor.getState().addUploadingItem('a.png')
-    const b = useTierEditor.getState().addUploadingItem('b.png')
+    const a = useTierEditor.getState().addUploadingItem('Lemon tart')
+    const b = useTierEditor.getState().addUploadingItem('Mousse cake')
     useTierEditor.getState().markItemUploaded(a, 'https://blob/a.png')
     useTierEditor.getState().markItemError(b)
     const rowId = useTierEditor.getState().rows[0].id
@@ -305,7 +309,15 @@ describe('useTierEditor — selectors', () => {
     expect(payload.description).toBe('My picks')
     expect(payload.category).toBe('Cinema')
     expect(payload.bankItems).toEqual([])
-    expect(payload.rows[0].items).toEqual(['https://blob/a.png'])
+    expect(payload.rows[0].items).toEqual([{ url: 'https://blob/a.png', label: 'Lemon tart' }])
+  })
+
+  it('buildSavePayload includes coverImageUrl when set', () => {
+    useTierEditor.getState().setMetadata({
+      title: 'T', category: 'C', coverImageUrl: 'https://blob/cover.png',
+    })
+    const payload = buildSavePayload(useTierEditor.getState())
+    expect(payload.coverImageUrl).toBe('https://blob/cover.png')
   })
 })
 
@@ -316,36 +328,44 @@ describe('useTierEditor — initFromDb', () => {
     title: 'Anime Tier List',
     description: 'My picks',
     category: 'anime',
-    sidebarItems: ['https://blob/bank1.png', 'https://blob/bank2.png'],
+    sidebarItems: [
+      { url: 'https://blob/bank1.png', label: 'Naruto' },
+      { url: 'https://blob/bank2.png', label: 'Goku' },
+    ],
     rows: [
-      { id: 'row-s', label: 'S', color: '#ff0', order: 0, items: ['https://blob/placed.png'] },
+      { id: 'row-s', label: 'S', color: '#ff0', order: 0, items: [{ url: 'https://blob/placed.png', label: 'Luffy' }] },
       { id: 'row-a', label: 'A', color: '#0ff', order: 1, items: [] },
     ],
   }
 
   it('seeds metadata from the DB payload', () => {
     useTierEditor.getState().initFromDb(seed)
-    expect(snapshot().metadata).toEqual({
+    expect(snapshot().metadata).toMatchObject({
       title: 'Anime Tier List',
       description: 'My picks',
       category: 'anime',
     })
   })
 
-  it('seeds rows with correct labels, colors, and placed items', () => {
+  it('seeds rows with correct labels, colors, and placed items with labels', () => {
     useTierEditor.getState().initFromDb(seed)
     const rows = snapshot().rows
     expect(rows).toHaveLength(2)
     expect(rows[0]).toMatchObject({ id: 'row-s', label: 'S', color: '#ff0' })
-    expect(rows[0].items[0]).toMatchObject({ url: 'https://blob/placed.png', status: 'uploaded' })
+    expect(rows[0].items[0]).toMatchObject({ url: 'https://blob/placed.png', label: 'Luffy', status: 'uploaded' })
   })
 
-  it('seeds bankItems from sidebarItems as uploaded items', () => {
+  it('seeds bankItems from sidebarItems preserving labels', () => {
     useTierEditor.getState().initFromDb(seed)
     const bank = snapshot().bankItems
     expect(bank).toHaveLength(2)
-    expect(bank[0]).toMatchObject({ url: 'https://blob/bank1.png', status: 'uploaded' })
-    expect(bank[1]).toMatchObject({ url: 'https://blob/bank2.png', status: 'uploaded' })
+    expect(bank[0]).toMatchObject({ url: 'https://blob/bank1.png', label: 'Naruto', status: 'uploaded' })
+    expect(bank[1]).toMatchObject({ url: 'https://blob/bank2.png', label: 'Goku', status: 'uploaded' })
+  })
+
+  it('seeds coverImageUrl from DB payload', () => {
+    useTierEditor.getState().initFromDb({ ...seed, coverImageUrl: 'https://blob/cover.png' })
+    expect(snapshot().metadata.coverImageUrl).toBe('https://blob/cover.png')
   })
 
   it('calling initFromDb twice replaces state completely (idempotent seed)', () => {
@@ -357,7 +377,7 @@ describe('useTierEditor — initFromDb', () => {
   })
 
   it('replaces prior state from /new so no leftover items remain', () => {
-    useTierEditor.getState().addUploadingItem('stale.png')
+    useTierEditor.getState().addUploadingItem('stale item')
     useTierEditor.getState().setMetadata({ title: 'Old' })
     useTierEditor.getState().initFromDb(seed)
     const s = snapshot()

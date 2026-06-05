@@ -8,6 +8,7 @@ export const MAX_TITLE_LENGTH = 80
 export const MAX_DESCRIPTION_LENGTH = 500
 export const MAX_CATEGORY_LENGTH = 40
 export const MAX_LABEL_LENGTH = 20
+export const MAX_IMAGE_LABEL_LENGTH = 50
 
 export const TIER_COLORS = {
   S: 'oklch(0.65 0.22 250)',
@@ -22,14 +23,24 @@ export type TierRow = {
   id: string
   label: string
   color: string
-  items: string[]
+  items: ImageItem[]
 }
+
+export type ImageItem = {
+  url: string
+  label: string
+}
+
+export const imageItemSchema = z.object({
+  url: z.string().url(),
+  label: z.string().min(1).max(MAX_IMAGE_LABEL_LENGTH),
+})
 
 export const tierRowSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1).max(MAX_LABEL_LENGTH),
   color: z.string().min(1),
-  items: z.array(z.string().url()).max(MAX_ITEM_COUNT),
+  items: z.array(imageItemSchema).max(MAX_ITEM_COUNT),
 })
 
 export const createTierListSchema = z
@@ -37,11 +48,12 @@ export const createTierListSchema = z
     title: z.string().min(1).max(MAX_TITLE_LENGTH),
     description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
     category: z.string().min(1).max(MAX_CATEGORY_LENGTH),
+    coverImageUrl: z.string().url().optional(),
     rows: z
       .array(tierRowSchema)
       .min(MIN_ROW_COUNT)
       .max(MAX_ROW_COUNT),
-    bankItems: z.array(z.string().url()).max(MAX_ITEM_COUNT),
+    bankItems: z.array(imageItemSchema).max(MAX_ITEM_COUNT),
   })
   .refine(
     (val) => {

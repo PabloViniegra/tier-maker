@@ -65,9 +65,9 @@ function setupTransaction() {
 }
 
 const validPayload = {
-  bankItems: ['https://blob/bank.png'],
+  bankItems: [{ url: 'https://blob/bank.png', label: 'Bank item' }],
   rows: [
-    { id: 'row-1', label: 'S', color: '#ff0', items: ['https://blob/a.png'] },
+    { id: 'row-1', label: 'S', color: '#ff0', items: [{ url: 'https://blob/a.png', label: 'A item' }] },
     { id: 'row-2', label: 'A', color: '#0ff', items: [] },
   ],
 }

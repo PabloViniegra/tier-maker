@@ -7,6 +7,12 @@ import { useTierEditor } from '@/lib/stores/tier-editor'
 import { BANK_DROPPABLE } from '@/app/dashboard/tier-lists/new/_components/constants'
 import { dragActiveVariants } from '@/lib/motion-variants'
 import { cn } from '@/lib/utils'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 export function ItemBankStrip() {
   const bankItems = useTierEditor((s) => s.bankItems)
@@ -34,51 +40,58 @@ export function ItemBankStrip() {
                 All items placed
               </span>
             )}
-            {bankItems.map((item, index) => (
-              <Draggable key={item.id} draggableId={item.id} index={index}>
-                {(dragProvided, dragSnapshot) => (
-                  <div
-                    ref={dragProvided.innerRef}
-                    {...dragProvided.draggableProps}
-                    {...dragProvided.dragHandleProps}
-                    className='group/item relative h-20 w-20 shrink-0'
-                  >
-                    <motion.div
-                      initial={false}
-                      variants={dragActiveVariants}
-                      animate={dragSnapshot.isDragging ? 'dragging' : 'idle'}
-                      className='relative h-full w-full overflow-hidden rounded border border-border bg-background'
+            <TooltipProvider>
+              {bankItems.map((item, index) => (
+                <Draggable key={item.id} draggableId={item.id} index={index}>
+                  {(dragProvided, dragSnapshot) => (
+                    <div
+                      ref={dragProvided.innerRef}
+                      {...dragProvided.draggableProps}
+                      {...dragProvided.dragHandleProps}
+                      className='group/item relative h-20 w-20 shrink-0'
                     >
-                      {item.status === 'uploaded' && item.url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={item.url}
-                          alt={item.name ?? ''}
-                          className='h-full w-full object-cover'
-                          draggable={false}
-                        />
-                      ) : item.status === 'uploading' ? (
-                        <div className='flex h-full w-full items-center justify-center text-muted-foreground'>
-                          <Loader2 size={14} className='animate-spin' />
-                        </div>
-                      ) : (
-                        <div className='flex h-full w-full items-center justify-center bg-destructive/20 text-destructive'>
-                          <X size={14} />
-                        </div>
-                      )}
-                      <button
-                        type='button'
-                        onClick={() => removeItem({ source: 'bank', id: item.id })}
-                        className='absolute right-0 top-0 hidden rounded bg-background/80 p-0.5 text-muted-foreground group-hover/item:block hover:text-foreground'
-                        aria-label='Remove'
+                      <motion.div
+                        initial={false}
+                        variants={dragActiveVariants}
+                        animate={dragSnapshot.isDragging ? 'dragging' : 'idle'}
+                        className='relative h-full w-full overflow-hidden rounded border border-border bg-background'
                       >
-                        <X size={10} />
-                      </button>
-                    </motion.div>
-                  </div>
-                )}
-              </Draggable>
-            ))}
+                        {item.status === 'uploaded' && item.url ? (
+                          <Tooltip>
+                            <TooltipTrigger className='h-full w-full'>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={item.url}
+                                alt={item.label}
+                                className='h-full w-full object-cover'
+                                draggable={false}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>{item.label}</TooltipContent>
+                          </Tooltip>
+                        ) : item.status === 'uploading' ? (
+                          <div className='flex h-full w-full items-center justify-center text-muted-foreground'>
+                            <Loader2 size={14} className='animate-spin' />
+                          </div>
+                        ) : (
+                          <div className='flex h-full w-full items-center justify-center bg-destructive/20 text-destructive'>
+                            <X size={14} />
+                          </div>
+                        )}
+                        <button
+                          type='button'
+                          onClick={() => removeItem({ source: 'bank', id: item.id })}
+                          className='absolute right-0 top-0 hidden rounded bg-background/80 p-0.5 text-muted-foreground group-hover/item:block hover:text-foreground'
+                          aria-label='Remove'
+                        >
+                          <X size={10} />
+                        </button>
+                      </motion.div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+            </TooltipProvider>
             {provided.placeholder}
           </div>
         )}

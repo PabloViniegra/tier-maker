@@ -23,16 +23,17 @@ type Props = {
 
 function buildUpdatePayload(state: ReturnType<typeof useTierEditor.getState>): UpdateTierListPayload {
   return {
+    coverImageUrl: state.metadata.coverImageUrl,
     bankItems: state.bankItems
       .filter((i) => i.status === 'uploaded' && i.url)
-      .map((i) => i.url as string),
+      .map((i) => ({ url: i.url as string, label: i.label })),
     rows: state.rows.map((r) => ({
       id: r.id,
       label: r.label,
       color: r.color,
       items: r.items
         .filter((i) => i.status === 'uploaded' && i.url)
-        .map((i) => i.url as string),
+        .map((i) => ({ url: i.url as string, label: i.label })),
     })),
   }
 }

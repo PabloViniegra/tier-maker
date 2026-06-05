@@ -9,6 +9,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 import { user } from './auth'
+import type { ImageItem } from '@/lib/validators/tier-list'
 
 export const tierTemplates = pgTable('tier_templates', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -18,7 +19,8 @@ export const tierTemplates = pgTable('tier_templates', {
   creatorId: text('creator_id').references(() => user.id, {
     onDelete: 'cascade',
   }),
-  sidebarItems: jsonb('sidebar_items').$type<string[]>().notNull(),
+  coverImageUrl: text('cover_image_url'),
+  sidebarItems: jsonb('sidebar_items').$type<ImageItem[]>().notNull(),
   isPublic: boolean('is_public').notNull().default(true),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
@@ -31,7 +33,7 @@ export const tierRows = pgTable('tier_rows', {
   label: text('label').notNull(),
   color: text('color').notNull(),
   order: integer('order').notNull(),
-  items: jsonb('items').$type<string[]>().default([]).notNull(),
+  items: jsonb('items').$type<ImageItem[]>().default([]).notNull(),
 })
 
 export const userCategoryPresets = pgTable(
