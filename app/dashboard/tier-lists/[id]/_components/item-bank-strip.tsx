@@ -58,11 +58,13 @@ export function ItemBankStrip() {
                       >
                         {item.status === 'uploaded' && item.url ? (
                           <Tooltip>
-                            <TooltipTrigger className='h-full w-full'>
+                            <TooltipTrigger aria-label={item.label} className='h-full w-full'>
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={item.url}
                                 alt={item.label}
+                                width={80}
+                                height={80}
                                 className='h-full w-full object-cover'
                                 draggable={false}
                               />
@@ -81,8 +83,8 @@ export function ItemBankStrip() {
                         <button
                           type='button'
                           onClick={() => removeItem({ source: 'bank', id: item.id })}
-                          className='absolute right-0 top-0 hidden rounded bg-background/80 p-0.5 text-muted-foreground group-hover/item:block hover:text-foreground'
-                          aria-label='Remove'
+                          className='absolute right-0 top-0 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 focus-visible:opacity-100 hover:text-foreground'
+                          aria-label={`Remove ${item.label}`}
                         >
                           <X size={10} />
                         </button>

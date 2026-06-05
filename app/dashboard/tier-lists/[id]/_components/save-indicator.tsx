@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'motion/react'
 import { Check, Loader2, AlertCircle } from 'lucide-react'
+import { statusFadeVariants } from '@/lib/motion-variants'
 import { cn } from '@/lib/utils'
 
 export type SaveState = 'idle' | 'saving' | 'saved' | 'error'
@@ -33,20 +34,22 @@ export function SaveIndicator({ state }: Props) {
   const config = state !== 'idle' ? CONFIG[state] : null
 
   return (
-    <AnimatePresence mode='wait'>
-      {config && (
-        <motion.span
-          key={state}
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 4 }}
-          transition={{ duration: 0.15 }}
-          className={cn('flex items-center gap-1.5 text-xs font-medium', config.className)}
-        >
-          {config.icon}
-          {config.label}
-        </motion.span>
-      )}
-    </AnimatePresence>
+    <span role='status' aria-live='polite' className='inline-flex'>
+      <AnimatePresence mode='wait'>
+        {config && (
+          <motion.span
+            key={state}
+            variants={statusFadeVariants}
+            initial='initial'
+            animate='animate'
+            exit='exit'
+            className={cn('flex items-center gap-1.5 text-xs font-medium', config.className)}
+          >
+            {config.icon}
+            {config.label}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </span>
   )
 }

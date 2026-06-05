@@ -41,6 +41,12 @@ export const springTransition = {
   damping: 35,
 }
 
+export const statusFadeVariants: Variants = {
+  initial: { opacity: 0, y: -4 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.15, ease: 'easeInOut' } },
+  exit: { opacity: 0, y: 4, transition: { duration: 0.15, ease: 'easeInOut' } },
+}
+
 export const dragActiveVariants: Variants = {
   idle: { scale: 1, opacity: 1, boxShadow: 'none', zIndex: 0 },
   dragging: {

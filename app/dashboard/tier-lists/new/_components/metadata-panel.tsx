@@ -258,9 +258,10 @@ export function MetadataPanel({
       </div>
 
       <div className='flex flex-col gap-1.5'>
-        <Label>Cover image (optional)</Label>
+        <Label htmlFor='cover-image-input'>Cover image (optional)</Label>
         <input
           ref={coverInputRef}
+          id='cover-image-input'
           type='file'
           accept='image/jpeg,image/png,image/webp,image/gif'
           className='sr-only'
@@ -272,13 +273,13 @@ export function MetadataPanel({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={metadata.coverImageUrl}
-              alt='cover preview'
+              alt='Cover image preview'
               className='h-full w-full object-cover'
             />
             <button
               type='button'
               onClick={() => setMetadata({ coverImageUrl: undefined })}
-              className='absolute right-1 top-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/cover:opacity-100 hover:text-foreground'
+              className='absolute right-1 top-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/cover:opacity-100 focus-visible:opacity-100 hover:text-foreground'
               aria-label='Remove cover'
             >
               <X size={14} />

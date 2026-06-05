@@ -76,15 +76,20 @@ function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, on
             if (e.key === 'Enter') confirmEdit()
             if (e.key === 'Escape') cancelEdit()
           }}
-          className='w-[4.5rem] rounded bg-transparent text-center text-xs font-bold text-white outline-none placeholder:text-white/60'
+          className='w-[4.5rem] rounded bg-transparent text-center text-xs font-bold text-white outline-none placeholder:text-white/60 focus-visible:ring-2 focus-visible:ring-white/60'
           maxLength={20}
           aria-label='Edit tier label'
         />
       ) : (
         <span
+          role='button'
+          tabIndex={0}
           onDoubleClick={startEdit}
-          className='line-clamp-2 cursor-text select-none break-words px-1 text-center text-xs leading-tight'
-          title='Double-click to rename'
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startEdit() }
+          }}
+          className='line-clamp-2 cursor-text select-none break-words rounded px-1 text-center text-xs leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60'
+          title='Double-click or press Enter to rename'
         >
           {label}
         </span>
@@ -126,7 +131,7 @@ function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, on
         onClick={onRemove}
         disabled={!canRemove}
         className={cn(
-          'absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-border bg-background text-muted-foreground opacity-0 transition-opacity group-hover/chip:opacity-100',
+          'absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-border bg-background text-muted-foreground opacity-0 transition-opacity group-hover/chip:opacity-100 focus-visible:opacity-100',
           !canRemove && 'cursor-not-allowed opacity-0'
         )}
         aria-label='Remove row'
@@ -152,6 +157,7 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
   const lg = rowMinHeight === '24'
   const itemCls = lg ? 'h-20 w-20' : 'h-12 w-12'
   const rowHeightCls = lg ? 'min-h-24' : 'min-h-16'
+  const imgSize = lg ? 80 : 48
 
   return (
     <section ref={boardRef as React.RefObject<HTMLElement>} className='flex flex-col gap-1.5'>
@@ -205,11 +211,13 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
                           >
                             {item.status === 'uploaded' && item.url ? (
                               <Tooltip>
-                                <TooltipTrigger className='h-full w-full'>
+                                <TooltipTrigger aria-label={item.label} className='h-full w-full'>
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={item.url}
                                     alt={item.label}
+                                    width={imgSize}
+                                    height={imgSize}
                                     className='h-full w-full object-cover'
                                     draggable={false}
                                   />
@@ -230,8 +238,8 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
                               onClick={() =>
                                 removeItem({ source: 'row', id: item.id, rowId: row.id })
                               }
-                              className='absolute right-0 top-0 hidden rounded bg-background/80 p-0.5 text-muted-foreground group-hover/item:block hover:text-foreground'
-                              aria-label='Remove'
+                              className='absolute right-0 top-0 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 focus-visible:opacity-100 hover:text-foreground'
+                              aria-label={`Remove ${item.label}`}
                             >
                               <X size={10} />
                             </button>
