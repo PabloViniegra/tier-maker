@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
+import { TierMakerIcon } from '@/components/tier-maker-icon'
 import { cn } from '@/lib/utils'
 
 type Props = {
@@ -12,8 +13,9 @@ export function ExploreHeader({ isLoggedIn }: Props) {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <Link
           href="/"
-          className="font-heading text-base font-semibold text-foreground"
+          className="flex items-center gap-2 font-heading text-base font-semibold text-foreground"
         >
+          <TierMakerIcon size={18} aria-hidden="true" />
           Tier Maker
         </Link>
 

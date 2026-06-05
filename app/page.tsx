@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { buttonVariants } from '@/components/ui/button'
+import { TierMakerIcon } from '@/components/tier-maker-icon'
 import { BentoGrid, BentoCell } from '@/components/bento-grid'
 import { TierRowsBackground } from '@/components/tier-rows-background'
 import { TierListMockup } from '@/components/tier-list-mockup'
@@ -14,9 +15,12 @@ export default function HomePage() {
       {/* Minimal nav */}
       <header className='sticky top-0 z-10 border-b border-border/50 bg-background/80 backdrop-blur-sm'>
         <div className='mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6'>
-          <span className='font-heading text-base font-semibold text-foreground'>
-            Tier Maker
-          </span>
+          <div className='flex items-center gap-2'>
+            <TierMakerIcon size={18} aria-hidden="true" />
+            <span className='font-heading text-base font-semibold text-foreground'>
+              Tier Maker
+            </span>
+          </div>
           <nav className='flex items-center gap-2'>
             <Link
               href='/login'
