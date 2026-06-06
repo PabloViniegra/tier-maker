@@ -36,10 +36,12 @@ export default async function PublicTierFillPage({ params }: Props) {
       {!session && <AnonymousCTABanner />}
       <div className="flex-1 overflow-hidden">
         <PublicTierFill
+          tierId={id}
           data={{
             title: data.title,
             description: data.description,
             category: data.category,
+            coverImageUrl: data.coverImageUrl,
             sidebarItems: data.sidebarItems,
             rows: data.rows,
           }}
