@@ -19,7 +19,7 @@ export function ItemBankStrip() {
   const removeItem = useTierEditor((s) => s.removeItem)
 
   return (
-    <div className='border-t border-border bg-background'>
+    <div suppressHydrationWarning className='border-t border-border bg-background'>
       <div className='px-4 pb-1 pt-2'>
         <p className='text-xs font-medium text-muted-foreground'>
           Items ({bankItems.length})
