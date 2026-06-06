@@ -82,7 +82,7 @@ export function ItemBank({ onPickFiles }: { onPickFiles: (files: File[]) => void
               <TooltipProvider>
                 <ul className='grid grid-cols-2 gap-2'>
                   {bankItems.map((item, index) => (
-                    <Draggable key={item.id} draggableId={item.id} index={index}>
+                    <Draggable key={item.id} draggableId={item.id} index={index} disableInteractiveElementBlocking>
                       {(dragProvided, dragSnapshot) => (
                         <li
                           ref={dragProvided.innerRef}
@@ -98,7 +98,11 @@ export function ItemBank({ onPickFiles }: { onPickFiles: (files: File[]) => void
                           >
                             {item.status === 'uploaded' && item.url ? (
                               <Tooltip>
-                                <TooltipTrigger aria-label={item.label} className='h-full w-full'>
+                                <TooltipTrigger
+                                  render={<span />}
+                                  className='block h-full w-full'
+                                  aria-label={item.label}
+                                >
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={item.url}

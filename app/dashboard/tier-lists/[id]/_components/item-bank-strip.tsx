@@ -19,7 +19,7 @@ export function ItemBankStrip() {
   const removeItem = useTierEditor((s) => s.removeItem)
 
   return (
-    <div className='border-t border-border bg-background/80 backdrop-blur-sm'>
+    <div className='border-t border-border bg-background'>
       <div className='px-4 pb-1 pt-2'>
         <p className='text-xs font-medium text-muted-foreground'>
           Items ({bankItems.length})
@@ -42,7 +42,7 @@ export function ItemBankStrip() {
             )}
             <TooltipProvider>
               {bankItems.map((item, index) => (
-                <Draggable key={item.id} draggableId={item.id} index={index}>
+                <Draggable key={item.id} draggableId={item.id} index={index} disableInteractiveElementBlocking>
                   {(dragProvided, dragSnapshot) => (
                     <div
                       ref={dragProvided.innerRef}
@@ -58,7 +58,7 @@ export function ItemBankStrip() {
                       >
                         {item.status === 'uploaded' && item.url ? (
                           <Tooltip>
-                            <TooltipTrigger aria-label={item.label} className='h-full w-full'>
+                            <TooltipTrigger render={<span />} aria-label={item.label} className='block h-full w-full'>
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={item.url}
