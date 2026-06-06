@@ -194,7 +194,7 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
                 )}
                 <TooltipProvider>
                   {row.items.map((item, index) => (
-                    <Draggable key={item.id} draggableId={item.id} index={index}>
+                    <Draggable key={item.id} draggableId={item.id} index={index} disableInteractiveElementBlocking>
                       {(dragProvided, dragSnapshot) => (
                         <div
                           ref={dragProvided.innerRef}
@@ -211,7 +211,11 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
                           >
                             {item.status === 'uploaded' && item.url ? (
                               <Tooltip>
-                                <TooltipTrigger aria-label={item.label} className='h-full w-full'>
+                                <TooltipTrigger
+                                  render={<span />}
+                                  className='block h-full w-full'
+                                  aria-label={item.label}
+                                >
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={item.url}

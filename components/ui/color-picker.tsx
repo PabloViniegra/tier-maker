@@ -115,9 +115,7 @@ export type ColorPickerSelectionProps = HTMLAttributes<HTMLDivElement>
 export const ColorPickerSelection = memo(({ className, ...props }: ColorPickerSelectionProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
-  const [positionX, setPositionX] = useState(0)
-  const [positionY, setPositionY] = useState(0)
-  const { hue, setSaturation, setLightness } = useColorPicker()
+  const { hue, saturation, lightness, setSaturation, setLightness } = useColorPicker()
 
   const backgroundGradient = useMemo(
     () =>
@@ -127,6 +125,11 @@ export const ColorPickerSelection = memo(({ className, ...props }: ColorPickerSe
     [hue]
   )
 
+  // Derive cursor position from actual saturation/lightness so it always reflects the current color.
+  const positionX = saturation / 100
+  const topLightness = positionX < 0.01 ? 100 : 50 + 50 * (1 - positionX)
+  const positionY = topLightness > 0 ? Math.max(0, Math.min(1, 1 - lightness / topLightness)) : 0
+
   const updateFromEvent = useCallback(
     (clientX: number, clientY: number) => {
       const el = containerRef.current
@@ -134,11 +137,9 @@ export const ColorPickerSelection = memo(({ className, ...props }: ColorPickerSe
       const rect = el.getBoundingClientRect()
       const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
       const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
-      setPositionX(x)
-      setPositionY(y)
       setSaturation(x * 100)
-      const topLightness = x < 0.01 ? 100 : 50 + 50 * (1 - x)
-      setLightness(topLightness * (1 - y))
+      const tl = x < 0.01 ? 100 : 50 + 50 * (1 - x)
+      setLightness(tl * (1 - y))
     },
     [setSaturation, setLightness]
   )
@@ -187,8 +188,8 @@ export const ColorPickerHue = ({ className, ...props }: ColorPickerHueProps) => 
       className={cn('relative flex h-4 w-full touch-none select-none', className)}
       max={360}
       step={1}
-      value={[hue]}
-      onValueChange={(next) => setHue((next as readonly number[])[0] ?? 0)}
+      value={hue}
+      onValueChange={(next) => setHue(next as number)}
       aria-label='Hue'
       {...props}
     >
@@ -215,8 +216,8 @@ export const ColorPickerAlpha = ({ className, ...props }: ColorPickerAlphaProps)
       className={cn('relative flex h-4 w-full touch-none select-none', className)}
       max={100}
       step={1}
-      value={[alpha]}
-      onValueChange={(next) => setAlpha((next as readonly number[])[0] ?? 0)}
+      value={alpha}
+      onValueChange={(next) => setAlpha(next as number)}
       aria-label='Alpha'
       {...props}
     >
