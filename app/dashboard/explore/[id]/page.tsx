@@ -28,11 +28,13 @@ export default async function DashboardExploreTierFillPage({ params }: Props) {
 
   return (
     <PublicTierFill
+      tierId={id}
       backHref="/dashboard/explore"
       data={{
         title: data.title,
         description: data.description,
         category: data.category,
+        coverImageUrl: data.coverImageUrl,
         sidebarItems: data.sidebarItems,
         rows: data.rows,
       }}

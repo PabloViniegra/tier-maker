@@ -1,6 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { defaultTierRows, type ImageItem } from '@/lib/validators/tier-list'
 
 export type TierItemStatus = 'uploading' | 'uploaded' | 'error'
@@ -78,7 +79,7 @@ type Actions = {
   initFromDb: (data: TierListDetailSeed) => void
 }
 
-const initialState: State = (() => {
+export const initialState: State = (() => {
   const rows = defaultTierRows().map<EditorTierRow>((r) => ({
     id: r.id,
     label: r.label,
@@ -111,137 +112,175 @@ function newId(): string {
   return Math.random().toString(36).slice(2, 10)
 }
 
-export const useTierEditor = create<State & Actions>((set) => ({
-  ...initialState,
-  setMetadata: (patch) =>
-    set((s) => ({ metadata: { ...s.metadata, ...patch } })),
-  addUploadingItem: (label) => {
-    const id = newId()
-    set((s) => ({
-      bankItems: [...s.bankItems, { id, label, status: 'uploading' }],
-    }))
-    return id
-  },
-  markItemUploaded: (id, url) =>
-    set((s) => ({
-      bankItems: s.bankItems.map((i) =>
-        i.id === id ? { ...i, status: 'uploaded', url } : i
-      ),
-    })),
-  markItemError: (id) =>
-    set((s) => ({
-      bankItems: s.bankItems.map((i) =>
-        i.id === id ? { ...i, status: 'error' } : i
-      ),
-    })),
-  removeItem: (input) =>
-    set((s) => {
-      if (input.source === 'bank') {
-        return { bankItems: s.bankItems.filter((i) => i.id !== input.id) }
-      }
-      return {
-        rows: s.rows.map((r) =>
-          r.id === input.rowId
-            ? { ...r, items: r.items.filter((i) => i.id !== input.id) }
-            : r
-        ),
-      }
-    }),
-  removeItemEverywhere: (id) =>
-    set((s) => ({
-      bankItems: s.bankItems.filter((i) => i.id !== id),
-      rows: s.rows.map((r) => ({ ...r, items: r.items.filter((i) => i.id !== id) })),
-    })),
-  moveItem: (input) =>
-    set((s) => {
-      const { source, sourceId, sourceIndex, target, targetId, targetIndex } = input
-
-      const fromList: TierItem[] =
-        source === 'bank'
-          ? s.bankItems
-          : s.rows.find((r) => r.id === sourceId)?.items ?? []
-      if (sourceIndex < 0 || sourceIndex >= fromList.length) return s
-      const item = fromList[sourceIndex]
-
-      const withoutItem: State =
-        source === 'bank'
-          ? { ...s, bankItems: removeAt(s.bankItems, sourceIndex) }
-          : {
-              ...s,
-              rows: s.rows.map((r) =>
-                r.id === sourceId
-                  ? { ...r, items: removeAt(r.items, sourceIndex) }
-                  : r
-              ),
-            }
-
-      if (target === 'bank') {
-        return {
-          ...withoutItem,
-          bankItems: insertAt(withoutItem.bankItems, targetIndex, item),
-        }
-      }
-
-      return {
-        ...withoutItem,
-        rows: withoutItem.rows.map((r) => {
-          if (r.id !== targetId) return r
-          return { ...r, items: insertAt(r.items, targetIndex, item) }
-        }),
-      }
-    }),
-  updateRow: (id, patch) =>
-    set((s) => ({
-      rows: s.rows.map((r) => (r.id === id ? { ...r, ...patch } : r)),
-    })),
-  addRow: () =>
-    set((s) => {
-      if (s.rows.length >= 10) return s
-      return {
-        rows: [
-          ...s.rows,
-          { id: newId(), label: '?', color: '#6b7280', items: [] },
-        ],
-      }
-    }),
-  removeRow: (id) =>
-    set((s) => {
-      if (s.rows.length <= 1) return s
-      const row = s.rows.find((r) => r.id === id)
-      const rescued = row ? row.items : []
-      return {
-        rows: s.rows.filter((r) => r.id !== id),
-        bankItems: [...s.bankItems, ...rescued],
-      }
-    }),
-  reset: () => set(initialState),
-  initFromDb: (data) =>
-    set({
-      metadata: {
-        title: data.title,
-        description: data.description ?? '',
-        category: data.category,
-        coverImageUrl: data.coverImageUrl ?? undefined,
+export const useTierEditor = create<State & Actions>()(
+  persist(
+    (set) => ({
+      ...initialState,
+      setMetadata: (patch) =>
+        set((s) => ({ metadata: { ...s.metadata, ...patch } })),
+      addUploadingItem: (label) => {
+        const id = newId()
+        set((s) => ({
+          bankItems: [...s.bankItems, { id, label, status: 'uploading' }],
+        }))
+        return id
       },
-      bankItems: data.sidebarItems.map((item) => ({
-        id: newId(),
-        url: item.url,
-        label: item.label,
-        status: 'uploaded' as TierItemStatus,
-      })),
-      rows: data.rows.map((r) => ({
-        id: r.id,
-        label: r.label,
-        color: r.color,
-        items: r.items.map((item) => ({
-          id: newId(),
-          url: item.url,
-          label: item.label,
-          status: 'uploaded' as TierItemStatus,
+      markItemUploaded: (id, url) =>
+        set((s) => ({
+          bankItems: s.bankItems.map((i) =>
+            i.id === id ? { ...i, status: 'uploaded', url } : i
+          ),
         })),
-      })),
+      markItemError: (id) =>
+        set((s) => ({
+          bankItems: s.bankItems.map((i) =>
+            i.id === id ? { ...i, status: 'error' } : i
+          ),
+        })),
+      removeItem: (input) =>
+        set((s) => {
+          if (input.source === 'bank') {
+            return { bankItems: s.bankItems.filter((i) => i.id !== input.id) }
+          }
+          return {
+            rows: s.rows.map((r) =>
+              r.id === input.rowId
+                ? { ...r, items: r.items.filter((i) => i.id !== input.id) }
+                : r
+            ),
+          }
+        }),
+      removeItemEverywhere: (id) =>
+        set((s) => ({
+          bankItems: s.bankItems.filter((i) => i.id !== id),
+          rows: s.rows.map((r) => ({ ...r, items: r.items.filter((i) => i.id !== id) })),
+        })),
+      moveItem: (input) =>
+        set((s) => {
+          const { source, sourceId, sourceIndex, target, targetId, targetIndex } = input
+
+          const fromList: TierItem[] =
+            source === 'bank'
+              ? s.bankItems
+              : s.rows.find((r) => r.id === sourceId)?.items ?? []
+          if (sourceIndex < 0 || sourceIndex >= fromList.length) return s
+          const item = fromList[sourceIndex]
+
+          const withoutItem: State =
+            source === 'bank'
+              ? { ...s, bankItems: removeAt(s.bankItems, sourceIndex) }
+              : {
+                  ...s,
+                  rows: s.rows.map((r) =>
+                    r.id === sourceId
+                      ? { ...r, items: removeAt(r.items, sourceIndex) }
+                      : r
+                  ),
+                }
+
+          if (target === 'bank') {
+            return {
+              ...withoutItem,
+              bankItems: insertAt(withoutItem.bankItems, targetIndex, item),
+            }
+          }
+
+          return {
+            ...withoutItem,
+            rows: withoutItem.rows.map((r) => {
+              if (r.id !== targetId) return r
+              return { ...r, items: insertAt(r.items, targetIndex, item) }
+            }),
+          }
+        }),
+      updateRow: (id, patch) =>
+        set((s) => ({
+          rows: s.rows.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+        })),
+      addRow: () =>
+        set((s) => {
+          if (s.rows.length >= 10) return s
+          return {
+            rows: [
+              ...s.rows,
+              { id: newId(), label: '?', color: '#6b7280', items: [] },
+            ],
+          }
+        }),
+      removeRow: (id) =>
+        set((s) => {
+          if (s.rows.length <= 1) return s
+          const row = s.rows.find((r) => r.id === id)
+          const rescued = row ? row.items : []
+          return {
+            rows: s.rows.filter((r) => r.id !== id),
+            bankItems: [...s.bankItems, ...rescued],
+          }
+        }),
+      reset: () => {
+        set(initialState)
+        useTierEditor.persist.clearStorage()
+      },
+      initFromDb: (data) =>
+        set({
+          metadata: {
+            title: data.title,
+            description: data.description ?? '',
+            category: data.category,
+            coverImageUrl: data.coverImageUrl ?? undefined,
+          },
+          bankItems: data.sidebarItems.map((item) => ({
+            id: newId(),
+            url: item.url,
+            label: item.label,
+            status: 'uploaded' as TierItemStatus,
+          })),
+          rows: data.rows.map((r) => ({
+            id: r.id,
+            label: r.label,
+            color: r.color,
+            items: r.items.map((item) => ({
+              id: newId(),
+              url: item.url,
+              label: item.label,
+              status: 'uploaded' as TierItemStatus,
+            })),
+          })),
+        }),
     }),
-}))
+    {
+      name: 'tier-editor-draft',
+      partialize: (state) => ({
+        metadata: {
+          title: state.metadata.title,
+          description: state.metadata.description,
+          category: state.metadata.category,
+          // coverImageUrl excluded — always sourced from initFromDb (server data)
+        },
+        rows: state.rows,
+        bankItems: state.bankItems,
+      }),
+      merge: (persisted, current) => {
+        const p = persisted as {
+          metadata?: Pick<EditorMetadata, 'title' | 'description' | 'category'>
+          rows?: EditorTierRow[]
+          bankItems?: TierItem[]
+        }
+        return {
+          ...current,
+          metadata: { ...current.metadata, ...(p.metadata ?? {}) },
+          bankItems: (p.bankItems ?? current.bankItems).filter(
+            (i) => i.status !== 'uploading'
+          ),
+          rows: (p.rows ?? current.rows).map((r) => ({
+            ...r,
+            items: r.items.filter((i) => i.status !== 'uploading'),
+          })),
+        }
+      },
+    }
+  )
+)
 
 export function collectSavedItemUrls(state: State): string[] {
   const urls: string[] = []
