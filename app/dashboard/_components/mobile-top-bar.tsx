@@ -42,8 +42,8 @@ export function MobileTopBar({ user }: { user: SidebarUser }) {
               <SidebarLogo />
             </SheetTitle>
           </SheetHeader>
-          <SidebarNav pathname={pathname} />
-          <SidebarUserProfile user={user} />
+          <SidebarNav pathname={pathname} collapsed={false} />
+          <SidebarUserProfile user={user} collapsed={false} />
         </SheetContent>
       </Sheet>
 

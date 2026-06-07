@@ -57,3 +57,13 @@ export const dragActiveVariants: Variants = {
     transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] },
   },
 }
+
+export const sidebarVariants: Variants = {
+  expanded: { width: 240 },
+  collapsed: { width: 56 },
+}
+
+export const sidebarLabelVariants: Variants = {
+  expanded: { opacity: 1, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } },
+  collapsed: { opacity: 0, transition: { duration: 0.1, ease: [0.16, 1, 0.3, 1] } },
+}
