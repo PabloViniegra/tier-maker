@@ -26,6 +26,7 @@ import {
   getPublicTierListById,
   getDistinctPublicCategories,
   getPublicTierLists,
+  getAllPublicTierListIds,
 } from '../tier-templates'
 
 // ─── getPublicTierListById ─────────────────────────────────────────────────
@@ -152,5 +153,35 @@ describe('getPublicTierLists', () => {
     const result = await getPublicTierLists({ page: 1, pageSize: 12 })
     expect(result.items).toHaveLength(0)
     expect(result.total).toBe(0)
+  })
+})
+
+// ─── getAllPublicTierListIds ───────────────────────────────────────────────
+
+describe('getAllPublicTierListIds', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns empty array when no public templates exist', async () => {
+    mockSelect.mockReturnValue(makeDbChain([]))
+    const result = await getAllPublicTierListIds()
+    expect(result).toEqual([])
+  })
+
+  it('returns id and createdAt for each public template', async () => {
+    const rows = [
+      { id: 'tid1', createdAt: new Date('2026-01-01') },
+      { id: 'tid2', createdAt: new Date('2026-03-15') },
+    ]
+    mockSelect.mockReturnValue(makeDbChain(rows))
+    const result = await getAllPublicTierListIds()
+    expect(result).toHaveLength(2)
+    expect(result[0]).toEqual({ id: 'tid1', createdAt: new Date('2026-01-01') })
+    expect(result[1]).toEqual({ id: 'tid2', createdAt: new Date('2026-03-15') })
+  })
+
+  it('returns only the id and createdAt fields (minimal projection)', async () => {
+    mockSelect.mockReturnValue(makeDbChain([{ id: 'tid1', createdAt: new Date('2026-01-01') }]))
+    const result = await getAllPublicTierListIds()
+    expect(Object.keys(result[0])).toEqual(expect.arrayContaining(['id', 'createdAt']))
   })
 })

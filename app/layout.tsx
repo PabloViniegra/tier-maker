@@ -8,9 +8,25 @@ import { PageTransition } from '@/components/page-transition'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tier-maker.app'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: { default: 'Tier Maker', template: '%s | Tier Maker' },
   description: 'Build and share tier lists for anything. Movies, games, albums — drag, rank, and share with one link.',
+  openGraph: {
+    type: 'website',
+    siteName: 'Tier Maker',
+    title: 'Tier Maker',
+    description: 'Build and share tier lists for anything. Movies, games, albums — drag, rank, and share with one link.',
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Tier Maker' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tier Maker',
+    description: 'Build and share tier lists for anything. Movies, games, albums — drag, rank, and share with one link.',
+    images: ['/og.png'],
+  },
 }
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
