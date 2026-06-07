@@ -92,7 +92,7 @@ describe('getRecentTierLists', () => {
         id: 'a',
         title: 'Anime Rankings',
         category: 'anime',
-        sidebarItems: ['Naruto', 'One Piece'],
+        itemCount: 2,
         createdAt: new Date('2026-06-01'),
       },
     ]
@@ -118,7 +118,7 @@ describe('getRecentTierLists', () => {
         id: 'a',
         title: 'Anime Rankings',
         category: 'anime',
-        sidebarItems: ['Naruto', 'One Piece', 'Bleach'],
+        itemCount: 3,
         createdAt: new Date('2026-06-01'),
       },
     ]
@@ -199,14 +199,14 @@ describe('getAllUserTierLists', () => {
         id: 'a',
         title: 'Anime',
         category: 'anime',
-        sidebarItems: ['Naruto', 'Bleach'],
+        itemCount: 2,
         createdAt: new Date('2026-06-01'),
       },
       {
         id: 'b',
         title: 'Movies',
         category: 'cine',
-        sidebarItems: ['Inception'],
+        itemCount: 1,
         createdAt: new Date('2026-05-15'),
       },
     ]
@@ -228,7 +228,7 @@ describe('getAllUserTierLists', () => {
         id: 'a',
         title: 'Anime',
         category: 'anime',
-        sidebarItems: ['Naruto', 'Bleach', 'One Piece'],
+        itemCount: 3,
         createdAt: new Date('2026-06-01'),
       },
     ]
@@ -266,12 +266,7 @@ describe('getAllUserTierLists', () => {
         id: 'x',
         title: 'Best Albums',
         category: 'música',
-        sidebarItems: [
-          { url: 'https://blob/a.png', label: 'A' },
-          { url: 'https://blob/b.png', label: 'B' },
-          { url: 'https://blob/c.png', label: 'C' },
-          { url: 'https://blob/d.png', label: 'D' },
-        ],
+        itemCount: 4,
         coverImageUrl: null,
         firstItemUrl: 'https://blob/a.png',
         createdAt: date,

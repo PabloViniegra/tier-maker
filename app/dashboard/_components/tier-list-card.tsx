@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, MoreVertical, Pencil } from 'lucide-react'
 import { getInitials, getCategoryGradient } from '@/lib/utils/cover-placeholder'
 import { Badge } from '@/components/ui/badge'
@@ -52,13 +53,14 @@ export function TierListCard({
       )}
       style={style}
     >
-      <Link href={fillHref} className="aspect-video w-full overflow-hidden bg-muted block">
+      <Link href={fillHref} className="relative aspect-video w-full overflow-hidden bg-muted block">
         {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={imageUrl}
-            alt="cover"
-            className="h-full w-full object-cover"
+            alt={title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
           <div

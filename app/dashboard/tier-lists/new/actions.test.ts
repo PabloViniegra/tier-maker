@@ -2,10 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('server-only', () => ({}))
 
-const { mockPut, mockRevalidatePath, mockGetSession, mockTransaction } =
+const { mockPut, mockRevalidatePath, mockRevalidateTag, mockGetSession, mockTransaction } =
   vi.hoisted(() => ({
     mockPut: vi.fn(),
     mockRevalidatePath: vi.fn(),
+    mockRevalidateTag: vi.fn(),
     mockGetSession: vi.fn(),
     mockTransaction: vi.fn(),
   }))
@@ -16,6 +17,7 @@ vi.mock('@vercel/blob', () => ({
 
 vi.mock('next/cache', () => ({
   revalidatePath: mockRevalidatePath,
+  revalidateTag: mockRevalidateTag,
 }))
 
 vi.mock('@/lib/session', () => ({
