@@ -1,7 +1,7 @@
 'use server'
 
 import { put } from '@vercel/blob'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierRows, tierTemplates, userCategoryPresets } from '@/lib/db/schema'
@@ -122,6 +122,7 @@ export async function createTierListAction(
   })
 
   revalidatePath('/dashboard')
+  revalidateTag('public-categories', {})
   return { id }
 }
 

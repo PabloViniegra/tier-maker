@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+vi.mock('next/cache', () => ({
+  unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
+}))
+
 // Drizzle queries are chainable thenables. This proxy resolves with `data`
 // when the chain is awaited, and returns itself for any method call.
 function makeDbChain(data: unknown) {
@@ -102,7 +106,7 @@ describe('getPublicTierLists', () => {
     id: 'tid',
     title: 'My List',
     category: 'Games',
-    sidebarItems: ['a', 'b', 'c'],
+    itemCount: 3,
     createdAt: new Date('2026-01-01'),
     creatorName: 'Alice',
     ...overrides,
@@ -121,7 +125,7 @@ describe('getPublicTierLists', () => {
   })
 
   it('maps sidebarItems length to itemCount', async () => {
-    const rows = [makeTemplateRow({ sidebarItems: ['a', 'b', 'c', 'd'] })]
+    const rows = [makeTemplateRow({ itemCount: 4 })]
     mockSelect
       .mockReturnValueOnce(makeDbChain(rows))
       .mockReturnValueOnce(makeDbChain([{ count: 1 }]))

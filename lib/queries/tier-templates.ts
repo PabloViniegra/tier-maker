@@ -1,9 +1,12 @@
 import 'server-only'
+import { unstable_cache } from 'next/cache'
 import { eq, desc, count, countDistinct, max, and, asc, or, ilike, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierRows, tierTemplates } from '@/lib/db/schema'
 import { user } from '@/lib/db/schema/auth'
 import type { ImageItem } from '@/lib/validators/tier-list'
+
+const sidebarItemCount = sql<number>`COALESCE(jsonb_array_length(${tierTemplates.sidebarItems}), 0)`
 
 export type TierListSummary = {
   id: string
@@ -59,7 +62,7 @@ export async function getRecentTierLists(
       id: tierTemplates.id,
       title: tierTemplates.title,
       category: tierTemplates.category,
-      sidebarItems: tierTemplates.sidebarItems,
+      itemCount: sidebarItemCount,
       coverImageUrl: tierTemplates.coverImageUrl,
       createdAt: tierTemplates.createdAt,
       firstItemUrl: firstItemUrlExpr,
@@ -73,7 +76,7 @@ export async function getRecentTierLists(
     id: r.id,
     title: r.title,
     category: r.category,
-    itemCount: r.sidebarItems.length,
+    itemCount: r.itemCount ?? 0,
     createdAt: r.createdAt,
     coverImageUrl: r.coverImageUrl ?? null,
     firstItemUrl: r.firstItemUrl ?? null,
@@ -88,7 +91,7 @@ export async function getAllUserTierLists(
       id: tierTemplates.id,
       title: tierTemplates.title,
       category: tierTemplates.category,
-      sidebarItems: tierTemplates.sidebarItems,
+      itemCount: sidebarItemCount,
       coverImageUrl: tierTemplates.coverImageUrl,
       createdAt: tierTemplates.createdAt,
       firstItemUrl: firstItemUrlExpr,
@@ -101,7 +104,7 @@ export async function getAllUserTierLists(
     id: r.id,
     title: r.title,
     category: r.category,
-    itemCount: r.sidebarItems.length,
+    itemCount: r.itemCount ?? 0,
     createdAt: r.createdAt,
     coverImageUrl: r.coverImageUrl ?? null,
     firstItemUrl: r.firstItemUrl ?? null,
@@ -142,18 +145,19 @@ export type PublicTierListsParams = {
 export async function getPublicTierListById(
   id: string
 ): Promise<TierListDetail | null> {
-  const [tpl] = await db
-    .select()
-    .from(tierTemplates)
-    .where(and(eq(tierTemplates.id, id), eq(tierTemplates.isPublic, true)))
+  const [[tpl], rows] = await Promise.all([
+    db
+      .select()
+      .from(tierTemplates)
+      .where(and(eq(tierTemplates.id, id), eq(tierTemplates.isPublic, true))),
+    db
+      .select()
+      .from(tierRows)
+      .where(eq(tierRows.templateId, id))
+      .orderBy(asc(tierRows.order)),
+  ])
 
   if (!tpl) return null
-
-  const rows = await db
-    .select()
-    .from(tierRows)
-    .where(eq(tierRows.templateId, id))
-    .orderBy(asc(tierRows.order))
 
   return {
     id: tpl.id,
@@ -173,16 +177,20 @@ export async function getPublicTierListById(
   }
 }
 
-export async function getDistinctPublicCategories(): Promise<string[]> {
-  const rows = await db
-    .select({ category: tierTemplates.category })
-    .from(tierTemplates)
-    .where(eq(tierTemplates.isPublic, true))
-    .groupBy(tierTemplates.category)
-    .orderBy(asc(tierTemplates.category))
+export const getDistinctPublicCategories = unstable_cache(
+  async (): Promise<string[]> => {
+    const rows = await db
+      .select({ category: tierTemplates.category })
+      .from(tierTemplates)
+      .where(eq(tierTemplates.isPublic, true))
+      .groupBy(tierTemplates.category)
+      .orderBy(asc(tierTemplates.category))
 
-  return rows.map((r) => r.category)
-}
+    return rows.map((r) => r.category)
+  },
+  ['distinct-public-categories'],
+  { revalidate: 300, tags: ['public-categories'] }
+)
 
 export async function getPublicTierLists(
   params: PublicTierListsParams
@@ -213,7 +221,7 @@ export async function getPublicTierLists(
         id: tierTemplates.id,
         title: tierTemplates.title,
         category: tierTemplates.category,
-        sidebarItems: tierTemplates.sidebarItems,
+        itemCount: sidebarItemCount,
         coverImageUrl: tierTemplates.coverImageUrl,
         createdAt: tierTemplates.createdAt,
         creatorName: user.name,
@@ -236,7 +244,7 @@ export async function getPublicTierLists(
       id: r.id,
       title: r.title,
       category: r.category,
-      itemCount: r.sidebarItems.length,
+      itemCount: r.itemCount ?? 0,
       createdAt: r.createdAt,
       coverImageUrl: r.coverImageUrl ?? null,
       firstItemUrl: r.firstItemUrl ?? null,
@@ -250,18 +258,19 @@ export async function getTierListById(
   id: string,
   userId: string
 ): Promise<TierListDetail | null> {
-  const [tpl] = await db
-    .select()
-    .from(tierTemplates)
-    .where(and(eq(tierTemplates.id, id), eq(tierTemplates.creatorId, userId)))
+  const [[tpl], rows] = await Promise.all([
+    db
+      .select()
+      .from(tierTemplates)
+      .where(and(eq(tierTemplates.id, id), eq(tierTemplates.creatorId, userId))),
+    db
+      .select()
+      .from(tierRows)
+      .where(eq(tierRows.templateId, id))
+      .orderBy(asc(tierRows.order)),
+  ])
 
   if (!tpl) return null
-
-  const rows = await db
-    .select()
-    .from(tierRows)
-    .where(eq(tierRows.templateId, id))
-    .orderBy(asc(tierRows.order))
 
   return {
     id: tpl.id,

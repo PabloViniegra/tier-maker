@@ -1,6 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
+vi.mock('next/image', () => ({
+  default: ({ src, alt, fill: _fill, sizes: _sizes, ...props }: { src: string; alt: string; fill?: boolean; sizes?: string } & React.ImgHTMLAttributes<HTMLImageElement>) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={alt} {...props} />
+  ),
+}))
+
 vi.mock('@/components/ui/dropdown-menu', () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   DropdownMenuTrigger: ({ children, ...props }: React.HTMLAttributes<HTMLButtonElement> & { children: React.ReactNode }) => (
@@ -69,7 +76,7 @@ describe('TierListCard', () => {
 
   it('renders the cover image when coverImageUrl is provided', () => {
     render(<TierListCard {...baseProps} coverImageUrl="https://blob/cover.png" />)
-    const img = screen.getByRole('img', { name: /cover/i })
+    const img = screen.getByRole('img', { name: /my anime rankings/i })
     expect(img).toHaveAttribute('src', 'https://blob/cover.png')
   })
 
