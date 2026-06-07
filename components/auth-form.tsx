@@ -41,6 +41,7 @@ function PasswordInput({ id, placeholder, registration, error }: {
           {...registration}
           type={show ? 'text' : 'password'}
           aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? `${id}-error` : undefined}
         />
         <Button
           type='button'
@@ -48,12 +49,12 @@ function PasswordInput({ id, placeholder, registration, error }: {
           size='icon-sm'
           className='absolute right-0.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
           onClick={() => setShow((v) => !v)}
-          aria-label={show ? 'Hide' : 'Show'}
+          aria-label={show ? 'Hide password' : 'Show password'}
         >
           {show ? <EyeOff /> : <Eye />}
         </Button>
       </div>
-      {error && <p className='mt-1 text-xs text-destructive'>{error}</p>}
+      {error && <p id={`${id}-error`} className='mt-1 text-xs text-destructive' role='alert'>{error}</p>}
     </>
   )
 }
@@ -99,9 +100,10 @@ function LoginForm() {
           placeholder='you@example.com'
           {...register('email')}
           aria-invalid={errors.email ? 'true' : 'false'}
+          aria-describedby={errors.email ? 'email-error' : undefined}
         />
         {errors.email && (
-          <p className='text-xs text-destructive'>{errors.email.message}</p>
+          <p id='email-error' className='text-xs text-destructive' role='alert'>{errors.email.message}</p>
         )}
       </div>
 
@@ -172,9 +174,10 @@ function RegisterForm() {
           placeholder='Your name'
           {...register('name')}
           aria-invalid={errors.name ? 'true' : 'false'}
+          aria-describedby={errors.name ? 'name-error' : undefined}
         />
         {errors.name && (
-          <p className='text-xs text-destructive'>{errors.name.message}</p>
+          <p id='name-error' className='text-xs text-destructive' role='alert'>{errors.name.message}</p>
         )}
       </div>
 
@@ -186,9 +189,10 @@ function RegisterForm() {
           placeholder='you@example.com'
           {...register('email')}
           aria-invalid={errors.email ? 'true' : 'false'}
+          aria-describedby={errors.email ? 'email-error' : undefined}
         />
         {errors.email && (
-          <p className='text-xs text-destructive'>{errors.email.message}</p>
+          <p id='email-error' className='text-xs text-destructive' role='alert'>{errors.email.message}</p>
         )}
       </div>
 

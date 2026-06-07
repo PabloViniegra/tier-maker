@@ -35,6 +35,7 @@ export function ExploreSearchInput({ defaultValue }: Props) {
         value={value}
         onChange={handleChange}
         placeholder="Search tier lists…"
+        aria-label="Search tier lists"
         className="w-full rounded-md border border-border bg-surface py-2 pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
       />
     </div>

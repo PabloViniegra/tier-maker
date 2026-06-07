@@ -22,7 +22,7 @@ export default function HomePage() {
               Tier Maker
             </span>
           </div>
-          <nav className='flex items-center gap-2'>
+          <nav aria-label="Main" className='flex items-center gap-2'>
             <Link
               href='/login'
               className={cn(
@@ -42,7 +42,7 @@ export default function HomePage() {
       </header>
 
       {/* Bento grid */}
-      <main className='mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-6 md:py-8'>
+      <main id="main-content" className='mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-6 md:py-8'>
         <BentoGrid>
           {/* ── Hero ── 8 cols × 2 rows */}
           <BentoCell

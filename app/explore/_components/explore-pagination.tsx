@@ -45,7 +45,7 @@ export function ExplorePagination({ total, page, pageSize, searchParams }: Props
       {!isFirst && (
         <Link
           href={buildPageUrl(searchParams, page - 1)}
-          aria-label="prev"
+          aria-label="Previous page"
           className={linkClass}
         >
           Prev
@@ -56,7 +56,7 @@ export function ExplorePagination({ total, page, pageSize, searchParams }: Props
         <Link
           key={p}
           href={buildPageUrl(searchParams, p)}
-          aria-label={String(p)}
+          aria-label={`Page ${p}`}
           aria-current={p === page ? 'page' : undefined}
           className={cn(linkClass, p === page && activeLinkClass)}
         >
@@ -67,7 +67,7 @@ export function ExplorePagination({ total, page, pageSize, searchParams }: Props
       {!isLast && (
         <Link
           href={buildPageUrl(searchParams, page + 1)}
-          aria-label="next"
+          aria-label="Next page"
           className={linkClass}
         >
           Next

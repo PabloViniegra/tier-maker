@@ -34,9 +34,9 @@ describe('ExplorePagination', () => {
   it('renders a link for each page number', () => {
     // total=36, pageSize=12 → 3 pages
     render(<ExplorePagination {...baseProps} />)
-    expect(screen.getByRole('link', { name: '1' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '2' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '3' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Page 1' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Page 2' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Page 3' })).toBeInTheDocument()
   })
 
   it('prev link points to page - 1', () => {

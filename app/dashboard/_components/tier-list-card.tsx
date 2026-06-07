@@ -90,7 +90,7 @@ export function TierListCard({
             <DropdownMenu>
               <DropdownMenuTrigger
                 className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
-                aria-label="Options"
+                aria-label={`Options for ${title}`}
               >
                 <MoreVertical size={12} />
               </DropdownMenuTrigger>
@@ -116,13 +116,14 @@ export function TierListCard({
           </span>
           <Link
             href={fillHref}
+            aria-label={`Open ${title}`}
             className={cn(
               buttonVariants({ variant: 'ghost', size: 'sm' }),
               'h-6 gap-1 px-2 text-xs'
             )}
           >
             Open
-            <ArrowRight size={12} />
+            <ArrowRight size={12} aria-hidden="true" />
           </Link>
         </div>
       </div>
