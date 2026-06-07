@@ -11,16 +11,19 @@ export function TierListGridSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-5 w-20" />
-            <Skeleton className="h-3 w-14" />
-          </div>
-          <Skeleton className="h-4 w-3/4" />
-          <Separator />
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-3 w-12" />
-            <Skeleton className="h-6 w-14" />
+        <div key={i} className="flex flex-col gap-3 rounded-lg border border-border bg-surface overflow-hidden">
+          <Skeleton className="aspect-video w-full rounded-none" />
+          <div className="flex flex-col gap-3 px-4 pb-4">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-5 w-20" />
+              <Skeleton className="h-3 w-14" />
+            </div>
+            <Skeleton className="h-4 w-3/4" />
+            <Separator />
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-3 w-12" />
+              <Skeleton className="h-6 w-14" />
+            </div>
           </div>
         </div>
       ))}
