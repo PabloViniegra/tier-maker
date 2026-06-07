@@ -40,7 +40,7 @@ describe('AuthForm — login mode', () => {
   it('renders email and password fields in login mode', () => {
     render(<AuthForm mode="login" />)
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument()
     expect(screen.queryByLabelText(/name/i)).not.toBeInTheDocument()
     expect(screen.queryByLabelText(/confirm password/i)).not.toBeInTheDocument()
   })
@@ -61,7 +61,7 @@ describe('AuthForm — login mode', () => {
 
     render(<AuthForm mode="login" />)
     await user.type(screen.getByLabelText(/email/i), 'user@example.com')
-    await user.type(screen.getByLabelText(/password/i), 'password123')
+    await user.type(screen.getByLabelText(/^password$/i), 'password123')
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     await waitFor(() => {
@@ -79,7 +79,7 @@ describe('AuthForm — login mode', () => {
 
     render(<AuthForm mode="login" />)
     await user.type(screen.getByLabelText(/email/i), 'user@example.com')
-    await user.type(screen.getByLabelText(/password/i), 'password123')
+    await user.type(screen.getByLabelText(/^password$/i), 'password123')
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     await waitFor(() => {
@@ -95,7 +95,7 @@ describe('AuthForm — login mode', () => {
 
     render(<AuthForm mode="login" />)
     await user.type(screen.getByLabelText(/email/i), 'user@example.com')
-    await user.type(screen.getByLabelText(/password/i), 'password123')
+    await user.type(screen.getByLabelText(/^password$/i), 'password123')
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     await waitFor(() => {

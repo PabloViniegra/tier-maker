@@ -34,7 +34,7 @@ export default async function PublicTierFillPage({ params }: Props) {
     <div className="flex h-screen flex-col bg-background">
       <ExploreHeader isLoggedIn={!!session} />
       {!session && <AnonymousCTABanner />}
-      <div className="flex-1 overflow-hidden">
+      <main id="main-content" className="flex-1 overflow-hidden">
         <PublicTierFill
           tierId={id}
           data={{
@@ -46,7 +46,7 @@ export default async function PublicTierFillPage({ params }: Props) {
             rows: data.rows,
           }}
         />
-      </div>
+      </main>
     </div>
   )
 }

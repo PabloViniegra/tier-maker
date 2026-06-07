@@ -25,7 +25,7 @@ export function ExploreSortSelect({ value }: Props) {
 
   return (
     <Select value={value} onValueChange={setSort}>
-      <SelectTrigger className="w-[150px]">
+      <SelectTrigger className="w-[150px]" aria-label="Sort tier lists by">
         <SelectValue placeholder="Sort by" />
       </SelectTrigger>
       <SelectContent>

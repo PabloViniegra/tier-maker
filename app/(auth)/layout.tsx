@@ -9,7 +9,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className='flex min-h-dvh'>
       {/* Left decorative panel — desktop only */}
-      <div className='relative hidden overflow-hidden border-r border-border bg-background lg:flex lg:w-1/2'>
+      <div aria-hidden="true" className='relative hidden overflow-hidden border-r border-border bg-background lg:flex lg:w-1/2'>
         <TierRowsBackground />
         <div className='absolute inset-0 bg-[radial-gradient(ellipse_at_40%_50%,oklch(0.62_0.22_250/0.12)_0%,transparent_65%)]' />
         <div className='relative z-10 flex h-full w-full flex-col justify-end p-10'>
@@ -21,7 +21,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Right form panel */}
-      <div className='flex w-full flex-col items-center justify-center bg-background p-6 lg:w-1/2 lg:p-12'>
+      <main id="main-content" className='flex w-full flex-col items-center justify-center bg-background p-6 lg:w-1/2 lg:p-12'>
         <div className='w-full max-w-sm'>
           {/* Wordmark — mobile only (desktop shows it in left panel) */}
           <div className='mb-6 text-center lg:hidden'>
@@ -36,7 +36,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             {children}
           </FadeUp>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

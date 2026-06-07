@@ -45,7 +45,7 @@ export default async function ExplorePage({ searchParams }: Props) {
     <div className="flex min-h-screen flex-col bg-background">
       <ExploreHeader isLoggedIn={!!session} />
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+      <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <div className="mb-6">
           <h1 className="font-heading text-2xl font-semibold text-foreground">
             Explore Tier Lists

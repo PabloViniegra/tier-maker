@@ -41,7 +41,7 @@ export function ExploreCard({
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
           />
         ) : (
-          <div className="h-full w-full bg-gradient-to-br from-muted to-muted-foreground/10" />
+          <div aria-hidden="true" className="h-full w-full bg-gradient-to-br from-muted to-muted-foreground/10" />
         )}
       </div>
 
