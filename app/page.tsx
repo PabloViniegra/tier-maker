@@ -7,11 +7,12 @@ import { TierRowsBackground } from '@/components/tier-rows-background'
 import { TierListMockup } from '@/components/tier-list-mockup'
 import { BentoFeatureCells } from '@/components/bento-feature-cells'
 import { FadeUp } from '@/components/ui/fade-up'
+import { SiteFooter } from '@/components/site-footer'
 import { cn } from '@/lib/utils'
 
 export default function HomePage() {
   return (
-    <div className='min-h-[100dvh] bg-background'>
+    <div className='flex min-h-[100dvh] flex-col bg-background'>
       {/* Minimal nav */}
       <header className='sticky top-0 z-10 border-b border-border/50 bg-background/80 backdrop-blur-sm'>
         <div className='mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6'>
@@ -41,7 +42,7 @@ export default function HomePage() {
       </header>
 
       {/* Bento grid */}
-      <main className='mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8'>
+      <main className='mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-6 md:py-8'>
         <BentoGrid>
           {/* ── Hero ── 8 cols × 2 rows */}
           <BentoCell
@@ -128,6 +129,8 @@ export default function HomePage() {
           </BentoCell>
         </BentoGrid>
       </main>
+
+      <SiteFooter />
     </div>
   )
 }
