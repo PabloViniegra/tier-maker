@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ArrowRight, MoreVertical, Pencil } from 'lucide-react'
+import { getInitials, getCategoryGradient } from '@/lib/utils/cover-placeholder'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -62,8 +63,13 @@ export function TierListCard({
         ) : (
           <div
             data-testid="card-cover-placeholder"
-            className="h-full w-full bg-gradient-to-br from-muted to-muted-foreground/10"
-          />
+            className="h-full w-full flex items-center justify-center"
+            style={{ background: getCategoryGradient(category) }}
+          >
+            <span className="text-white font-bold text-3xl select-none drop-shadow">
+              {getInitials(title)}
+            </span>
+          </div>
         )}
       </Link>
 

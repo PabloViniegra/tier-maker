@@ -91,9 +91,11 @@ describe('TierListCard', () => {
     expect(img).toHaveAttribute('src', 'https://blob/cover.png')
   })
 
-  it('shows a placeholder element when neither cover nor firstItemUrl is set', () => {
+  it('shows a placeholder with title initials when neither cover nor firstItemUrl is set', () => {
     render(<TierListCard {...baseProps} />)
-    expect(screen.getByTestId('card-cover-placeholder')).toBeInTheDocument()
+    const placeholder = screen.getByTestId('card-cover-placeholder')
+    expect(placeholder).toBeInTheDocument()
+    expect(placeholder).toHaveTextContent('MA')
   })
 
   it('renders a context menu trigger button', () => {
