@@ -46,4 +46,11 @@ describe('auth — module shape', () => {
     const config = betterAuthMock.mock.calls[0][0]
     expect(config.database).toBeDefined()
   })
+
+  it('betterAuth was called with Google social provider configured', () => {
+    const config = betterAuthMock.mock.calls[0][0]
+    expect(config.socialProviders?.google).toBeDefined()
+    expect(config.socialProviders?.google?.clientId).toBeDefined()
+    expect(config.socialProviders?.google?.clientSecret).toBeDefined()
+  })
 })
