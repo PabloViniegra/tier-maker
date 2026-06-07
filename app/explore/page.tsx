@@ -15,8 +15,19 @@ import { ExploreGrid } from './_components/explore-grid'
 import { ExplorePagination } from './_components/explore-pagination'
 
 export const metadata: Metadata = {
-  title: 'Explore Tier Lists — Tier Maker',
+  title: 'Explore Tier Lists',
   description: 'Browse and fill community-created tier lists. No account required.',
+  openGraph: {
+    title: 'Explore Tier Lists — Tier Maker',
+    description: 'Browse and fill community-created tier lists. No account required.',
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Tier Maker' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Explore Tier Lists — Tier Maker',
+    description: 'Browse and fill community-created tier lists. No account required.',
+    images: ['/og.png'],
+  },
 }
 
 type Props = {

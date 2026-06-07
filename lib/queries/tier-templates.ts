@@ -289,3 +289,10 @@ export async function getTierListById(
     })),
   }
 }
+
+export async function getAllPublicTierListIds(): Promise<{ id: string; createdAt: Date }[]> {
+  return db
+    .select({ id: tierTemplates.id, createdAt: tierTemplates.createdAt })
+    .from(tierTemplates)
+    .where(eq(tierTemplates.isPublic, true))
+}

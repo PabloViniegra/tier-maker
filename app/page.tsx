@@ -1,6 +1,31 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { buttonVariants } from '@/components/ui/button'
+
+export const metadata: Metadata = {
+  openGraph: {
+    type: 'website',
+    title: 'Tier Maker — Rank everything. Share instantly.',
+    description: 'Build tier lists for any topic in seconds. Movies, games, albums — drag, rank, and share with one link.',
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Tier Maker' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tier Maker — Rank everything. Share instantly.',
+    description: 'Build tier lists for any topic in seconds. Movies, games, albums — drag, rank, and share with one link.',
+    images: ['/og.png'],
+  },
+}
+
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tier-maker.app'
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Tier Maker',
+  url: baseUrl,
+}
 import { TierMakerIcon } from '@/components/tier-maker-icon'
 import { BentoGrid, BentoCell } from '@/components/bento-grid'
 import { TierRowsBackground } from '@/components/tier-rows-background'
@@ -13,6 +38,10 @@ import { cn } from '@/lib/utils'
 export default function HomePage() {
   return (
     <div className='flex min-h-[100dvh] flex-col bg-background'>
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       {/* Minimal nav */}
       <header className='sticky top-0 z-10 border-b border-border/50 bg-background/80 backdrop-blur-sm'>
         <div className='mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6'>

@@ -1,6 +1,12 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { AuthForm } from '@/components/auth-form'
+
+export const metadata: Metadata = {
+  title: 'Sign In',
+  description: 'Sign in to your Tier Maker account to create and manage your tier lists.',
+}
 
 export default function LoginPage() {
   return (
