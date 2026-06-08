@@ -12,12 +12,12 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       <div aria-hidden="true" className='relative hidden overflow-hidden border-r border-border bg-background lg:flex lg:w-1/2'>
         <TierRowsBackground />
         <div className='absolute inset-0 bg-[radial-gradient(ellipse_at_40%_50%,oklch(0.62_0.22_250/0.12)_0%,transparent_65%)]' />
-        <div className='relative z-10 flex h-full w-full flex-col justify-end p-10'>
+        <FadeUp onMount delay={0.1} className='relative z-10 flex h-full w-full flex-col justify-end p-10'>
           <p className='font-heading text-2xl font-semibold text-foreground'>Tier Maker</p>
           <p className='mt-1 text-sm text-muted-foreground'>
             Create and share tier lists with the community
           </p>
-        </div>
+        </FadeUp>
       </div>
 
       {/* Right form panel */}

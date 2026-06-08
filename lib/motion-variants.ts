@@ -2,6 +2,7 @@ import type { Variants } from 'motion/react'
 
 export const STAGGER_DELAY = 0.06
 export const MAX_STAGGER = 4
+export const EASE_SMOOTH = [0.16, 1, 0.3, 1] as const
 
 export function staggerIndex(i: number): number {
   return Math.min(i, MAX_STAGGER - 1)
@@ -12,7 +13,7 @@ export const fadeUpVariants: Variants = {
   visible: (delay: number = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.24, ease: [0.16, 1, 0.3, 1], delay },
+    transition: { duration: 0.24, ease: EASE_SMOOTH, delay },
   }),
 }
 
@@ -54,7 +55,7 @@ export const dragActiveVariants: Variants = {
     opacity: 1,
     boxShadow: '0 12px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)',
     zIndex: 50,
-    transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.12, ease: EASE_SMOOTH },
   },
 }
 
@@ -64,6 +65,29 @@ export const sidebarVariants: Variants = {
 }
 
 export const sidebarLabelVariants: Variants = {
-  expanded: { opacity: 1, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } },
-  collapsed: { opacity: 0, transition: { duration: 0.1, ease: [0.16, 1, 0.3, 1] } },
+  expanded: { opacity: 1, transition: { duration: 0.2, ease: EASE_SMOOTH } },
+  collapsed: { opacity: 0, transition: { duration: 0.1, ease: EASE_SMOOTH } },
+}
+
+export const bentoIconFloatVariants = {
+  y: [0, -3, 0],
+  transition: { repeat: Infinity, duration: 4, ease: 'easeInOut' as const },
+}
+
+export const bentoSpotlightVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 0 },
+  hovered: { opacity: 1, transition: { duration: 0.5, ease: EASE_SMOOTH } },
+}
+
+export function bentoIconFloat(delay = 0) {
+  return {
+    y: [0, -3, 0],
+    transition: { repeat: Infinity, duration: 4, ease: 'easeInOut' as const, delay },
+  }
+}
+
+export const cardLiftVariants: Variants = {
+  hover: { y: -2, transition: springTransition },
+  tap: { scale: 0.99, y: 0, transition: { duration: 0.1, ease: 'easeOut' } },
 }

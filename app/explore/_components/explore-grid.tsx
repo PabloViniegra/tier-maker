@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'motion/react'
-import { fadeUpVariants, staggerIndex, STAGGER_DELAY } from '@/lib/motion-variants'
+import { fadeUpVariants, staggerIndex, STAGGER_DELAY, cardLiftVariants } from '@/lib/motion-variants'
 import { ExploreCard } from './explore-card'
 import type { PublicTierListSummary } from '@/lib/queries/tier-templates'
 
@@ -25,10 +25,12 @@ export function ExploreGrid({ items }: Props) {
       {items.map((item, i) => (
         <motion.div
           key={item.id}
-          variants={fadeUpVariants}
+          variants={{ ...fadeUpVariants, ...cardLiftVariants }}
           initial="hidden"
           animate="visible"
           custom={staggerIndex(i) * STAGGER_DELAY}
+          whileHover="hover"
+          whileTap="tap"
         >
           <ExploreCard {...item} />
         </motion.div>

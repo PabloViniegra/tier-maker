@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 import { TierListCard, type TierListCardProps } from './tier-list-card'
 import { DashboardEmptyState } from './dashboard-empty-state'
-import { fadeUpVariants, staggerIndex, STAGGER_DELAY, springTransition } from '@/lib/motion-variants'
+import { fadeUpVariants, staggerIndex, STAGGER_DELAY, cardLiftVariants } from '@/lib/motion-variants'
 
 export function TierListGridSkeleton() {
   return (
@@ -54,10 +54,10 @@ export function TierListGrid({ tierLists }: { tierLists: TierListCardProps[] }) 
       {tierLists.map((tierList, i) => (
         <motion.div
           key={tierList.id}
-          variants={fadeUpVariants}
+          variants={{ ...fadeUpVariants, ...cardLiftVariants }}
           custom={staggerIndex(i) * STAGGER_DELAY}
-          whileHover={{ y: -2, transition: springTransition }}
-          whileTap={{ scale: 0.99, y: 0, transition: { duration: 0.1, ease: 'easeOut' } }}
+          whileHover="hover"
+          whileTap="tap"
         >
           <TierListCard {...tierList} />
         </motion.div>
