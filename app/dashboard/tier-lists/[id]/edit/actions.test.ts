@@ -120,7 +120,7 @@ describe('updateTierListStructureAction', () => {
     authedSession()
     mockOwned()
     setupTransaction()
-    const { description: _, ...withoutDesc } = validInput
+    const { description: _description, ...withoutDesc } = validInput // eslint-disable-line @typescript-eslint/no-unused-vars
     await expect(updateTierListStructureAction('tpl-1', withoutDesc)).resolves.toEqual({ ok: true })
   })
 

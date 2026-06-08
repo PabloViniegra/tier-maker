@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useTierEditor, initialState } from '@/lib/stores/tier-editor'
 import { getTierFill, setTierFill } from '@/lib/idb/tier-fill-store'
 import { buildTierFillKey } from '@/lib/idb/tier-fill-key'
@@ -14,34 +14,28 @@ export function useTierFillPersistence(
   userId: string | null,
   seed: TierListDetailSeed
 ): void {
-  // seed is static (server-provided) for the lifetime of this page — capture in ref
-  // so the effect only re-runs when the identity (tierId/userId) actually changes
-  const seedRef = useRef(seed)
-  seedRef.current = seed
-
   useEffect(() => {
     const key = buildTierFillKey(userId, tierId)
     let debounceTimer: ReturnType<typeof setTimeout> | null = null
     let seeded = false
 
     async function init() {
-      const currentSeed = seedRef.current
       try {
         const draft = await getTierFill(key)
-        const merged = mergeTierFill(currentSeed, draft)
+        const merged = mergeTierFill(seed, draft)
         useTierEditor.setState((s) => ({
           ...s,
           metadata: {
-            title: currentSeed.title,
-            description: currentSeed.description ?? '',
-            category: currentSeed.category,
-            coverImageUrl: currentSeed.coverImageUrl ?? undefined,
+            title: seed.title,
+            description: seed.description ?? '',
+            category: seed.category,
+            coverImageUrl: seed.coverImageUrl ?? undefined,
           },
           rows: merged.rows,
           bankItems: merged.bankItems,
         }))
       } catch {
-        useTierEditor.getState().initFromDb(currentSeed)
+        useTierEditor.getState().initFromDb(seed)
       } finally {
         seeded = true
       }
@@ -69,5 +63,5 @@ export function useTierFillPersistence(
       unsubscribe()
       useTierEditor.setState(initialState)
     }
-  }, [userId, tierId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, tierId, seed])
 }
