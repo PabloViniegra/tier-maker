@@ -8,6 +8,11 @@ import {
   staggerContainerVariants,
   pageTransitionVariants,
   dragActiveVariants,
+  bentoIconFloatVariants,
+  bentoSpotlightVariants,
+  EASE_SMOOTH,
+  bentoIconFloat,
+  cardLiftVariants,
 } from './motion-variants'
 
 describe('constants', () => {
@@ -108,5 +113,93 @@ describe('dragActiveVariants', () => {
     const idle = dragActiveVariants.idle as TargetAndTransition
     expect(idle.scale).toBe(1)
     expect(idle.opacity).toBe(1)
+  })
+})
+
+describe('bentoIconFloatVariants', () => {
+  it('y keyframes oscillate from 0 to -3 and back', () => {
+    const y = bentoIconFloatVariants.y as number[]
+    expect(y).toEqual([0, -3, 0])
+  })
+
+  it('animation repeats infinitely', () => {
+    const transition = bentoIconFloatVariants.transition as { repeat: number }
+    expect(transition.repeat).toBe(Infinity)
+  })
+
+  it('duration is within design spec (≥ 3s, ≤ 6s)', () => {
+    const transition = bentoIconFloatVariants.transition as { duration: number }
+    expect(transition.duration).toBeGreaterThanOrEqual(3)
+    expect(transition.duration).toBeLessThanOrEqual(6)
+  })
+})
+
+describe('bentoSpotlightVariants', () => {
+  it('non-hovered states (hidden, visible) are fully transparent', () => {
+    const hidden = bentoSpotlightVariants.hidden as TargetAndTransition
+    const visible = bentoSpotlightVariants.visible as TargetAndTransition
+    expect(hidden.opacity).toBe(0)
+    expect(visible.opacity).toBe(0)
+  })
+
+  it('hovered state is fully opaque', () => {
+    const hovered = bentoSpotlightVariants.hovered as TargetAndTransition
+    expect(hovered.opacity).toBe(1)
+  })
+
+  it('hovered transition duration is within design spec (≤ 0.6s)', () => {
+    const hovered = bentoSpotlightVariants.hovered as TargetAndTransition
+    const transition = hovered.transition as { duration: number }
+    expect(transition.duration).toBeLessThanOrEqual(0.6)
+    expect(transition.duration).toBeGreaterThan(0)
+  })
+})
+
+describe('EASE_SMOOTH', () => {
+  it('is a 4-element bezier array', () => {
+    expect(EASE_SMOOTH).toHaveLength(4)
+  })
+
+  it('matches the project canonical smooth decelerate curve', () => {
+    expect(EASE_SMOOTH).toEqual([0.16, 1, 0.3, 1])
+  })
+})
+
+describe('bentoIconFloat', () => {
+  it('returns y keyframes oscillating 0 → -3 → 0', () => {
+    expect(bentoIconFloat(0).y).toEqual([0, -3, 0])
+  })
+
+  it('threads delay into transition', () => {
+    const result = bentoIconFloat(0.5)
+    expect((result.transition as { delay: number }).delay).toBe(0.5)
+  })
+
+  it('defaults delay to 0', () => {
+    const result = bentoIconFloat()
+    expect((result.transition as { delay: number }).delay).toBe(0)
+  })
+
+  it('repeats infinitely', () => {
+    const result = bentoIconFloat(0)
+    expect((result.transition as { repeat: number }).repeat).toBe(Infinity)
+  })
+})
+
+describe('cardLiftVariants', () => {
+  it('hover state lifts card up (negative y)', () => {
+    const hover = cardLiftVariants.hover as TargetAndTransition
+    expect(hover.y as number).toBeLessThan(0)
+  })
+
+  it('tap state shrinks card slightly', () => {
+    const tap = cardLiftVariants.tap as TargetAndTransition
+    expect(tap.scale as number).toBeLessThan(1)
+    expect(tap.scale as number).toBeGreaterThan(0.95)
+  })
+
+  it('tap state resets y to 0', () => {
+    const tap = cardLiftVariants.tap as TargetAndTransition
+    expect(tap.y).toBe(0)
   })
 })

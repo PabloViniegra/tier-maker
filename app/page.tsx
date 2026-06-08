@@ -81,46 +81,52 @@ export default function HomePage() {
           >
             <TierRowsBackground />
             <div className='absolute inset-0 bg-[radial-gradient(ellipse_at_30%_65%,oklch(0.62_0.22_250/0.14)_0%,transparent_68%)]' />
-            <FadeUp className='relative flex h-full flex-col justify-end p-7 lg:p-10'>
-              <div className='mb-4'>
+            <div className='relative flex h-full flex-col justify-end p-7 lg:p-10'>
+              <FadeUp delay={0} className='mb-4'>
                 <span className='rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary'>
                   Now in beta
                 </span>
-              </div>
-              <h1 className='font-heading text-4xl font-semibold leading-[1.15] tracking-tight text-foreground lg:text-5xl'>
-                Rank everything.
-                <br />
-                Share instantly.
-              </h1>
-              <p className='mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground'>
-                Build tier lists for any topic in seconds. Movies, games,
-                albums&mdash;drag, rank, and share with one link.
-              </p>
-              <div className='mt-7 flex flex-wrap items-center gap-2.5'>
-                <Link
-                  href='/register'
-                  className={cn(buttonVariants({ size: 'default' }))}
-                >
-                  Get started
-                </Link>
-                <Link
-                  href='/login'
-                  className={cn(
-                    buttonVariants({ variant: 'ghost', size: 'default' })
-                  )}
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href='/explore'
-                  className={cn(
-                    'text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline'
-                  )}
-                >
-                  Browse tier lists →
-                </Link>
-              </div>
-            </FadeUp>
+              </FadeUp>
+              <FadeUp delay={0.06}>
+                <h1 className='font-heading text-4xl font-semibold leading-[1.15] tracking-tight text-foreground lg:text-5xl'>
+                  Rank everything.
+                  <br />
+                  Share instantly.
+                </h1>
+              </FadeUp>
+              <FadeUp delay={0.12}>
+                <p className='mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground'>
+                  Build tier lists for any topic in seconds. Movies, games,
+                  albums&mdash;drag, rank, and share with one link.
+                </p>
+              </FadeUp>
+              <FadeUp delay={0.18} className='mt-7'>
+                <div className='flex flex-wrap items-center gap-2.5'>
+                  <Link
+                    href='/register'
+                    className={cn(buttonVariants({ size: 'default' }))}
+                  >
+                    Get started
+                  </Link>
+                  <Link
+                    href='/login'
+                    className={cn(
+                      buttonVariants({ variant: 'ghost', size: 'default' })
+                    )}
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href='/explore'
+                    className={cn(
+                      'text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline'
+                    )}
+                  >
+                    Browse tier lists →
+                  </Link>
+                </div>
+              </FadeUp>
+            </div>
           </BentoCell>
 
           {/* ── Feature cells — interactive, client component ── */}
