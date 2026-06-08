@@ -8,6 +8,7 @@ import {
   getUserTierListStats,
   getRecentTierLists,
 } from '@/lib/queries/tier-templates'
+import { FadeUp } from '@/components/ui/fade-up'
 import { StatsCards, StatsCardsSkeleton } from './_components/stats-cards'
 import {
   TierListGrid,
@@ -19,7 +20,9 @@ export const metadata: Metadata = { title: 'Dashboard' }
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
-      <h1 className="font-heading text-xl">Dashboard</h1>
+      <FadeUp delay={0} onMount>
+        <h1 className="font-heading text-xl">Dashboard</h1>
+      </FadeUp>
       <ViewTransition>
         <Suspense fallback={<DashboardContentSkeleton />}>
           <DashboardContent />
@@ -42,17 +45,19 @@ async function DashboardContent() {
     <>
       <StatsCards stats={stats} />
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <h2 className="font-heading text-base">Recent Tier Lists</h2>
-          {stats.total > 0 && (
-            <Badge
-              variant="secondary"
-              className="h-5 text-[10px] tabular-nums"
-            >
-              {stats.total}
-            </Badge>
-          )}
-        </div>
+        <FadeUp delay={0.06} onMount>
+          <div className="flex items-center gap-2">
+            <h2 className="font-heading text-base">Recent Tier Lists</h2>
+            {stats.total > 0 && (
+              <Badge
+                variant="secondary"
+                className="h-5 text-[10px] tabular-nums"
+              >
+                {stats.total}
+              </Badge>
+            )}
+          </div>
+        </FadeUp>
         <TierListGrid tierLists={tierLists} />
       </div>
     </>

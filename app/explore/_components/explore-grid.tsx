@@ -1,23 +1,22 @@
 'use client'
 
 import { motion } from 'motion/react'
+import { hasActiveFilters } from '@/lib/explore-params'
+import type { ExploreFilters } from '@/lib/explore-params'
 import { fadeUpVariants, staggerIndex, STAGGER_DELAY, cardLiftVariants } from '@/lib/motion-variants'
 import { ExploreCard } from './explore-card'
+import { ExploreEmptyState } from './explore-empty-state'
 import type { PublicTierListSummary } from '@/lib/queries/tier-templates'
 
-type Props = {
+const cardVariants = { ...fadeUpVariants, ...cardLiftVariants }
+
+type Props = ExploreFilters & {
   items: PublicTierListSummary[]
 }
 
-export function ExploreGrid({ items }: Props) {
+export function ExploreGrid({ items, q, category, sort }: Props) {
   if (items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <p className="text-sm text-muted-foreground">
-          No tier lists match your filters.
-        </p>
-      </div>
-    )
+    return <ExploreEmptyState filtersActive={hasActiveFilters({ q, category, sort })} />
   }
 
   return (
@@ -25,7 +24,7 @@ export function ExploreGrid({ items }: Props) {
       {items.map((item, i) => (
         <motion.div
           key={item.id}
-          variants={{ ...fadeUpVariants, ...cardLiftVariants }}
+          variants={cardVariants}
           initial="hidden"
           animate="visible"
           custom={staggerIndex(i) * STAGGER_DELAY}

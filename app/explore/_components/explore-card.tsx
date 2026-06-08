@@ -6,6 +6,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { formatRelativeDate } from '@/lib/utils/format-date'
+import { getCategoryGradient, getInitials } from '@/lib/utils/cover-placeholder'
 import type { PublicTierListSummary } from '@/lib/queries/tier-templates'
 
 type Props = PublicTierListSummary & {
@@ -41,7 +42,15 @@ export function ExploreCard({
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
           />
         ) : (
-          <div aria-hidden="true" className="h-full w-full bg-gradient-to-br from-muted to-muted-foreground/10" />
+          <div
+            data-testid="card-cover-placeholder"
+            className="h-full w-full flex items-center justify-center"
+            style={{ background: getCategoryGradient(category) }}
+          >
+            <span className="text-white font-bold text-3xl select-none drop-shadow">
+              {getInitials(title)}
+            </span>
+          </div>
         )}
       </div>
 
