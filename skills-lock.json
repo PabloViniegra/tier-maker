@@ -37,6 +37,12 @@
       "skillPath": "skills/frontend-ui-engineering/SKILL.md",
       "computedHash": "917f6cf8c3d694c2b145463799ee492a2b88d7bf22ff479e08111d3ea5501e65"
     },
+    "improve": {
+      "source": "shadcn/improve",
+      "sourceType": "github",
+      "skillPath": "skills/improve/SKILL.md",
+      "computedHash": "431adaf38132005b32cacb952313f18b4c03ee98ee4c5859bad323156a48bb02"
+    },
     "interface-design": {
       "source": "dammyjay93/interface-design",
       "sourceType": "github",
