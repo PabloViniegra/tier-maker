@@ -123,84 +123,24 @@ describe('AuthForm — register mode', () => {
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument()
   })
 
-  it('shows validation errors for short name and password', async () => {
+  it('disables all email registration fields and shows info alert', () => {
     render(<AuthForm mode="register" />)
-    await user.type(screen.getByLabelText(/name/i), 'J')
-    await user.type(screen.getByLabelText(/email/i), 'john@example.com')
-    await user.type(screen.getByLabelText(/^password$/i), 'short')
-    await user.type(screen.getByLabelText(/confirm password/i), 'short')
-    await user.click(screen.getByRole('button', { name: /sign up/i }))
 
-    await waitFor(() => {
-      expect(screen.getByText(/name must be at least 2 characters/i)).toBeInTheDocument()
-    })
-    expect(screen.getByText(/password must be at least 8 characters/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/name/i)).toBeDisabled()
+    expect(screen.getByLabelText(/email/i)).toBeDisabled()
+    expect(screen.getByLabelText(/^password$/i)).toBeDisabled()
+    expect(screen.getByLabelText(/confirm password/i)).toBeDisabled()
+    expect(screen.getByRole('button', { name: /sign up/i })).toBeDisabled()
+
+    expect(screen.getByText(/email registration is temporarily disabled/i)).toBeInTheDocument()
+    expect(screen.getByText(/please sign up with google/i)).toBeInTheDocument()
   })
 
-  it('shows error when passwords do not match', async () => {
+  it('does not call signUp when submit is disabled', async () => {
     render(<AuthForm mode="register" />)
-    await user.type(screen.getByLabelText(/name/i), 'John Doe')
-    await user.type(screen.getByLabelText(/email/i), 'john@example.com')
-    await user.type(screen.getByLabelText(/^password$/i), 'password123')
-    await user.type(screen.getByLabelText(/confirm password/i), 'different123')
-    await user.click(screen.getByRole('button', { name: /sign up/i }))
+    const submitButton = screen.getByRole('button', { name: /sign up/i })
+    await user.click(submitButton)
 
-    await waitFor(() => {
-      expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument()
-    })
-  })
-
-  it('calls signUp with correct data on valid submit', async () => {
-    mockSignUpEmail.mockResolvedValue({ data: { user: {} }, error: null } as never)
-
-    render(<AuthForm mode="register" />)
-    await user.type(screen.getByLabelText(/name/i), 'John Doe')
-    await user.type(screen.getByLabelText(/email/i), 'john@example.com')
-    await user.type(screen.getByLabelText(/^password$/i), 'password123')
-    await user.type(screen.getByLabelText(/confirm password/i), 'password123')
-    await user.click(screen.getByRole('button', { name: /sign up/i }))
-
-    await waitFor(() => {
-      expect(mockSignUpEmail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'John Doe',
-          email: 'john@example.com',
-          password: 'password123',
-        })
-      )
-    })
-  })
-
-  it('redirects to dashboard on successful registration', async () => {
-    mockSignUpEmail.mockResolvedValue({ data: { user: {} }, error: null } as never)
-
-    render(<AuthForm mode="register" />)
-    await user.type(screen.getByLabelText(/name/i), 'John Doe')
-    await user.type(screen.getByLabelText(/email/i), 'john@example.com')
-    await user.type(screen.getByLabelText(/^password$/i), 'password123')
-    await user.type(screen.getByLabelText(/confirm password/i), 'password123')
-    await user.click(screen.getByRole('button', { name: /sign up/i }))
-
-    await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/dashboard')
-    })
-  })
-
-  it('shows error toast on failed registration', async () => {
-    mockSignUpEmail.mockResolvedValue({
-      data: null,
-      error: { message: 'Email already in use' },
-    } as never)
-
-    render(<AuthForm mode="register" />)
-    await user.type(screen.getByLabelText(/name/i), 'John Doe')
-    await user.type(screen.getByLabelText(/email/i), 'john@example.com')
-    await user.type(screen.getByLabelText(/^password$/i), 'password123')
-    await user.type(screen.getByLabelText(/confirm password/i), 'password123')
-    await user.click(screen.getByRole('button', { name: /sign up/i }))
-
-    await waitFor(() => {
-      expect(mockToastError).toHaveBeenCalledWith('Email already in use')
-    })
+    expect(mockSignUpEmail).not.toHaveBeenCalled()
   })
 })
