@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { toPng } from 'html-to-image'
+import { toast } from 'sonner'
 import { Download, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -24,9 +24,8 @@ export function ExportButton({ boardRef, title }: Props) {
     if (!boardRef.current || exporting) return
     setExporting(true)
     try {
-      // Capture the live board element directly (no clone) so all images
-      // and computed styles are already resolved. Run twice — first pass
-      // warms the image cache inside html-to-image, second pass is clean.
+      const { toPng } = await import('html-to-image')
+      // Run twice — first pass warms the image cache, second pass is clean.
       await toPng(boardRef.current, { cacheBust: true })
       const dataUrl = await toPng(boardRef.current, {
         cacheBust: true,
@@ -41,6 +40,8 @@ export function ExportButton({ boardRef, title }: Props) {
       link.download = `${title || 'tier-list'}.png`
       link.href = dataUrl
       link.click()
+    } catch (err) {
+      toast.error('Export failed: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
       setExporting(false)
     }

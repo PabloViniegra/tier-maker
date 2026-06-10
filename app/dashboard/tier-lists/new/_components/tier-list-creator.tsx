@@ -4,9 +4,10 @@ import { useCallback, useEffect, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
+import { DragDropContext } from '@hello-pangea/dnd'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useTierEditor, buildSavePayload, hasPendingUploads, type TierListDetailSeed } from '@/lib/stores/tier-editor'
+import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
 import { MetadataPanel } from './metadata-panel'
 import { ItemBank } from './item-bank'
 import { TierBoard } from './tier-board'
@@ -16,7 +17,6 @@ import { uploadImagesAction, createTierListAction } from '../actions'
 import { updateTierListStructureAction } from '../../[id]/edit/actions'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { BANK_DROPPABLE, rowIdFromDroppableId } from './constants'
 import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
 
 type TierListCreatorProps = {
@@ -36,6 +36,7 @@ export function TierListCreator({
   const isEditMode = Boolean(initialData && editId)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const { onDragEnd } = useTierDnd()
   const [isDraggingFile, setIsDraggingFile] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<File[] | null>(null)
 
@@ -46,7 +47,7 @@ export function TierListCreator({
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const openModal = useCallback((files: File[]) => {
-    const { bankItems } = useTierEditor.getState()
+    const { bankItems, rows } = useTierEditor.getState()
     const filtered: File[] = []
     for (const file of files) {
       if (!file.type.startsWith('image/')) {
@@ -59,7 +60,8 @@ export function TierListCreator({
       }
       filtered.push(file)
     }
-    if (bankItems.length + filtered.length > 30) {
+    const totalItems = bankItems.length + rows.reduce((n, r) => n + r.items.length, 0)
+    if (totalItems + filtered.length > 30) {
       toast.error('You can upload at most 30 images per tier list')
       return
     }
@@ -69,19 +71,20 @@ export function TierListCreator({
   const handleModalConfirm = useCallback(async (labeled: LabeledFile[]) => {
     setPendingFiles(null)
     const { addUploadingItem, markItemUploaded, markItemError } = useTierEditor.getState()
-    for (const { file, label } of labeled) {
-      const id = addUploadingItem(label)
-      try {
-        const fd = new FormData()
-        fd.append('file', file)
-        const { url } = await uploadImagesAction(fd)
-        markItemUploaded(id, url)
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Upload failed'
-        markItemError(id)
-        toast.error(message)
-      }
-    }
+    await Promise.all(
+      labeled.map(async ({ file, label }) => {
+        const id = addUploadingItem(label)
+        try {
+          const fd = new FormData()
+          fd.append('file', file)
+          const { url } = await uploadImagesAction(fd)
+          markItemUploaded(id, url)
+        } catch (err) {
+          markItemError(id)
+          toast.error(err instanceof Error ? err.message : 'Upload failed')
+        }
+      })
+    )
   }, [])
 
   useEffect(() => {
@@ -129,27 +132,6 @@ export function TierListCreator({
       window.removeEventListener('drop', onDrop)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const onDragEnd = useCallback((result: DropResult) => {
-    const { source, destination } = result
-    if (!destination) return
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    ) {
-      return
-    }
-    const fromBank = source.droppableId === BANK_DROPPABLE
-    const toBank = destination.droppableId === BANK_DROPPABLE
-    useTierEditor.getState().moveItem({
-      source: fromBank ? 'bank' : 'row',
-      sourceId: fromBank ? undefined : rowIdFromDroppableId(source.droppableId),
-      sourceIndex: source.index,
-      target: toBank ? 'bank' : 'row',
-      targetId: toBank ? undefined : rowIdFromDroppableId(destination.droppableId),
-      targetIndex: destination.index,
-    })
-  }, [])
 
   const handleSave = useCallback(() => {
     const current = useTierEditor.getState()

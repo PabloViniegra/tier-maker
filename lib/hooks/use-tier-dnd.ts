@@ -6,7 +6,7 @@ import { useTierEditor } from '@/lib/stores/tier-editor'
 import {
   BANK_DROPPABLE,
   rowIdFromDroppableId,
-} from '@/app/dashboard/tier-lists/new/_components/constants'
+} from './tier-dnd-constants'
 
 export function useTierDnd() {
   const onDragEnd = useCallback((result: DropResult) => {

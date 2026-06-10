@@ -210,7 +210,8 @@ describe('getAllUserTierLists', () => {
         createdAt: new Date('2026-05-15'),
       },
     ]
-    const orderBy = vi.fn().mockResolvedValue(rows)
+    const limit = vi.fn().mockResolvedValue(rows)
+    const orderBy = vi.fn().mockReturnValue({ limit })
     const where = vi.fn().mockReturnValue({ orderBy })
     const from = vi.fn().mockReturnValue({ where })
     mockDb.select.mockReturnValue({ from })
@@ -235,7 +236,9 @@ describe('getAllUserTierLists', () => {
     mockDb.select.mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockResolvedValue(rows),
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue(rows),
+          }),
         }),
       }),
     })
@@ -249,7 +252,9 @@ describe('getAllUserTierLists', () => {
     mockDb.select.mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockResolvedValue([]),
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([]),
+          }),
         }),
       }),
     })
@@ -275,7 +280,9 @@ describe('getAllUserTierLists', () => {
     mockDb.select.mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockResolvedValue(rows),
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue(rows),
+          }),
         }),
       }),
     })

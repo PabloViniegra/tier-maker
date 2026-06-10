@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import localFont from 'next/font/local'
 
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -36,6 +37,12 @@ const fontMono = Geist_Mono({
   variable: '--font-mono',
 })
 
+const calSans = localFont({
+  src: '../node_modules/@fontsource/cal-sans/files/cal-sans-latin-400-normal.woff2',
+  variable: '--font-cal-sans',
+  display: 'swap',
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -49,7 +56,8 @@ export default function RootLayout({
         'antialiased',
         fontMono.variable,
         'font-sans',
-        geist.variable
+        geist.variable,
+        calSans.variable
       )}
     >
       <body>

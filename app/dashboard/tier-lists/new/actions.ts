@@ -122,6 +122,7 @@ export async function createTierListAction(
   })
 
   revalidatePath('/dashboard')
+  revalidatePath('/explore')
   revalidateTag('public-categories', {})
   return { id }
 }

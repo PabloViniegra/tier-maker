@@ -18,10 +18,12 @@ export function useTierFillPersistence(
     const key = buildTierFillKey(userId, tierId)
     let debounceTimer: ReturnType<typeof setTimeout> | null = null
     let seeded = false
+    let cancelled = false
 
     async function init() {
       try {
         const draft = await getTierFill(key)
+        if (cancelled) return
         const merged = mergeTierFill(seed, draft)
         useTierEditor.setState((s) => ({
           ...s,
@@ -35,6 +37,7 @@ export function useTierFillPersistence(
           bankItems: merged.bankItems,
         }))
       } catch {
+        if (cancelled) return
         useTierEditor.getState().initFromDb(seed)
       } finally {
         seeded = true
@@ -59,6 +62,7 @@ export function useTierFillPersistence(
     })
 
     return () => {
+      cancelled = true
       if (debounceTimer) clearTimeout(debounceTimer)
       unsubscribe()
       useTierEditor.setState(initialState)

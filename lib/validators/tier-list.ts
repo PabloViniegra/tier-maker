@@ -66,6 +66,20 @@ export const createTierListSchema = z
 
 export type CreateTierListInput = z.infer<typeof createTierListSchema>
 
+export const updateTierListPayloadSchema = z
+  .object({
+    coverImageUrl: z.string().url().optional(),
+    bankItems: z.array(imageItemSchema).max(MAX_ITEM_COUNT),
+    rows: z.array(tierRowSchema).max(MAX_ROW_COUNT),
+  })
+  .refine(
+    (val) => {
+      const total = val.bankItems.length + val.rows.reduce((sum, r) => sum + r.items.length, 0)
+      return total <= MAX_ITEM_COUNT
+    },
+    { message: `Total items must be <= ${MAX_ITEM_COUNT}` }
+  )
+
 export const imageUploadSchema = z.object({
   size: z
     .number()

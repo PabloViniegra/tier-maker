@@ -30,7 +30,8 @@ export default async function DashboardExplorePage({ searchParams }: Props) {
   const q = sp.q ?? ''
   const category = sp.category ?? ''
   const sort = toSort(sp.sort)
-  const page = Math.max(1, parseInt(sp.page ?? '1', 10))
+  const rawPage = parseInt(sp.page ?? '1', 10)
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1
 
   const [{ items, total }, categories] = await Promise.all([
     getPublicTierLists({ q, category, sort, page, pageSize: PAGE_SIZE }),

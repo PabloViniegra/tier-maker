@@ -39,6 +39,8 @@ export async function updateTierListStructureAction(
 
   revalidatePath(`/dashboard/tier-lists/${id}`)
   revalidatePath('/dashboard/tier-lists')
+  revalidatePath('/explore')
+  revalidatePath(`/explore/${id}`)
 
   return { ok: true }
 }

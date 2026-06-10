@@ -33,7 +33,8 @@ export function MetadataPanel({
   categoryPresets: string[]
   userPresets: UserCategoryPreset[]
 }) {
-  const { metadata, setMetadata } = useTierEditor()
+  const metadata = useTierEditor((s) => s.metadata)
+  const setMetadata = useTierEditor((s) => s.setMetadata)
   const [categoryOpen, setCategoryOpen] = useState(false)
   const [categoryInput, setCategoryInput] = useState(metadata.category)
   const [userPresets, setUserPresets] = useState(initialUserPresets)

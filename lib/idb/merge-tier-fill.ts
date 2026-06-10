@@ -22,13 +22,14 @@ function buildDraftRowMap(rows: TierFillDraft['rows']): Map<string, TierItem[]> 
 
 function applyDraftToRows(
   serverRows: TierListDetailSeed['rows'],
-  draftRowMap: Map<string, TierItem[]>
+  draftRowMap: Map<string, TierItem[]>,
+  serverCatalogue: Set<string>
 ): EditorTierRow[] {
   return serverRows.map((r) => ({
     id: r.id,
     label: r.label,
     color: r.color,
-    items: draftRowMap.get(r.id) ?? [],
+    items: (draftRowMap.get(r.id) ?? []).filter((i) => i.url && serverCatalogue.has(i.url)),
   }))
 }
 
@@ -69,7 +70,7 @@ export function mergeTierFill(
   const placedUrls = collectPlacedUrls(draft.rows)
   const draftRowMap = buildDraftRowMap(draft.rows)
 
-  const rows = applyDraftToRows(seed.rows, draftRowMap)
+  const rows = applyDraftToRows(seed.rows, draftRowMap, serverCatalogue)
   const surviving = survivingDraftBankItems(draft.bankItems, serverCatalogue)
   const survivingUrls = new Set(surviving.map((i) => i.url).filter(Boolean) as string[])
   const fresh = newServerBankItems(seed.sidebarItems, placedUrls, survivingUrls)

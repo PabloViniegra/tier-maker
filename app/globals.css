@@ -1,7 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource/cal-sans';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -51,7 +50,6 @@
 }
 
 :root {
-  --font-cal-sans: 'Cal Sans', sans-serif;
   --accent-base: oklch(0.62 0.22 250);
 
   --background: oklch(0.98 0 0);

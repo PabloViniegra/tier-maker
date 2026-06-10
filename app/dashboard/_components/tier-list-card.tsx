@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, MoreVertical, Pencil } from 'lucide-react'
+import { ArrowRight, Link as LinkIcon, MoreVertical, Pencil } from 'lucide-react'
 import { getInitials, getCategoryGradient } from '@/lib/utils/cover-placeholder'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { formatRelativeDate } from '@/lib/utils/format-date'
 
@@ -100,6 +101,15 @@ export function TierListCard({
                     <Pencil size={13} />
                     Edit
                   </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/explore/${id}`)
+                    toast.success('Link copied')
+                  }}
+                >
+                  <LinkIcon size={13} />
+                  Copy link
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

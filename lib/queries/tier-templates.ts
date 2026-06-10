@@ -99,6 +99,7 @@ export async function getAllUserTierLists(
     .from(tierTemplates)
     .where(eq(tierTemplates.creatorId, userId))
     .orderBy(desc(tierTemplates.createdAt))
+    .limit(200)
 
   return rows.map((r) => ({
     id: r.id,

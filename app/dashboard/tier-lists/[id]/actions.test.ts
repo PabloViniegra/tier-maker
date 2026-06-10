@@ -45,12 +45,35 @@ function mockNotOwned() {
   })
 }
 
-function setupTransaction() {
+function setupTransaction(ownedId = 'tpl-1') {
   mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
     const tx = {
       update: vi.fn().mockReturnValue({
         set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: ownedId }]),
+          }),
+        }),
+      }),
+      delete: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      }),
+      insert: vi.fn().mockReturnValue({
+        values: vi.fn().mockResolvedValue(undefined),
+      }),
+    }
+    return cb(tx)
+  })
+}
+
+function setupTransactionNotOwned() {
+  mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
+    const tx = {
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([]),
+          }),
         }),
       }),
       delete: vi.fn().mockReturnValue({
@@ -84,13 +107,12 @@ describe('updateTierListAction', () => {
 
   it('throws when tier list belongs to a different user', async () => {
     authedSession('user-other')
-    mockNotOwned()
+    setupTransactionNotOwned()
     await expect(updateTierListAction('tpl-1', validPayload)).rejects.toThrow(/not found/i)
   })
 
   it('returns { ok: true } on valid owned update', async () => {
     authedSession()
-    mockOwned()
     setupTransaction()
 
     const result = await updateTierListAction('tpl-1', validPayload)
@@ -100,7 +122,6 @@ describe('updateTierListAction', () => {
 
   it('runs inside a transaction', async () => {
     authedSession()
-    mockOwned()
     setupTransaction()
 
     await updateTierListAction('tpl-1', validPayload)
@@ -108,15 +129,13 @@ describe('updateTierListAction', () => {
     expect(mockTransaction).toHaveBeenCalledTimes(1)
   })
 
-  it('revalidates the detail page and index after save', async () => {
+  it('revalidates the detail page after save', async () => {
     authedSession()
-    mockOwned('tpl-1')
-    setupTransaction()
+    setupTransaction('tpl-1')
 
     await updateTierListAction('tpl-1', validPayload)
 
     expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists/tpl-1')
-    expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
   })
 
   it('propagates transaction errors', async () => {

@@ -1,11 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierTemplates } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
-import { assertOwned, replaceTierRows } from '@/lib/db/tier-list-mutations'
+import { replaceTierRows } from '@/lib/db/tier-list-mutations'
+import { updateTierListPayloadSchema } from '@/lib/validators/tier-list'
 import type { ImageItem } from '@/lib/validators/tier-list'
 
 export type UpdateTierListPayload = {
@@ -26,22 +27,25 @@ export async function updateTierListAction(
   const session = await getSession()
   if (!session) throw new Error('Unauthenticated')
 
-  await assertOwned(id, session.user.id)
+  const parsed = updateTierListPayloadSchema.safeParse(payload)
+  if (!parsed.success) throw new Error('Invalid payload')
 
   await db.transaction(async (tx) => {
-    await tx
+    const [updated] = await tx
       .update(tierTemplates)
       .set({
-        sidebarItems: payload.bankItems,
-        coverImageUrl: payload.coverImageUrl ?? null,
+        sidebarItems: parsed.data.bankItems,
+        coverImageUrl: parsed.data.coverImageUrl ?? null,
       })
-      .where(eq(tierTemplates.id, id))
+      .where(and(eq(tierTemplates.id, id), eq(tierTemplates.creatorId, session.user.id)))
+      .returning({ id: tierTemplates.id })
 
-    await replaceTierRows(tx, id, payload.rows)
+    if (!updated) throw new Error('Not found')
+
+    await replaceTierRows(tx, id, parsed.data.rows)
   })
 
   revalidatePath(`/dashboard/tier-lists/${id}`)
-  revalidatePath('/dashboard/tier-lists')
 
   return { ok: true }
 }

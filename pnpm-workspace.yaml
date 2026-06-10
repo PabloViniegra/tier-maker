@@ -7,4 +7,8 @@ allowBuilds:
   esbuild: true
 
 overrides:
+  # kysely is a peer dep of better-auth; pinned to prevent version conflicts
   kysely: '0.28.17'
+  # patch transitive advisories (esbuild dev-server CORS, postcss build-time XSS)
+  esbuild: '>=0.24.3'
+  postcss: '>=8.5.10'

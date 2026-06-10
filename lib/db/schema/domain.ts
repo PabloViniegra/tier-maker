@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -11,30 +12,43 @@ import {
 import { user } from './auth'
 import type { ImageItem } from '@/lib/validators/tier-list'
 
-export const tierTemplates = pgTable('tier_templates', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  title: text('title').notNull(),
-  description: text('description'),
-  category: text('category').notNull(),
-  creatorId: text('creator_id').references(() => user.id, {
-    onDelete: 'cascade',
-  }),
-  coverImageUrl: text('cover_image_url'),
-  sidebarItems: jsonb('sidebar_items').$type<ImageItem[]>().notNull(),
-  isPublic: boolean('is_public').notNull().default(true),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+export const tierTemplates = pgTable(
+  'tier_templates',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    title: text('title').notNull(),
+    description: text('description'),
+    category: text('category').notNull(),
+    creatorId: text('creator_id').references(() => user.id, {
+      onDelete: 'cascade',
+    }),
+    coverImageUrl: text('cover_image_url'),
+    sidebarItems: jsonb('sidebar_items').$type<ImageItem[]>().notNull(),
+    isPublic: boolean('is_public').notNull().default(true),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => [
+    index('tier_templates_creator_id_idx').on(t.creatorId),
+    index('tier_templates_is_public_created_at_idx').on(t.isPublic, t.createdAt),
+  ]
+)
 
-export const tierRows = pgTable('tier_rows', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  templateId: uuid('template_id').references(() => tierTemplates.id, {
-    onDelete: 'cascade',
-  }),
-  label: text('label').notNull(),
-  color: text('color').notNull(),
-  order: integer('order').notNull(),
-  items: jsonb('items').$type<ImageItem[]>().default([]).notNull(),
-})
+export const tierRows = pgTable(
+  'tier_rows',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    templateId: uuid('template_id').references(() => tierTemplates.id, {
+      onDelete: 'cascade',
+    }),
+    label: text('label').notNull(),
+    color: text('color').notNull(),
+    order: integer('order').notNull(),
+    items: jsonb('items').$type<ImageItem[]>().default([]).notNull(),
+  },
+  (t) => [
+    index('tier_rows_template_id_idx').on(t.templateId),
+  ]
+)
 
 export const userCategoryPresets = pgTable(
   'user_category_presets',
