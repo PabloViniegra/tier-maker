@@ -39,3 +39,6 @@ next-env.d.ts
 .mcp.json
 opencode.json
 .playwright-mcp/*
+
+# vercel
+.vercel
