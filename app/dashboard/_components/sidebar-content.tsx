@@ -100,6 +100,7 @@ export function SidebarNav({
                   render={
                     <Link
                       href={href}
+                      prefetch={true}
                       aria-label={label}
                       className={linkClassName}
                     >
@@ -113,7 +114,7 @@ export function SidebarNav({
           }
 
           return (
-            <Link key={href} href={href} className={linkClassName}>
+            <Link key={href} href={href} prefetch={true} className={linkClassName}>
               {linkInner}
             </Link>
           )
@@ -130,6 +131,7 @@ export function SidebarNav({
                 <Link
                   data-testid="create-tier-list-trigger"
                   href="/dashboard/tier-lists/new"
+                  prefetch={true}
                   aria-label="Create Tier List"
                   className={cn(
                     buttonVariants({ variant: 'outline', size: 'sm' }),
@@ -145,6 +147,7 @@ export function SidebarNav({
         ) : (
           <Link
             href="/dashboard/tier-lists/new"
+            prefetch={true}
             className={cn(
               buttonVariants({ variant: 'outline', size: 'sm' }),
               'w-full justify-start gap-2'

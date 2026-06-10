@@ -5,7 +5,6 @@ import localFont from 'next/font/local'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { MotionProvider } from '@/components/motion-provider'
-import { PageTransition } from '@/components/page-transition'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
 
@@ -69,7 +68,7 @@ export default function RootLayout({
         </a>
         <MotionProvider>
           <ThemeProvider>
-            <PageTransition>{children}</PageTransition>
+            {children}
             <Toaster />
           </ThemeProvider>
         </MotionProvider>
