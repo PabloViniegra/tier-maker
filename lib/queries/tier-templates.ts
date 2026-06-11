@@ -193,67 +193,69 @@ export const getDistinctPublicCategories = unstable_cache(
   { revalidate: 300, tags: ['public-categories'] }
 )
 
-export async function getPublicTierLists(
-  params: PublicTierListsParams
-): Promise<{ items: PublicTierListSummary[]; total: number }> {
-  const { q, category, sort = 'newest', page, pageSize } = params
+export const getPublicTierLists = unstable_cache(
+  async (params: PublicTierListsParams): Promise<{ items: PublicTierListSummary[]; total: number }> => {
+    const { q, category, sort = 'newest', page, pageSize } = params
 
-  const conditions = and(
-    eq(tierTemplates.isPublic, true),
-    q
-      ? or(
-          ilike(tierTemplates.title, `%${q}%`),
-          ilike(tierTemplates.description, `%${q}%`)
-        )
-      : undefined,
-    category ? eq(tierTemplates.category, category) : undefined
-  )
+    const conditions = and(
+      eq(tierTemplates.isPublic, true),
+      q
+        ? or(
+            ilike(tierTemplates.title, `%${q}%`),
+            ilike(tierTemplates.description, `%${q}%`)
+          )
+        : undefined,
+      category ? eq(tierTemplates.category, category) : undefined
+    )
 
-  const orderCol =
-    sort === 'oldest'
-      ? asc(tierTemplates.createdAt)
-      : sort === 'a-z'
-        ? asc(tierTemplates.title)
-        : desc(tierTemplates.createdAt)
+    const orderCol =
+      sort === 'oldest'
+        ? asc(tierTemplates.createdAt)
+        : sort === 'a-z'
+          ? asc(tierTemplates.title)
+          : desc(tierTemplates.createdAt)
 
-  const [rows, [countRow]] = await Promise.all([
-    db
-      .select({
-        id: tierTemplates.id,
-        title: tierTemplates.title,
-        category: tierTemplates.category,
-        itemCount: sidebarItemCount,
-        coverImageUrl: tierTemplates.coverImageUrl,
-        createdAt: tierTemplates.createdAt,
-        creatorName: user.name,
-        firstItemUrl: firstItemUrlExpr,
-      })
-      .from(tierTemplates)
-      .leftJoin(user, eq(tierTemplates.creatorId, user.id))
-      .where(conditions)
-      .orderBy(orderCol)
-      .limit(pageSize)
-      .offset((page - 1) * pageSize),
-    db
-      .select({ count: count() })
-      .from(tierTemplates)
-      .where(conditions),
-  ])
+    const [rows, [countRow]] = await Promise.all([
+      db
+        .select({
+          id: tierTemplates.id,
+          title: tierTemplates.title,
+          category: tierTemplates.category,
+          itemCount: sidebarItemCount,
+          coverImageUrl: tierTemplates.coverImageUrl,
+          createdAt: tierTemplates.createdAt,
+          creatorName: user.name,
+          firstItemUrl: firstItemUrlExpr,
+        })
+        .from(tierTemplates)
+        .leftJoin(user, eq(tierTemplates.creatorId, user.id))
+        .where(conditions)
+        .orderBy(orderCol)
+        .limit(pageSize)
+        .offset((page - 1) * pageSize),
+      db
+        .select({ count: count() })
+        .from(tierTemplates)
+        .where(conditions),
+    ])
 
-  return {
-    items: rows.map((r) => ({
-      id: r.id,
-      title: r.title,
-      category: r.category,
-      itemCount: r.itemCount ?? 0,
-      createdAt: r.createdAt,
-      coverImageUrl: r.coverImageUrl ?? null,
-      firstItemUrl: r.firstItemUrl ?? null,
-      creatorName: r.creatorName ?? null,
-    })),
-    total: countRow?.count ?? 0,
-  }
-}
+    return {
+      items: rows.map((r) => ({
+        id: r.id,
+        title: r.title,
+        category: r.category,
+        itemCount: r.itemCount ?? 0,
+        createdAt: r.createdAt,
+        coverImageUrl: r.coverImageUrl ?? null,
+        firstItemUrl: r.firstItemUrl ?? null,
+        creatorName: r.creatorName ?? null,
+      })),
+      total: countRow?.count ?? 0,
+    }
+  },
+  ['public-tier-lists'],
+  { revalidate: 60, tags: ['public-tier-lists'] }
+)
 
 export async function getTierListById(
   id: string,

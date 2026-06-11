@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, ViewTransition } from 'react'
 import type { Metadata } from 'next'
 import { getSession } from '@/lib/session'
 import {
@@ -93,14 +93,16 @@ export default async function ExplorePage({ searchParams }: Props) {
           </FadeUp>
         </div>
 
-        <ExploreGrid items={items} q={q} category={category} sort={sort} />
+        <ViewTransition>
+          <ExploreGrid items={items} q={q} category={category} sort={sort} />
 
-        <ExplorePagination
-          total={total}
-          page={page}
-          pageSize={PAGE_SIZE}
-          searchParams={{ q, category, sort }}
-        />
+          <ExplorePagination
+            total={total}
+            page={page}
+            pageSize={PAGE_SIZE}
+            searchParams={{ q, category, sort }}
+          />
+        </ViewTransition>
       </main>
     </div>
   )

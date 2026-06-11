@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Suspense } from 'react'
 import { getSession } from '@/lib/session'
 import { getCategoryPresets } from '@/lib/queries/category-presets'
 import { getUserCategoryPresets } from '@/lib/queries/user-category-presets'
@@ -16,9 +15,7 @@ export default async function NewTierListPage() {
 
   return (
     <div className='flex flex-col gap-6 p-6'>
-      <Suspense fallback={null}>
-        <TierListCreator categoryPresets={presets} userCategoryPresets={userPresets} />
-      </Suspense>
+      <TierListCreator categoryPresets={presets} userCategoryPresets={userPresets} />
     </div>
   )
 }

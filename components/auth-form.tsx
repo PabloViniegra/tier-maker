@@ -62,14 +62,13 @@ function PasswordInput({ id, placeholder, registration, error, disabled }: {
   )
 }
 
-function LoginForm() {
+export function LoginForm() {
   const router = useRouter()
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
-    // Zod v4 / @hookform/resolvers compat: zodResolver overloads don't infer from v4 classic types
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(loginSchema as any),
   })
@@ -135,14 +134,13 @@ function LoginForm() {
   )
 }
 
-function RegisterForm() {
+export function RegisterForm() {
   const router = useRouter()
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<RegisterInput>({
-    // Zod v4 / @hookform/resolvers compat: zodResolver overloads don't infer from v4 classic types
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(registerSchema as any),
   })

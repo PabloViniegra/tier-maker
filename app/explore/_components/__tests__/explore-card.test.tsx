@@ -27,41 +27,41 @@ const baseProps = {
 
 describe('ExploreCard', () => {
   it('renders the title', () => {
-    render(<ExploreCard {...baseProps} />)
+    render(<ExploreCard data={baseProps} />)
     expect(screen.getByText('Best Anime Ever')).toBeInTheDocument()
   })
 
   it('renders the category badge', () => {
-    render(<ExploreCard {...baseProps} />)
+    render(<ExploreCard data={baseProps} />)
     expect(screen.getByText('anime')).toBeInTheDocument()
   })
 
   it('renders creator name', () => {
-    render(<ExploreCard {...baseProps} />)
+    render(<ExploreCard data={baseProps} />)
     expect(screen.getByText(/pablo/i)).toBeInTheDocument()
   })
 
   it('renders cover image when coverImageUrl is provided', () => {
-    render(<ExploreCard {...baseProps} coverImageUrl="https://blob/cover.png" />)
+    render(<ExploreCard data={{ ...baseProps, coverImageUrl: 'https://blob/cover.png' }} />)
     const img = screen.getByRole('img', { name: /best anime ever/i })
     expect(img).toHaveAttribute('src', 'https://blob/cover.png')
   })
 
   it('renders firstItemUrl as fallback when no cover', () => {
-    render(<ExploreCard {...baseProps} firstItemUrl="https://blob/item.png" />)
+    render(<ExploreCard data={{ ...baseProps, firstItemUrl: 'https://blob/item.png' }} />)
     const img = screen.getByRole('img')
     expect(img).toHaveAttribute('src', 'https://blob/item.png')
   })
 
   it('shows placeholder with title initials when no image is provided', () => {
-    render(<ExploreCard {...baseProps} />)
+    render(<ExploreCard data={baseProps} />)
     const placeholder = screen.getByTestId('card-cover-placeholder')
     expect(placeholder).toBeInTheDocument()
     expect(placeholder).toHaveTextContent('BA')
   })
 
   it('placeholder uses category-based gradient background', () => {
-    render(<ExploreCard {...baseProps} />)
+    render(<ExploreCard data={baseProps} />)
     const placeholder = screen.getByTestId('card-cover-placeholder')
     expect(placeholder.getAttribute('style')).toContain('linear-gradient')
   })

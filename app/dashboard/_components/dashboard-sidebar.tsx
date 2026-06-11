@@ -18,6 +18,7 @@ import {
 export function DashboardSidebar({ user }: { user: SidebarUser }) {
   const pathname = usePathname()
   const collapsed = useUIStore((s) => s.sidebarCollapsed)
+  const toggleSidebar = useUIStore((s) => s.toggleSidebar)
 
   useEffect(() => {
     void useUIStore.persist.rehydrate()
@@ -50,7 +51,7 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
         {/* right-edge collapse toggle */}
         <button
           type="button"
-          onClick={useUIStore.getState().toggleSidebar}
+          onClick={toggleSidebar}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-expanded={!collapsed}
           className="absolute top-4 -right-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-background shadow-sm transition-colors hover:bg-muted"

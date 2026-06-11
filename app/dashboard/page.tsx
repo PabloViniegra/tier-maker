@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { ViewTransition } from 'react'
+import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 
 import { Badge } from '@/components/ui/badge'
@@ -17,7 +18,10 @@ import {
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const session = await getSession()
+  if (!session) redirect('/login')
+
   return (
     <div className="flex flex-col gap-6 p-6">
       <FadeUp delay={0} onMount>
@@ -25,17 +29,14 @@ export default function DashboardPage() {
       </FadeUp>
       <ViewTransition>
         <Suspense fallback={<DashboardContentSkeleton />}>
-          <DashboardContent />
+          <DashboardContent userId={session.user.id} />
         </Suspense>
       </ViewTransition>
     </div>
   )
 }
 
-async function DashboardContent() {
-  const session = await getSession()
-  const userId = session!.user.id
-
+async function DashboardContent({ userId }: { userId: string }) {
   const [stats, tierLists] = await Promise.all([
     getUserTierListStats(userId),
     getRecentTierLists(userId),

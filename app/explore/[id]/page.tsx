@@ -1,14 +1,13 @@
-import { cache } from 'react'
+import { cache, ViewTransition } from 'react'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getSession } from '@/lib/session'
 import { getPublicTierListById } from '@/lib/queries/tier-templates'
-
-// Deduplicate DB call between generateMetadata and the page function
-const getPublicTierList = cache(getPublicTierListById)
 import { ExploreHeader } from '../_components/explore-header'
 import { AnonymousCTABanner } from '../_components/anonymous-cta-banner'
 import { PublicTierFill } from '../_components/public-tier-fill'
+
+const getPublicTierList = cache(getPublicTierListById)
 
 type Props = {
   params: Promise<{ id: string }>
@@ -48,17 +47,19 @@ export default async function PublicTierFillPage({ params }: Props) {
       <ExploreHeader isLoggedIn={!!session} />
       {!session && <AnonymousCTABanner />}
       <main id="main-content" className="flex-1 overflow-hidden">
-        <PublicTierFill
-          tierId={id}
-          data={{
-            title: data.title,
-            description: data.description,
-            category: data.category,
-            coverImageUrl: data.coverImageUrl,
-            sidebarItems: data.sidebarItems,
-            rows: data.rows,
-          }}
-        />
+        <ViewTransition name={`tier-cover-${id}`}>
+          <PublicTierFill
+            tierId={id}
+            data={{
+              title: data.title,
+              description: data.description,
+              category: data.category,
+              coverImageUrl: data.coverImageUrl,
+              sidebarItems: data.sidebarItems,
+              rows: data.rows,
+            }}
+          />
+        </ViewTransition>
       </main>
     </div>
   )

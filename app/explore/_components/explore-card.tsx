@@ -1,3 +1,4 @@
+import { ViewTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
@@ -9,21 +10,13 @@ import { formatRelativeDate } from '@/lib/utils/format-date'
 import { getCategoryGradient, getInitials } from '@/lib/utils/cover-placeholder'
 import type { PublicTierListSummary } from '@/lib/queries/tier-templates'
 
-type Props = PublicTierListSummary & {
+type Props = {
+  data: PublicTierListSummary
   style?: React.CSSProperties
 }
 
-export function ExploreCard({
-  id,
-  title,
-  category,
-  itemCount,
-  createdAt,
-  creatorName,
-  coverImageUrl,
-  firstItemUrl,
-  style,
-}: Props) {
+export function ExploreCard({ data, style }: Props) {
+  const { id, title, category, itemCount, createdAt, creatorName, coverImageUrl, firstItemUrl } = data
   const imageUrl = coverImageUrl ?? firstItemUrl ?? null
 
   return (
@@ -32,27 +25,29 @@ export function ExploreCard({
       className="flex flex-col gap-3 rounded-lg border border-border bg-surface overflow-hidden transition-colors duration-200 hover:border-primary/20 hover:bg-overlay"
       style={style}
     >
-      <div className="relative aspect-video w-full overflow-hidden bg-muted">
-        {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt={title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-          />
-        ) : (
-          <div
-            data-testid="card-cover-placeholder"
-            className="h-full w-full flex items-center justify-center"
-            style={{ background: getCategoryGradient(category) }}
-          >
-            <span className="text-white font-bold text-3xl select-none drop-shadow">
-              {getInitials(title)}
-            </span>
-          </div>
-        )}
-      </div>
+      <ViewTransition name={`tier-cover-${id}`}>
+        <div className="relative aspect-video w-full overflow-hidden bg-muted">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            />
+          ) : (
+            <div
+              data-testid="card-cover-placeholder"
+              className="h-full w-full flex items-center justify-center"
+              style={{ background: getCategoryGradient(category) }}
+            >
+              <span className="text-white font-bold text-3xl select-none drop-shadow">
+                {getInitials(title)}
+              </span>
+            </div>
+          )}
+        </div>
+      </ViewTransition>
 
       <div className="flex flex-col gap-3 px-4 pb-4">
         <div className="flex items-center justify-between gap-2">

@@ -1,24 +1,15 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierTemplates } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
 import { replaceTierRows } from '@/lib/db/tier-list-mutations'
+import { z } from 'zod'
 import { updateTierListPayloadSchema } from '@/lib/validators/tier-list'
-import type { ImageItem } from '@/lib/validators/tier-list'
 
-export type UpdateTierListPayload = {
-  coverImageUrl?: string
-  bankItems: ImageItem[]
-  rows: Array<{
-    id: string
-    label: string
-    color: string
-    items: ImageItem[]
-  }>
-}
+export type UpdateTierListPayload = z.infer<typeof updateTierListPayloadSchema>
 
 export async function updateTierListAction(
   id: string,
@@ -46,6 +37,9 @@ export async function updateTierListAction(
   })
 
   revalidatePath(`/dashboard/tier-lists/${id}`)
+  revalidatePath('/dashboard')
+  revalidatePath('/explore')
+  revalidateTag('public-tier-lists', {})
 
   return { ok: true }
 }

@@ -2,16 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('server-only', () => ({}))
 
-const { mockGetSession, mockRevalidatePath, mockSelect, mockTransaction } =
+const { mockGetSession, mockRevalidatePath, mockRevalidateTag, mockSelect, mockTransaction } =
   vi.hoisted(() => ({
     mockGetSession: vi.fn(),
     mockRevalidatePath: vi.fn(),
+    mockRevalidateTag: vi.fn(),
     mockSelect: vi.fn(),
     mockTransaction: vi.fn(),
   }))
 
 vi.mock('@/lib/session', () => ({ getSession: mockGetSession }))
-vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }))
+vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath, revalidateTag: mockRevalidateTag }))
 vi.mock('@/lib/db', () => ({
   db: {
     select: mockSelect,

@@ -31,7 +31,7 @@ export function ExploreGrid({ items, q, category, sort }: Props) {
           whileHover="hover"
           whileTap="tap"
         >
-          <ExploreCard {...item} />
+          <ExploreCard data={item} />
         </motion.div>
       ))}
     </div>

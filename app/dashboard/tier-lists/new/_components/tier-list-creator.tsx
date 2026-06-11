@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -33,7 +33,7 @@ export function TierListCreator({
   initialData,
   editId,
 }: TierListCreatorProps) {
-  const isEditMode = Boolean(initialData && editId)
+  const isEditMode = editId !== undefined
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const { onDragEnd } = useTierDnd()
@@ -68,6 +68,9 @@ export function TierListCreator({
     if (filtered.length > 0) setPendingFiles(filtered)
   }, [setPendingFiles])
 
+  const openModalRef = useRef(openModal)
+  useEffect(() => { openModalRef.current = openModal }, [openModal])
+
   const handleModalConfirm = useCallback(async (labeled: LabeledFile[]) => {
     setPendingFiles(null)
     const { addUploadingItem, markItemUploaded, markItemError } = useTierEditor.getState()
@@ -99,11 +102,11 @@ export function TierListCreator({
       }
       if (files.length === 0) return
       e.preventDefault()
-      openModal(files)
+      openModalRef.current(files)
     }
     window.addEventListener('paste', onPaste)
     return () => window.removeEventListener('paste', onPaste)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     function onDragOver(e: DragEvent) {
@@ -121,7 +124,7 @@ export function TierListCreator({
       if (!e.dataTransfer?.files?.length) return
       e.preventDefault()
       setIsDraggingFile(false)
-      openModal(Array.from(e.dataTransfer.files))
+      openModalRef.current(Array.from(e.dataTransfer.files))
     }
     window.addEventListener('dragover', onDragOver)
     window.addEventListener('dragleave', onDragLeave)
@@ -131,7 +134,7 @@ export function TierListCreator({
       window.removeEventListener('dragleave', onDragLeave)
       window.removeEventListener('drop', onDrop)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSave = useCallback(() => {
     const current = useTierEditor.getState()
