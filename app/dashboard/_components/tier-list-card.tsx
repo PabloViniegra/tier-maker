@@ -1,12 +1,22 @@
 'use client'
 
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Link as LinkIcon, MoreVertical, Pencil } from 'lucide-react'
+import { ArrowRight, Link as LinkIcon, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { getInitials, getCategoryGradient } from '@/lib/utils/cover-placeholder'
 import { Badge } from '@/components/ui/badge'
-import { buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +26,7 @@ import {
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { formatRelativeDate } from '@/lib/utils/format-date'
+import { deleteTierList } from '@/app/dashboard/tier-lists/_actions/delete-tier-list'
 
 export type TierListCardProps = {
   id: string
@@ -45,6 +56,9 @@ export function TierListCard({
   const imageUrl = coverImageUrl ?? firstItemUrl ?? null
   const fillHref = `/dashboard/tier-lists/${id}`
   const editHref = `/dashboard/tier-lists/${id}/edit`
+
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   return (
     <div
@@ -111,6 +125,13 @@ export function TierListCard({
                   <LinkIcon size={13} />
                   Copy link
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setDialogOpen(true)}
+                >
+                  <Trash2 size={13} />
+                  Delete
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -137,6 +158,43 @@ export function TierListCard({
           </Link>
         </div>
       </div>
+
+      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        if (!isPending) setDialogOpen(open)
+      }}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Delete tier list</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{title}</strong>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose
+              render={<Button variant="outline" disabled={isPending} />}
+            >
+              Cancel
+            </DialogClose>
+            <Button
+              variant="destructive"
+              disabled={isPending}
+              onClick={() => {
+                startTransition(async () => {
+                  try {
+                    await deleteTierList(id)
+                    toast.success('Tier list deleted')
+                    setDialogOpen(false)
+                  } catch {
+                    toast.error('Failed to delete tier list')
+                  }
+                })
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
