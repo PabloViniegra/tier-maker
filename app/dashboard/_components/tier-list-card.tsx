@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Link as LinkIcon, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { ArrowRight, Heart, Link as LinkIcon, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { getInitials, getCategoryGradient } from '@/lib/utils/cover-placeholder'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -36,6 +36,7 @@ export type TierListCardProps = {
   createdAt: Date | string
   coverImageUrl?: string | null
   firstItemUrl?: string | null
+  likeCount?: number
 }
 
 function truncateCategory(cat: string, max = 20): string {
@@ -50,6 +51,7 @@ export function TierListCard({
   createdAt,
   coverImageUrl,
   firstItemUrl,
+  likeCount,
   className,
   style,
 }: TierListCardProps & { className?: string; style?: React.CSSProperties }) {
@@ -142,9 +144,17 @@ export function TierListCard({
         <Separator />
 
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            {itemCount} {itemCount === 1 ? 'item' : 'items'}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              {itemCount} {itemCount === 1 ? 'item' : 'items'}
+            </span>
+            {likeCount !== undefined && (
+              <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                <Heart size={10} aria-hidden="true" />
+                {likeCount}
+              </span>
+            )}
+          </div>
           <Link
             href={fillHref}
             aria-label={`Open ${title}`}

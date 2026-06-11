@@ -5,6 +5,8 @@ import {
   getDistinctPublicCategories,
 } from '@/lib/queries/tier-templates'
 import { PAGE_SIZE, toSort } from '@/lib/explore-params'
+import { getSession } from '@/lib/session'
+import { getUserLikedTemplateIds } from '@/lib/queries/tier-likes'
 import { FadeUp } from '@/components/ui/fade-up'
 import { ExploreSearchInput } from '@/app/explore/_components/explore-search-input'
 import { ExploreCategoryFilter } from '@/app/explore/_components/explore-category-filter'
@@ -33,10 +35,16 @@ export default async function DashboardExplorePage({ searchParams }: Props) {
   const rawPage = parseInt(sp.page ?? '1', 10)
   const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1
 
-  const [{ items, total }, categories] = await Promise.all([
+  const [session, { items, total }, categories] = await Promise.all([
+    getSession(),
     getPublicTierLists({ q, category, sort, page, pageSize: PAGE_SIZE }),
     getDistinctPublicCategories(),
   ])
+
+  const userId = session?.user.id ?? null
+  const likedIds = userId
+    ? await getUserLikedTemplateIds(userId, items.map((i) => i.id))
+    : []
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -73,7 +81,15 @@ export default async function DashboardExplorePage({ searchParams }: Props) {
         </FadeUp>
       </div>
 
-      <ExploreGrid items={items} q={q} category={category} sort={sort} />
+      <ExploreGrid
+        items={items}
+        q={q}
+        category={category}
+        sort={sort}
+        likedIds={likedIds}
+        currentUserId={userId}
+        isAuthenticated={!!session}
+      />
 
       <ExplorePagination
         total={total}

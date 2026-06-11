@@ -4,6 +4,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   unique,
@@ -61,4 +62,21 @@ export const userCategoryPresets = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (t) => [unique().on(t.userId, t.name)]
+)
+
+export const tierLikes = pgTable(
+  'tier_likes',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    templateId: uuid('template_id')
+      .notNull()
+      .references(() => tierTemplates.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.templateId] }),
+    index('tier_likes_template_id_idx').on(t.templateId),
+  ]
 )

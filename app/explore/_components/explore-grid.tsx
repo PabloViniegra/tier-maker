@@ -13,9 +13,12 @@ const cardVariants = { ...fadeUpVariants, ...cardLiftVariants }
 
 type Props = ExploreFilters & {
   items: PublicTierListSummary[]
+  likedIds: string[]
+  currentUserId: string | null
+  isAuthenticated: boolean
 }
 
-export function ExploreGrid({ items, q, category, sort }: Props) {
+export function ExploreGrid({ items, q, category, sort, likedIds, currentUserId, isAuthenticated }: Props) {
   if (items.length === 0) {
     const filtersActive = hasActiveFilters({ q, category, sort })
 
@@ -35,6 +38,8 @@ export function ExploreGrid({ items, q, category, sort }: Props) {
     )
   }
 
+  const likedSet = new Set(likedIds)
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((item, i) => (
@@ -47,7 +52,12 @@ export function ExploreGrid({ items, q, category, sort }: Props) {
           whileHover="hover"
           whileTap="tap"
         >
-          <ExploreCard data={item} />
+          <ExploreCard
+            data={item}
+            isLiked={likedSet.has(item.id)}
+            isOwner={currentUserId !== null && item.creatorId === currentUserId}
+            isAuthenticated={isAuthenticated}
+          />
         </motion.div>
       ))}
     </div>

@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { LikeButton } from '@/components/like-button'
 import { cn } from '@/lib/utils'
 import { formatRelativeDate } from '@/lib/utils/format-date'
 import { getCategoryGradient, getInitials } from '@/lib/utils/cover-placeholder'
@@ -12,42 +13,47 @@ import type { PublicTierListSummary } from '@/lib/queries/tier-templates'
 
 type Props = {
   data: PublicTierListSummary
+  isLiked: boolean
+  isOwner: boolean
+  isAuthenticated: boolean
   style?: React.CSSProperties
 }
 
-export function ExploreCard({ data, style }: Props) {
-  const { id, title, category, itemCount, createdAt, creatorName, coverImageUrl, firstItemUrl } = data
+export function ExploreCard({ data, isLiked, isOwner, isAuthenticated, style }: Props) {
+  const { id, title, category, itemCount, createdAt, creatorName, coverImageUrl, firstItemUrl, likeCount } = data
   const imageUrl = coverImageUrl ?? firstItemUrl ?? null
+  const href = `/explore/${id}`
 
   return (
-    <Link
-      href={`/explore/${id}`}
+    <div
       className="flex flex-col gap-3 rounded-lg border border-border bg-surface overflow-hidden transition-colors duration-200 hover:border-primary/20 hover:bg-overlay"
       style={style}
     >
-      <ViewTransition name={`tier-cover-${id}`}>
-        <div className="relative aspect-video w-full overflow-hidden bg-muted">
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-            />
-          ) : (
-            <div
-              data-testid="card-cover-placeholder"
-              className="h-full w-full flex items-center justify-center"
-              style={{ background: getCategoryGradient(category) }}
-            >
-              <span className="text-white font-bold text-3xl select-none drop-shadow">
-                {getInitials(title)}
-              </span>
-            </div>
-          )}
-        </div>
-      </ViewTransition>
+      <Link href={href} className="block">
+        <ViewTransition name={`tier-cover-${id}`}>
+          <div className="relative aspect-video w-full overflow-hidden bg-muted">
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+              />
+            ) : (
+              <div
+                data-testid="card-cover-placeholder"
+                className="h-full w-full flex items-center justify-center"
+                style={{ background: getCategoryGradient(category) }}
+              >
+                <span className="text-white font-bold text-3xl select-none drop-shadow">
+                  {getInitials(title)}
+                </span>
+              </div>
+            )}
+          </div>
+        </ViewTransition>
+      </Link>
 
       <div className="flex flex-col gap-3 px-4 pb-4">
         <div className="flex items-center justify-between gap-2">
@@ -59,7 +65,9 @@ export function ExploreCard({ data, style }: Props) {
           </span>
         </div>
 
-        <p className="text-sm font-medium leading-snug text-foreground">{title}</p>
+        <Link href={href}>
+          <p className="text-sm font-medium leading-snug text-foreground hover:underline">{title}</p>
+        </Link>
 
         <Separator />
 
@@ -74,17 +82,29 @@ export function ExploreCard({ data, style }: Props) {
               </span>
             )}
           </div>
-          <span
-            className={cn(
-              buttonVariants({ variant: 'ghost', size: 'sm' }),
-              'pointer-events-none h-6 gap-1 px-2 text-xs'
+          <div className="flex items-center gap-2">
+            {!isOwner && (
+              <LikeButton
+                templateId={id}
+                initialCount={likeCount}
+                initialIsLiked={isLiked}
+                isAuthenticated={isAuthenticated}
+              />
             )}
-          >
-            Fill
-            <ArrowRight size={12} />
-          </span>
+            <Link
+              href={href}
+              aria-label={`Fill ${title}`}
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'sm' }),
+                'h-6 gap-1 px-2 text-xs'
+              )}
+            >
+              Fill
+              <ArrowRight size={12} />
+            </Link>
+          </div>
         </div>
       </div>
-    </Link>
+    </div>
   )
 }
