@@ -14,6 +14,7 @@ const OPTIONS: { value: ExploreSort; label: string }[] = [
   { value: 'newest', label: 'Newest first' },
   { value: 'oldest', label: 'Oldest first' },
   { value: 'a-z', label: 'A → Z' },
+  { value: 'popular', label: 'Most liked' },
 ]
 
 type Props = {

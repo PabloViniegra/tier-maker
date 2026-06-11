@@ -7,6 +7,7 @@ import {
 } from '@/lib/queries/tier-templates'
 
 import { PAGE_SIZE, toSort } from '@/lib/explore-params'
+import { getUserLikedTemplateIds } from '@/lib/queries/tier-likes'
 import { FadeUp } from '@/components/ui/fade-up'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ExploreHeader } from './_components/explore-header'
@@ -55,6 +56,11 @@ export default async function ExplorePage({ searchParams }: Props) {
     getPublicTierLists({ q, category, sort, page, pageSize: PAGE_SIZE }),
     getDistinctPublicCategories(),
   ])
+
+  const userId = session?.user.id ?? null
+  const likedIds = userId
+    ? await getUserLikedTemplateIds(userId, items.map((i) => i.id))
+    : []
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -107,7 +113,15 @@ export default async function ExplorePage({ searchParams }: Props) {
       <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:py-8">
         <ViewTransition>
           <Suspense fallback={<ExploreGridSkeleton />}>
-            <ExploreGrid items={items} q={q} category={category} sort={sort} />
+            <ExploreGrid
+              items={items}
+              q={q}
+              category={category}
+              sort={sort}
+              likedIds={likedIds}
+              currentUserId={userId}
+              isAuthenticated={!!session}
+            />
           </Suspense>
 
           <ExplorePagination

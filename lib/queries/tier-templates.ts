@@ -3,12 +3,15 @@ import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
 import { eq, desc, count, countDistinct, max, and, asc, or, ilike, sql, gte } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { tierRows, tierTemplates } from '@/lib/db/schema'
+import { tierRows, tierTemplates, tierLikes } from '@/lib/db/schema'
 import { user } from '@/lib/db/schema/auth'
+import { CACHE_TAGS } from '@/lib/cache-tags'
+import { likeCountExpr } from '@/lib/queries/tier-likes'
 import type { ImageItem } from '@/lib/validators/tier-list'
 import { bucketByDay } from '@/lib/utils/stats-series'
 
 const sidebarItemCount = sql<number>`COALESCE(jsonb_array_length(${tierTemplates.sidebarItems}), 0)`
+
 
 export type TierListSummary = {
   id: string
@@ -144,7 +147,7 @@ export async function getRecentTierLists(
 
 export async function getAllUserTierLists(
   userId: string
-): Promise<TierListSummary[]> {
+): Promise<(TierListSummary & { likeCount: number })[]> {
   const rows = await db
     .select({
       id: tierTemplates.id,
@@ -154,6 +157,7 @@ export async function getAllUserTierLists(
       coverImageUrl: tierTemplates.coverImageUrl,
       createdAt: tierTemplates.createdAt,
       firstItemUrl: firstItemUrlExpr,
+      likeCount: likeCountExpr,
     })
     .from(tierTemplates)
     .where(eq(tierTemplates.creatorId, userId))
@@ -168,6 +172,7 @@ export async function getAllUserTierLists(
     createdAt: r.createdAt,
     coverImageUrl: r.coverImageUrl ?? null,
     firstItemUrl: r.firstItemUrl ?? null,
+    likeCount: r.likeCount ?? 0,
   }))
 }
 
@@ -179,6 +184,8 @@ export type TierListDetail = {
   coverImageUrl: string | null
   sidebarItems: ImageItem[]
   createdAt: Date
+  creatorId: string | null
+  likeCount: number
   rows: {
     id: string
     label: string
@@ -190,9 +197,11 @@ export type TierListDetail = {
 
 export type PublicTierListSummary = TierListSummary & {
   creatorName: string | null
+  creatorId: string | null
+  likeCount: number
 }
 
-export type ExploreSort = 'newest' | 'oldest' | 'a-z'
+export type ExploreSort = 'newest' | 'oldest' | 'a-z' | 'popular'
 
 export type PublicTierListsParams = {
   q?: string
@@ -207,7 +216,17 @@ export async function getPublicTierListById(
 ): Promise<TierListDetail | null> {
   const [[tpl], rows] = await Promise.all([
     db
-      .select()
+      .select({
+        id: tierTemplates.id,
+        title: tierTemplates.title,
+        description: tierTemplates.description,
+        category: tierTemplates.category,
+        coverImageUrl: tierTemplates.coverImageUrl,
+        sidebarItems: tierTemplates.sidebarItems,
+        createdAt: tierTemplates.createdAt,
+        creatorId: tierTemplates.creatorId,
+        likeCount: likeCountExpr,
+      })
       .from(tierTemplates)
       .where(and(eq(tierTemplates.id, id), eq(tierTemplates.isPublic, true))),
     db
@@ -227,6 +246,8 @@ export async function getPublicTierListById(
     coverImageUrl: tpl.coverImageUrl ?? null,
     sidebarItems: tpl.sidebarItems,
     createdAt: tpl.createdAt,
+    creatorId: tpl.creatorId ?? null,
+    likeCount: tpl.likeCount ?? 0,
     rows: rows.map((r) => ({
       id: r.id,
       label: r.label,
@@ -249,7 +270,7 @@ export const getDistinctPublicCategories = unstable_cache(
     return rows.map((r) => r.category)
   },
   ['distinct-public-categories'],
-  { revalidate: 300, tags: ['public-categories'] }
+  { revalidate: 300, tags: [CACHE_TAGS.publicCategories] }
 )
 
 export const getPublicTierLists = unstable_cache(
@@ -272,7 +293,9 @@ export const getPublicTierLists = unstable_cache(
         ? asc(tierTemplates.createdAt)
         : sort === 'a-z'
           ? asc(tierTemplates.title)
-          : desc(tierTemplates.createdAt)
+          : sort === 'popular'
+            ? desc(likeCountExpr)
+            : desc(tierTemplates.createdAt)
 
     const [rows, [countRow]] = await Promise.all([
       db
@@ -284,7 +307,9 @@ export const getPublicTierLists = unstable_cache(
           coverImageUrl: tierTemplates.coverImageUrl,
           createdAt: tierTemplates.createdAt,
           creatorName: user.name,
+          creatorId: tierTemplates.creatorId,
           firstItemUrl: firstItemUrlExpr,
+          likeCount: likeCountExpr,
         })
         .from(tierTemplates)
         .leftJoin(user, eq(tierTemplates.creatorId, user.id))
@@ -308,12 +333,14 @@ export const getPublicTierLists = unstable_cache(
         coverImageUrl: r.coverImageUrl ?? null,
         firstItemUrl: r.firstItemUrl ?? null,
         creatorName: r.creatorName ?? null,
+        creatorId: r.creatorId ?? null,
+        likeCount: r.likeCount ?? 0,
       })),
       total: countRow?.count ?? 0,
     }
   },
   ['public-tier-lists'],
-  { revalidate: 60, tags: ['public-tier-lists'] }
+  { revalidate: 60, tags: [CACHE_TAGS.publicTierLists] }
 )
 
 export async function getTierListById(
@@ -342,6 +369,8 @@ export async function getTierListById(
     coverImageUrl: tpl.coverImageUrl ?? null,
     sidebarItems: tpl.sidebarItems,
     createdAt: tpl.createdAt,
+    creatorId: tpl.creatorId ?? null,
+    likeCount: 0,
     rows: rows.map((r) => ({
       id: r.id,
       label: r.label,
@@ -357,4 +386,13 @@ export async function getAllPublicTierListIds(): Promise<{ id: string; createdAt
     .select({ id: tierTemplates.id, createdAt: tierTemplates.createdAt })
     .from(tierTemplates)
     .where(eq(tierTemplates.isPublic, true))
+}
+
+export async function getTemplateCreatorId(templateId: string): Promise<string | null> {
+  const [row] = await db
+    .select({ creatorId: tierTemplates.creatorId })
+    .from(tierTemplates)
+    .where(eq(tierTemplates.id, templateId))
+    .limit(1)
+  return row?.creatorId ?? null
 }

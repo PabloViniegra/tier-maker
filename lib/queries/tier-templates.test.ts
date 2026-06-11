@@ -379,6 +379,7 @@ describe('getAllUserTierLists', () => {
         coverImageUrl: null,
         firstItemUrl: 'https://blob/a.png',
         createdAt: date,
+        likeCount: 3,
       },
     ]
     mockDb.select.mockReturnValue({
@@ -401,6 +402,7 @@ describe('getAllUserTierLists', () => {
       createdAt: date,
       coverImageUrl: null,
       firstItemUrl: 'https://blob/a.png',
+      likeCount: 3,
     })
   })
 })

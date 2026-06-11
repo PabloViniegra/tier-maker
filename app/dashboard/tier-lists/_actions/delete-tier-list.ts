@@ -5,6 +5,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { db } from '@/lib/db'
 import { tierTemplates } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
+import { CACHE_TAGS } from '@/lib/cache-tags'
 
 export async function deleteTierList(id: string): Promise<{ ok: true }> {
   const session = await getSession()
@@ -19,7 +20,7 @@ export async function deleteTierList(id: string): Promise<{ ok: true }> {
 
   revalidatePath('/dashboard/tier-lists')
   revalidatePath('/explore')
-  revalidateTag('public-tier-lists', {})
+  revalidateTag(CACHE_TAGS.publicTierLists, {})
 
   return { ok: true }
 }
