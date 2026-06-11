@@ -1,11 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { DragDropContext } from '@hello-pangea/dnd'
-import { ArrowLeft, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useTierEditor, buildSavePayload, hasPendingUploads, type TierListDetailSeed } from '@/lib/stores/tier-editor'
 import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
 import { MetadataPanel } from './metadata-panel'
@@ -15,8 +14,7 @@ import { SaveBar } from './save-bar'
 import { ImageLabelModal, type LabeledFile } from './image-label-modal'
 import { uploadImagesAction, createTierListAction } from '../actions'
 import { updateTierListStructureAction } from '../../[id]/edit/actions'
-import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { PageHeader } from '@/components/page-header'
 import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
 
 type TierListCreatorProps = {
@@ -179,22 +177,12 @@ export function TierListCreator({
 
   return (
     <div className='flex flex-col gap-6'>
-      <header className='flex items-center justify-between gap-3'>
-        <div className='flex items-center gap-3'>
-          <Link
-            href={isEditMode ? '/dashboard/tier-lists' : '/dashboard'}
-            className={cn(
-              buttonVariants({ variant: 'ghost', size: 'sm' }),
-              'gap-1.5 text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <ArrowLeft size={14} />
-            Back
-          </Link>
-          <h1 className='font-heading text-xl'>{isEditMode ? 'Edit tier list' : 'New tier list'}</h1>
-        </div>
+      <PageHeader
+        backHref={isEditMode ? '/dashboard/tier-lists' : '/dashboard'}
+        title={isEditMode ? 'Edit tier list' : 'New tier list'}
+      >
         <SaveBar onSave={handleSave} isSaving={isPending} />
-      </header>
+      </PageHeader>
 
       <MetadataPanel categoryPresets={categoryPresets} userPresets={userCategoryPresets} />
 

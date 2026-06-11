@@ -1,10 +1,12 @@
 import 'server-only'
+import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
-import { eq, desc, count, countDistinct, max, and, asc, or, ilike, sql } from 'drizzle-orm'
+import { eq, desc, count, countDistinct, max, and, asc, or, ilike, sql, gte } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierRows, tierTemplates } from '@/lib/db/schema'
 import { user } from '@/lib/db/schema/auth'
 import type { ImageItem } from '@/lib/validators/tier-list'
+import { bucketByDay } from '@/lib/utils/stats-series'
 
 const sidebarItemCount = sql<number>`COALESCE(jsonb_array_length(${tierTemplates.sidebarItems}), 0)`
 
@@ -18,26 +20,83 @@ export type TierListSummary = {
   firstItemUrl: string | null
 }
 
-export async function getUserTierListStats(userId: string): Promise<{
+const STATS_WINDOW_DAYS = 14
+
+export type TierListStats = {
   total: number
   categories: number
   lastActivity: Date | null
-}> {
-  const [row] = await db
-    .select({
-      total: count(),
-      categories: countDistinct(tierTemplates.category),
-      lastActivity: max(tierTemplates.createdAt),
-    })
-    .from(tierTemplates)
-    .where(eq(tierTemplates.creatorId, userId))
+  /** Daily counts for tier lists created over the last STATS_WINDOW_DAYS days (oldest→newest) */
+  totalSeries: number[]
+  /** Tier lists created in the current STATS_WINDOW_DAYS window — delta numerator */
+  totalCurrent: number
+  /** Tier lists created in the previous STATS_WINDOW_DAYS window — delta denominator */
+  totalPrev: number
+  /** Distinct categories used in the current STATS_WINDOW_DAYS window — delta numerator */
+  categoriesCurrent: number
+  /** Distinct categories used in the previous STATS_WINDOW_DAYS window — delta denominator */
+  categoriesPrev: number
+}
+
+// React cache() deduplicates repeated calls within a single request/render pass.
+// unstable_cache is intentionally NOT used here: mutations call revalidatePath('/dashboard')
+// rather than a user-scoped tag, so wiring a cache tag would require invasive changes to all
+// mutation actions. cache() gives per-request dedup with zero stale-data risk.
+export const getUserTierListStats = cache(async function getUserTierListStats(userId: string): Promise<TierListStats> {
+  const now = new Date()
+  const windowStart = new Date(now.getTime() - STATS_WINDOW_DAYS * 24 * 60 * 60 * 1000)
+  const prevWindowStart = new Date(windowStart.getTime() - STATS_WINDOW_DAYS * 24 * 60 * 60 * 1000)
+
+  const [aggregateRow, recentRows] = await Promise.all([
+    db
+      .select({
+        total: count(),
+        categories: countDistinct(tierTemplates.category),
+        lastActivity: max(tierTemplates.createdAt),
+      })
+      .from(tierTemplates)
+      .where(eq(tierTemplates.creatorId, userId))
+      .then(([r]) => r),
+    // Fetch last 28 days of rows (current + prev window) for series and delta computation.
+    // Capped at 2000 rows: a user creating >100 lists/day over 28 days is far beyond normal
+    // usage; the cap prevents runaway memory on pathological data while keeping stats correct
+    // for all realistic workloads.
+    db
+      .select({
+        createdAt: tierTemplates.createdAt,
+        category: tierTemplates.category,
+      })
+      .from(tierTemplates)
+      .where(and(eq(tierTemplates.creatorId, userId), gte(tierTemplates.createdAt, prevWindowStart)))
+      .limit(2000),
+  ])
+
+  const currentWindowRows = recentRows.filter((r) => r.createdAt >= windowStart)
+  const prevWindowRows = recentRows.filter(
+    (r) => r.createdAt >= prevWindowStart && r.createdAt < windowStart,
+  )
+
+  const totalSeries = bucketByDay(
+    currentWindowRows.map((r) => r.createdAt),
+    STATS_WINDOW_DAYS,
+    now,
+  )
+  const totalCurrent = currentWindowRows.length
+  const totalPrev = prevWindowRows.length
+  const categoriesCurrent = new Set(currentWindowRows.map((r) => r.category)).size
+  const categoriesPrev = new Set(prevWindowRows.map((r) => r.category)).size
 
   return {
-    total: row?.total ?? 0,
-    categories: row?.categories ?? 0,
-    lastActivity: row?.lastActivity ?? null,
+    total: aggregateRow?.total ?? 0,
+    categories: aggregateRow?.categories ?? 0,
+    lastActivity: aggregateRow?.lastActivity ?? null,
+    totalSeries,
+    totalCurrent,
+    totalPrev,
+    categoriesCurrent,
+    categoriesPrev,
   }
-}
+})
 
 const firstItemUrlExpr = sql<string | null>`
   COALESCE(
