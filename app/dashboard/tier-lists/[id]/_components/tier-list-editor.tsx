@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { DragDropContext } from '@hello-pangea/dnd'
-import { ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
 import { toast } from 'sonner'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
@@ -12,9 +10,8 @@ import { updateTierListAction, type UpdateTierListPayload } from '../actions'
 import { ItemBankStrip } from './item-bank-strip'
 import { SaveIndicator, type SaveState } from './save-indicator'
 import { ExportButton } from './export-button'
+import { PageHeader } from '@/components/page-header'
 import type { TierListDetailSeed } from '@/lib/stores/tier-editor'
-import { cn } from '@/lib/utils'
-import { buttonVariants } from '@/components/ui/button'
 
 type Props = {
   id: string
@@ -85,26 +82,10 @@ export function TierListEditor({ id, data }: Props) {
 
   return (
     <div className='flex h-[calc(100vh-4rem)] flex-col'>
-      {/* Sticky top bar */}
-      <header className='flex shrink-0 items-center justify-between gap-3 border-b border-border bg-background/90 px-4 py-2 backdrop-blur-sm'>
-        <div className='flex items-center gap-3'>
-          <Link
-            href='/dashboard/tier-lists'
-            className={cn(
-              buttonVariants({ variant: 'ghost', size: 'sm' }),
-              'gap-1.5 text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <ArrowLeft size={14} />
-            Back
-          </Link>
-          <h1 className='line-clamp-1 font-heading text-lg'>{data.title}</h1>
-        </div>
-        <div className='flex items-center gap-3'>
-          <SaveIndicator state={saveState} />
-          <ExportButton boardRef={boardRef} title={data.title} />
-        </div>
-      </header>
+      <PageHeader backHref='/dashboard/tier-lists' title={data.title}>
+        <SaveIndicator state={saveState} />
+        <ExportButton boardRef={boardRef} title={data.title} />
+      </PageHeader>
 
       {/* Single DragDropContext wraps both board and bank */}
       <DragDropContext onDragEnd={onDragEnd}>

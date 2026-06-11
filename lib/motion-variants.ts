@@ -91,3 +91,59 @@ export const cardLiftVariants: Variants = {
   hover: { y: -2, transition: springTransition },
   tap: { scale: 0.99, y: 0, transition: { duration: 0.1, ease: 'easeOut' } },
 }
+
+// ── Hero Demo animation variants ──────────────────────────────────────────────
+
+/** Duration for a chip drifting from the bank into a tier row */
+export const HERO_DEMO_DRIFT_DURATION = 0.55
+
+/** Pause between sequential chip placements (seconds) */
+export const HERO_DEMO_STEP_INTERVAL = 0.9
+
+/** Full loop pause before resetting (seconds) */
+export const HERO_DEMO_RESET_PAUSE = 2.2
+
+/**
+ * Chip that is seated inside a tier row — appears with a short fade-up.
+ * Used with AnimatePresence so chips exit on reset.
+ */
+export const heroDemoChipVariants: Variants = {
+  hidden: { opacity: 0, y: 6, scale: 0.92 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: HERO_DEMO_DRIFT_DURATION, ease: EASE_SMOOTH },
+  },
+  exit: {
+    opacity: 0,
+    y: -4,
+    scale: 0.94,
+    transition: { duration: 0.22, ease: EASE_SMOOTH },
+  },
+}
+
+/**
+ * Chip that is sitting in the staging bank, waiting to be placed.
+ * Fades out when it is about to drift.
+ */
+export const heroDemoBankChipVariants: Variants = {
+  idle: { opacity: 1, scale: 1 },
+  placing: {
+    opacity: 0,
+    scale: 0.88,
+    transition: { duration: 0.18, ease: EASE_SMOOTH },
+  },
+}
+
+/**
+ * Container variant that staggers the initial reveal of the static tier rows.
+ */
+export const heroDemoRowRevealVariants: Variants = {
+  hidden: { opacity: 0, x: 8 },
+  visible: (delay: number = 0) => ({
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.3, ease: EASE_SMOOTH, delay },
+  }),
+}

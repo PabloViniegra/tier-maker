@@ -1,10 +1,11 @@
 'use client'
 
 import { motion } from 'motion/react'
+import { Layers } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 import { TierListCard, type TierListCardProps } from './tier-list-card'
-import { DashboardEmptyState } from './dashboard-empty-state'
+import { EmptyState } from '@/components/empty-state'
 import { fadeUpVariants, staggerIndex, STAGGER_DELAY, cardLiftVariants } from '@/lib/motion-variants'
 
 export function TierListGridSkeleton() {
@@ -40,7 +41,12 @@ export function TierListGrid({ tierLists }: { tierLists: TierListCardProps[] }) 
         animate="visible"
         custom={0}
       >
-        <DashboardEmptyState />
+        <EmptyState
+          icon={Layers}
+          title="No tier lists yet"
+          description="Create your first tier list to start ranking things."
+          cta={{ label: 'Create Tier List', href: '/dashboard/tier-lists/new' }}
+        />
       </motion.div>
     )
   }

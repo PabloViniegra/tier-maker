@@ -1,11 +1,12 @@
 'use client'
 
 import { motion } from 'motion/react'
+import { Search, Layers } from 'lucide-react'
 import { hasActiveFilters } from '@/lib/explore-params'
 import type { ExploreFilters } from '@/lib/explore-params'
 import { fadeUpVariants, staggerIndex, STAGGER_DELAY, cardLiftVariants } from '@/lib/motion-variants'
+import { EmptyState } from '@/components/empty-state'
 import { ExploreCard } from './explore-card'
-import { ExploreEmptyState } from './explore-empty-state'
 import type { PublicTierListSummary } from '@/lib/queries/tier-templates'
 
 const cardVariants = { ...fadeUpVariants, ...cardLiftVariants }
@@ -16,7 +17,22 @@ type Props = ExploreFilters & {
 
 export function ExploreGrid({ items, q, category, sort }: Props) {
   if (items.length === 0) {
-    return <ExploreEmptyState filtersActive={hasActiveFilters({ q, category, sort })} />
+    const filtersActive = hasActiveFilters({ q, category, sort })
+
+    return filtersActive ? (
+      <EmptyState
+        icon={Search}
+        title="No tier lists match your filters"
+        description="Try adjusting or clearing your search and filters."
+        cta={{ label: 'Clear filters', href: '/explore' }}
+      />
+    ) : (
+      <EmptyState
+        icon={Layers}
+        title="No public tier lists yet"
+        description="Be the first to create and share a tier list."
+      />
+    )
   }
 
   return (

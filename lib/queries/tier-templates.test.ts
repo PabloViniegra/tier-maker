@@ -18,17 +18,38 @@ const mockDb = db as unknown as {
   select: ReturnType<typeof vi.fn>
 }
 
+// Helper: mock both select() calls made by getUserTierListStats.
+// Call 1 — aggregate: .select().from().where().then(([r]) => r)
+// Call 2 — recent rows: .select().from().where()  (resolves to array)
+function mockStatsQueries(
+  aggregateRow: object | undefined,
+  recentRows: { createdAt: Date; category: string }[],
+) {
+  const aggregateRows = aggregateRow ? [aggregateRow] : []
+  // First call: aggregate query — where() must be a thenable so .then() works
+  const aggregatePromise = Promise.resolve(aggregateRows)
+  mockDb.select.mockReturnValueOnce({
+    from: vi.fn().mockReturnValue({
+      where: vi.fn().mockReturnValue(aggregatePromise),
+    }),
+  })
+  // Second call: recent rows query — has .limit() before awaiting
+  mockDb.select.mockReturnValueOnce({
+    from: vi.fn().mockReturnValue({
+      where: vi.fn().mockReturnValue({
+        limit: vi.fn().mockResolvedValue(recentRows),
+      }),
+    }),
+  })
+}
+
 describe('getUserTierListStats', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   it('returns zeros and null lastActivity when user has no tier lists', async () => {
-    mockDb.select.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([]),
-      }),
-    })
+    mockStatsQueries(undefined, [])
 
     const result = await getUserTierListStats('user-empty')
 
@@ -37,28 +58,16 @@ describe('getUserTierListStats', () => {
     expect(result.lastActivity).toBeNull()
   })
 
-  it('returns correct total count for user with tier lists', async () => {
-    mockDb.select.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([
-          { total: 3, categories: 2, lastActivity: new Date('2026-06-02') },
-        ]),
-      }),
-    })
+  it('returns correct all-time total count for user with tier lists', async () => {
+    mockStatsQueries({ total: 3, categories: 2, lastActivity: new Date('2026-06-02') }, [])
 
     const result = await getUserTierListStats('user-1')
 
     expect(result.total).toBe(3)
   })
 
-  it('counts distinct categories', async () => {
-    mockDb.select.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([
-          { total: 3, categories: 2, lastActivity: new Date('2026-06-02') },
-        ]),
-      }),
-    })
+  it('counts distinct categories (all-time)', async () => {
+    mockStatsQueries({ total: 3, categories: 2, lastActivity: new Date('2026-06-02') }, [])
 
     const result = await getUserTierListStats('user-1')
 
@@ -67,17 +76,112 @@ describe('getUserTierListStats', () => {
 
   it('returns the most recent createdAt as lastActivity', async () => {
     const latest = new Date('2026-06-02')
-    mockDb.select.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([
-          { total: 3, categories: 2, lastActivity: latest },
-        ]),
-      }),
-    })
+    mockStatsQueries({ total: 3, categories: 2, lastActivity: latest }, [])
 
     const result = await getUserTierListStats('user-1')
 
     expect(result.lastActivity).toEqual(latest)
+  })
+
+  it('returns totalSeries array of length 14', async () => {
+    mockStatsQueries({ total: 2, categories: 1, lastActivity: new Date() }, [])
+
+    const result = await getUserTierListStats('user-1')
+
+    expect(result.totalSeries).toHaveLength(14)
+  })
+
+  it('totalCurrent counts rows created in the current 14-day window', async () => {
+    const now = new Date()
+    const currentDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
+    const prevDate = new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000)
+    mockStatsQueries(
+      { total: 2, categories: 2, lastActivity: now },
+      [
+        { createdAt: currentDate, category: 'anime' },
+        { createdAt: prevDate, category: 'games' },
+      ],
+    )
+
+    const result = await getUserTierListStats('user-1')
+
+    // Only the row in the current window contributes to totalCurrent
+    expect(result.totalCurrent).toBe(1)
+  })
+
+  it('counts recent rows into totalPrev when they fall in the previous window', async () => {
+    const now = new Date()
+    // A date 20 days ago falls in the prev window (14–28 days before now)
+    const prevDate = new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000)
+    mockStatsQueries(
+      { total: 1, categories: 1, lastActivity: now },
+      [{ createdAt: prevDate, category: 'anime' }],
+    )
+
+    const result = await getUserTierListStats('user-1')
+
+    expect(result.totalPrev).toBe(1)
+  })
+
+  it('does not count current-window rows into totalPrev', async () => {
+    const now = new Date()
+    // A date 3 days ago falls in the current window
+    const currentDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
+    mockStatsQueries(
+      { total: 1, categories: 1, lastActivity: now },
+      [{ createdAt: currentDate, category: 'anime' }],
+    )
+
+    const result = await getUserTierListStats('user-1')
+
+    expect(result.totalPrev).toBe(0)
+  })
+
+  it('delta inputs are window-vs-window: totalCurrent vs totalPrev (not all-time vs prev)', async () => {
+    const now = new Date()
+    // all-time total = 50, but only 2 created in current window and 3 in prev window
+    const currentDates = [
+      new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+      new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
+    ]
+    const prevDates = [
+      new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000),
+      new Date(now.getTime() - 18 * 24 * 60 * 60 * 1000),
+      new Date(now.getTime() - 25 * 24 * 60 * 60 * 1000),
+    ]
+    mockStatsQueries(
+      { total: 50, categories: 10, lastActivity: now },
+      [
+        ...currentDates.map((d) => ({ createdAt: d, category: 'anime' })),
+        ...prevDates.map((d) => ({ createdAt: d, category: 'games' })),
+      ],
+    )
+
+    const result = await getUserTierListStats('user-1')
+
+    // all-time total is preserved for display
+    expect(result.total).toBe(50)
+    // delta inputs are current-window vs prev-window (not 50 vs 3)
+    expect(result.totalCurrent).toBe(2)
+    expect(result.totalPrev).toBe(3)
+  })
+
+  it('categoriesCurrent counts distinct categories in the current window', async () => {
+    const now = new Date()
+    const currentRows = [
+      { createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), category: 'anime' },
+      { createdAt: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000), category: 'anime' },
+      { createdAt: new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000), category: 'games' },
+    ]
+    mockStatsQueries(
+      { total: 3, categories: 2, lastActivity: now },
+      currentRows,
+    )
+
+    const result = await getUserTierListStats('user-1')
+
+    // 2 distinct categories in current window
+    expect(result.categoriesCurrent).toBe(2)
   })
 })
 
