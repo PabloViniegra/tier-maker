@@ -22,7 +22,7 @@ export type TierListCardProps = {
   title: string
   category: string
   itemCount: number
-  createdAt: Date
+  createdAt: Date | string
   coverImageUrl?: string | null
   firstItemUrl?: string | null
 }

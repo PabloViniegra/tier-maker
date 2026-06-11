@@ -1,7 +1,8 @@
-export function formatRelativeDate(date: Date | null): string {
+export function formatRelativeDate(date: Date | string | null): string {
   if (!date) return 'Never'
+  const d = typeof date === 'string' ? new Date(date) : date
   const now = Date.now()
-  const diff = now - date.getTime()
+  const diff = now - d.getTime()
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
   if (days === 0) return 'Today'
   if (days === 1) return 'Yesterday'

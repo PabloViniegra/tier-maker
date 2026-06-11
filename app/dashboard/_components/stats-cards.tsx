@@ -8,7 +8,7 @@ import { fadeUpVariants, STAGGER_DELAY } from '@/lib/motion-variants'
 type Stats = {
   total: number
   categories: number
-  lastActivity: Date | null
+  lastActivity: Date | string | null
 }
 
 const statDefs = [
