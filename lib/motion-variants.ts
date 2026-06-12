@@ -156,3 +156,12 @@ export const heroDemoRowRevealVariants: Variants = {
     transition: { duration: 0.3, ease: EASE_SMOOTH, delay },
   }),
 }
+
+export const slideUpVariants: Variants = {
+  hidden: { y: '100%', opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.3, ease: EASE_SMOOTH },
+  },
+}

@@ -6,6 +6,7 @@ import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { MotionProvider } from '@/components/motion-provider'
 import { Toaster } from '@/components/ui/sonner'
+import { CookieBanner } from '@/components/cookie-banner'
 import { cn } from '@/lib/utils'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tier-maker.app'
@@ -73,6 +74,7 @@ export default function RootLayout({
           <ThemeProvider>
             {children}
             <Toaster />
+            <CookieBanner />
           </ThemeProvider>
         </MotionProvider>
       </body>
