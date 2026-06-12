@@ -42,9 +42,13 @@ A modern web platform for creating, customizing, and sharing tier lists. Rank an
 
 - **Tier List Editor** — Drag-and-drop board with customizable S/A/B/C/D/F rows, editable labels, and color pickers
 - **Image Upload** — Upload images via click, drag-drop onto the page, or clipboard paste (JPG, PNG, WEBP, GIF; max 5 MB per file, 30 items per list)
+- **Image Labels** — Add text labels to each uploaded image for better identification
 - **Category Presets** — 15 built-in category presets plus the ability to save custom ones per user
-- **User Dashboard** — Stats overview, recent tier lists grid, and full tier list management
-- **Authentication** — Email/password registration and login via Better Auth
+- **Export to Image** — Download completed tier lists as high-resolution PNG images, optimized for social sharing
+- **Public Explore** — Browse, search, and filter public tier lists from the community with pagination and sorting
+- **Likes System** — Like and bookmark public tier lists you enjoy
+- **User Dashboard** — Stats overview, recent tier lists grid, and full tier list management with a collapsible sidebar
+- **Authentication** — Email/password registration and login via Better Auth with session management
 - **Dark/Light Themes** — Dark-first design with a circular-mask View Transition animation on toggle
 - **Responsive Layout** — Desktop sidebar collapses to a mobile hamburger sheet
 - **Animations** — Entrance animations, stagger effects, drag feedback, and page transitions powered by Motion
@@ -66,9 +70,11 @@ A modern web platform for creating, customizing, and sharing tier lists. Rank an
 | ORM | Drizzle ORM |
 | Auth | Better Auth |
 | Image Storage | Vercel Blob |
+| Notifications | Sonner (toast alerts) |
 | Package Manager | pnpm |
 | Testing | Vitest, Testing Library |
 | Linting | ESLint, Prettier |
+| Icons | Lucide React |
 
 ---
 
@@ -76,10 +82,13 @@ A modern web platform for creating, customizing, and sharing tier lists. Rank an
 
 The application follows the Next.js App Router conventions with server components by default. Client components are explicitly marked with `"use client"` only where interactivity is required.
 
-- **Server Actions** handle data mutations (tier list creation, image uploads, category preset management)
+- **Server Actions** handle data mutations (tier list creation, image uploads, category preset management, likes)
+- **Server Components** power the explore page with streaming, search, filtering, and pagination
 - **Drizzle ORM** manages schema definitions, migrations, and type-safe queries against a Neon PostgreSQL database
-- **Zustand** manages client-side state for the tier list editor
+- **Zustand** manages client-side state for the tier list editor and UI preferences
 - **Better Auth** provides session-based authentication with a Drizzle adapter
+- **IDB (IndexedDB)** persists unsaved tier list data locally for recovery
+- **Server-side Caching** uses Next.js cache tags for invalidation of explore and dashboard data
 
 ---
 
@@ -91,6 +100,7 @@ The application follows the Next.js App Router conventions with server component
 - pnpm = 11
 - A Neon PostgreSQL database (or any PostgreSQL instance)
 - A Vercel Blob storage token (for image uploads)
+- Google OAuth credentials (optional, for Google login)
 
 ### Installation
 
@@ -105,11 +115,26 @@ pnpm install
 Create a `.env.local` file in the project root:
 
 ```env
+# Database
 DATABASE_URI=postgresql://user:password@host/dbname?sslmode=require
+
+# Better Auth
 BETTER_AUTH_SECRET=your-auth-secret
 BETTER_AUTH_URL=http://localhost:3000
+
+# Vercel Blob (image storage)
+BLOB_STORE_ID=your-store-id
 BLOB_READ_WRITE_TOKEN=your-vercel-blob-token
+
+# Google OAuth (optional)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# App URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
+
+> **⚠️ Security Notice:** Never commit `.env.local` to version control. It is already listed in `.gitignore`. Keep your secrets private.
 
 ### Database Setup
 
@@ -157,26 +182,35 @@ tier-maker/
 │   ├── layout.tsx                  # Root layout (fonts, providers, transitions)
 │   ├── page.tsx                    # Landing page with bento grid
 │   ├── (auth)/                     # Auth route group (login, register)
-│   ├── api/auth/[...all]/         # Better Auth API handler
+│   ├── api/auth/[...all]/          # Better Auth API handler
+│   ├── explore/                    # Public explore page (browse community tier lists)
+│   │   ├── page.tsx                # Search, filter, pagination
+│   │   └── [id]/                   # View public tier list
 │   └── dashboard/                  # Auth-guarded dashboard
 │       ├── page.tsx                # Stats + recent tier lists
+│       ├── explore/                # Explore from within dashboard
 │       └── tier-lists/
 │           ├── page.tsx            # All user tier lists
-│           └── new/                # Tier list creator
+│           ├── new/                # Tier list creator
+│           └── [id]/               # View tier list
+│               └── edit/           # Edit/fill tier list
 ├── components/
 │   ├── ui/                         # Shadcn UI primitives
 │   ├── auth-form.tsx               # Login/register form
 │   ├── bento-grid.tsx              # Bento layout system
-│   └── tier-list-mockup.tsx        # Landing page preview
+│   ├── hero-demo.tsx               # Interactive landing demo
+│   ├── like-button.tsx             # Like/heart button
+│   └── sparkline.tsx               # Stats sparkline charts
 ├── lib/
 │   ├── auth.ts                     # Better Auth server config
 │   ├── auth-client.ts              # Better Auth React client
 │   ├── db.ts                       # Neon + Drizzle connection
 │   ├── db/schema/                  # Database schema definitions
-│   ├── queries/                    # Reusable DB queries
-│   ├── stores/                     # Zustand stores
+│   ├── queries/                    # Reusable DB queries (likes, templates, presets)
+│   ├── stores/                     # Zustand stores (editor, UI)
 │   ├── validators/                 # Zod schemas
-│   └── motion-variants.ts          # Animation variant definitions
+│   ├── motion-variants.ts          # Animation variant definitions
+│   └── cache-tags.ts               # Next.js cache tag constants
 ├── hooks/                          # Custom React hooks
 ├── drizzle/                        # Generated migrations
 ├── drizzle.config.ts               # Drizzle Kit configuration
