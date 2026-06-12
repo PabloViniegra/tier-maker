@@ -11,7 +11,10 @@ const { mockGetSession, mockRevalidatePath, mockRevalidateTag, mockDelete } =
   }))
 
 vi.mock('@/lib/session', () => ({ getSession: mockGetSession }))
-vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath, revalidateTag: mockRevalidateTag }))
+vi.mock('next/cache', () => ({
+  revalidatePath: mockRevalidatePath,
+  revalidateTag: mockRevalidateTag,
+}))
 vi.mock('@/lib/db', () => ({
   db: {
     delete: mockDelete,

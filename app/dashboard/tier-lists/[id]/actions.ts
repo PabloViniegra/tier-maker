@@ -28,7 +28,12 @@ export async function updateTierListAction(
         sidebarItems: parsed.data.bankItems,
         coverImageUrl: parsed.data.coverImageUrl ?? null,
       })
-      .where(and(eq(tierTemplates.id, id), eq(tierTemplates.creatorId, session.user.id)))
+      .where(
+        and(
+          eq(tierTemplates.id, id),
+          eq(tierTemplates.creatorId, session.user.id)
+        )
+      )
       .returning({ id: tierTemplates.id })
 
     if (!updated) throw new Error('Not found')

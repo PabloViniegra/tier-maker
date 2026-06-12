@@ -4,7 +4,12 @@ import { motion } from 'motion/react'
 import { Search, Layers } from 'lucide-react'
 import { hasActiveFilters } from '@/lib/explore-params'
 import type { ExploreFilters } from '@/lib/explore-params'
-import { fadeUpVariants, staggerIndex, STAGGER_DELAY, cardLiftVariants } from '@/lib/motion-variants'
+import {
+  fadeUpVariants,
+  staggerIndex,
+  STAGGER_DELAY,
+  cardLiftVariants,
+} from '@/lib/motion-variants'
 import { EmptyState } from '@/components/empty-state'
 import { ExploreCard } from './explore-card'
 import type { PublicTierListSummary } from '@/lib/queries/tier-templates'
@@ -18,7 +23,15 @@ type Props = ExploreFilters & {
   isAuthenticated: boolean
 }
 
-export function ExploreGrid({ items, q, category, sort, likedIds, currentUserId, isAuthenticated }: Props) {
+export function ExploreGrid({
+  items,
+  q,
+  category,
+  sort,
+  likedIds,
+  currentUserId,
+  isAuthenticated,
+}: Props) {
   if (items.length === 0) {
     const filtersActive = hasActiveFilters({ q, category, sort })
 

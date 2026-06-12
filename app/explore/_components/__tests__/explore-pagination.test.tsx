@@ -17,7 +17,9 @@ describe('ExplorePagination', () => {
 
   it('does not render a prev link on page 1', () => {
     render(<ExplorePagination {...baseProps} page={1} />)
-    expect(screen.queryByRole('link', { name: /prev/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: /prev/i })
+    ).not.toBeInTheDocument()
   })
 
   it('renders next link when not on last page', () => {
@@ -28,7 +30,9 @@ describe('ExplorePagination', () => {
   it('does not render a next link on the last page', () => {
     // total=36, pageSize=12 → 3 pages; page=3 is last
     render(<ExplorePagination {...baseProps} page={3} />)
-    expect(screen.queryByRole('link', { name: /next/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: /next/i })
+    ).not.toBeInTheDocument()
   })
 
   it('renders a link for each page number', () => {

@@ -57,6 +57,13 @@
       "when": 1781212540292,
       "tag": "0007_burly_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1781281531542,
+      "tag": "0008_nice_yellow_claw",
+      "breakpoints": true
     }
   ]
 }

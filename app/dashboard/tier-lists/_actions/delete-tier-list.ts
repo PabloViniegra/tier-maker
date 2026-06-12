@@ -13,7 +13,12 @@ export async function deleteTierList(id: string): Promise<{ ok: true }> {
 
   const [deleted] = await db
     .delete(tierTemplates)
-    .where(and(eq(tierTemplates.id, id), eq(tierTemplates.creatorId, session.user.id)))
+    .where(
+      and(
+        eq(tierTemplates.id, id),
+        eq(tierTemplates.creatorId, session.user.id)
+      )
+    )
     .returning({ id: tierTemplates.id })
 
   if (!deleted) throw new Error('Not found')

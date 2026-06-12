@@ -35,8 +35,11 @@ function chunk(type, data) {
 }
 
 // ── Build 32×32 RGBA image ───────────────────────────────────────────────────
-const W = 32, H = 32
-const R = 0x2e, G = 0x62, B = 0xd4  // #2E62D4
+const W = 32,
+  H = 32
+const R = 0x2e,
+  G = 0x62,
+  B = 0xd4 // #2E62D4
 
 const pixels = new Uint8Array(W * H * 4) // all transparent
 
@@ -45,7 +48,10 @@ function fillRect(x, y, w, h, alpha) {
   for (let row = y; row < Math.min(y + h, H); row++) {
     for (let col = x; col < Math.min(x + w, W); col++) {
       const i = (row * W + col) * 4
-      pixels[i] = R; pixels[i + 1] = G; pixels[i + 2] = B; pixels[i + 3] = a
+      pixels[i] = R
+      pixels[i + 1] = G
+      pixels[i + 2] = B
+      pixels[i + 3] = a
     }
   }
 }
@@ -54,7 +60,7 @@ function fillRect(x, y, w, h, alpha) {
 // bar1: y=3, h=5, width=32  (full)
 // bar2: y=13, h=5, width=22
 // bar3: y=22, h=5, width=13
-fillRect(0, 3,  32, 5, 1.0)
+fillRect(0, 3, 32, 5, 1.0)
 fillRect(0, 13, 22, 5, 0.6)
 fillRect(0, 22, 13, 5, 0.3)
 
@@ -67,7 +73,7 @@ for (let row = 0; row < H; row++) {
   for (let col = 0; col < W; col++) {
     const src = (row * W + col) * 4
     const dst = base + 1 + col * 4
-    scanlines[dst]     = pixels[src]
+    scanlines[dst] = pixels[src]
     scanlines[dst + 1] = pixels[src + 1]
     scanlines[dst + 2] = pixels[src + 2]
     scanlines[dst + 3] = pixels[src + 3]
@@ -77,11 +83,11 @@ for (let row = 0; row < H; row++) {
 const ihdrData = Buffer.allocUnsafe(13)
 ihdrData.writeUInt32BE(W, 0)
 ihdrData.writeUInt32BE(H, 4)
-ihdrData[8] = 8   // bit depth
-ihdrData[9] = 6   // color type: RGBA
-ihdrData[10] = 0  // compression
-ihdrData[11] = 0  // filter
-ihdrData[12] = 0  // interlace
+ihdrData[8] = 8 // bit depth
+ihdrData[9] = 6 // color type: RGBA
+ihdrData[10] = 0 // compression
+ihdrData[11] = 0 // filter
+ihdrData[12] = 0 // interlace
 
 const compressed = deflateSync(scanlines)
 
@@ -94,21 +100,23 @@ const png = Buffer.concat([
 
 // ── Wrap in ICO ───────────────────────────────────────────────────────────────
 const icoHeader = Buffer.allocUnsafe(6)
-icoHeader.writeUInt16LE(0, 0)  // reserved
-icoHeader.writeUInt16LE(1, 2)  // type: ICO
-icoHeader.writeUInt16LE(1, 4)  // image count: 1
+icoHeader.writeUInt16LE(0, 0) // reserved
+icoHeader.writeUInt16LE(1, 2) // type: ICO
+icoHeader.writeUInt16LE(1, 4) // image count: 1
 
 const dirEntry = Buffer.allocUnsafe(16)
-dirEntry[0] = 32         // width  (0 = 256)
-dirEntry[1] = 32         // height (0 = 256)
-dirEntry[2] = 0          // color count
-dirEntry[3] = 0          // reserved
-dirEntry.writeUInt16LE(1, 4)            // planes
-dirEntry.writeUInt16LE(32, 6)           // bit count
-dirEntry.writeUInt32LE(png.length, 8)   // bytes in image
-dirEntry.writeUInt32LE(22, 12)          // offset: 6 (header) + 16 (dir entry)
+dirEntry[0] = 32 // width  (0 = 256)
+dirEntry[1] = 32 // height (0 = 256)
+dirEntry[2] = 0 // color count
+dirEntry[3] = 0 // reserved
+dirEntry.writeUInt16LE(1, 4) // planes
+dirEntry.writeUInt16LE(32, 6) // bit count
+dirEntry.writeUInt32LE(png.length, 8) // bytes in image
+dirEntry.writeUInt32LE(22, 12) // offset: 6 (header) + 16 (dir entry)
 
 const ico = Buffer.concat([icoHeader, dirEntry, png])
 writeFileSync(join(root, 'app', 'favicon.ico'), ico)
 
-console.log(`favicon.ico written (${ico.length} bytes, PNG ${png.length} bytes)`)
+console.log(
+  `favicon.ico written (${ico.length} bytes, PNG ${png.length} bytes)`
+)

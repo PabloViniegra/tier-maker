@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 /** Single card skeleton matching ExploreCard geometry exactly. */
 function ExploreCardSkeleton() {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface overflow-hidden">
+    <div className="flex flex-col gap-3 overflow-hidden rounded-lg border border-border bg-surface">
       {/* Cover image — aspect-video */}
       <Skeleton className="aspect-video w-full rounded-none" />
 

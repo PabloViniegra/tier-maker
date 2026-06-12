@@ -12,7 +12,7 @@ export interface DeltaResult {
  */
 export function formatDelta(
   current: number,
-  previous: number | undefined | null,
+  previous: number | undefined | null
 ): DeltaResult | null {
   if (previous === undefined || previous === null || previous === 0) {
     return null

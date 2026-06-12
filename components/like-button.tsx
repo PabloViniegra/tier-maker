@@ -14,10 +14,18 @@ type Props = {
   isAuthenticated: boolean
 }
 
-export function LikeButton({ templateId, initialCount, initialIsLiked, isAuthenticated }: Props) {
+export function LikeButton({
+  templateId,
+  initialCount,
+  initialIsLiked,
+  isAuthenticated,
+}: Props) {
   const router = useRouter()
   const [, startTransition] = useTransition()
-  const [committed, setCommitted] = useState({ count: initialCount, isLiked: initialIsLiked })
+  const [committed, setCommitted] = useState({
+    count: initialCount,
+    isLiked: initialIsLiked,
+  })
   const [optimistic, setOptimistic] = useOptimistic(
     committed,
     (state, liked: boolean) => ({
@@ -37,7 +45,7 @@ export function LikeButton({ templateId, initialCount, initialIsLiked, isAuthent
       setOptimistic(nextLiked)
       try {
         await toggleLike(templateId)
-        setCommitted(prev => ({
+        setCommitted((prev) => ({
           count: nextLiked ? prev.count + 1 : prev.count - 1,
           isLiked: nextLiked,
         }))

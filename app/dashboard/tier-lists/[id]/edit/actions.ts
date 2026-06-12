@@ -6,7 +6,10 @@ import { db } from '@/lib/db'
 import { tierTemplates } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
 import { assertOwned, replaceTierRows } from '@/lib/db/tier-list-mutations'
-import { createTierListSchema, type CreateTierListInput } from '@/lib/validators/tier-list'
+import {
+  createTierListSchema,
+  type CreateTierListInput,
+} from '@/lib/validators/tier-list'
 
 export async function updateTierListStructureAction(
   id: string,
@@ -20,7 +23,8 @@ export async function updateTierListStructureAction(
 
   await assertOwned(id, session.user.id)
 
-  const { title, description, category, coverImageUrl, bankItems, rows } = parsed.data
+  const { title, description, category, coverImageUrl, bankItems, rows } =
+    parsed.data
 
   await db.transaction(async (tx) => {
     await tx

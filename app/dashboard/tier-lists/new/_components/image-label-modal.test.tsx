@@ -9,7 +9,9 @@ function makeFile(name = 'cake.png'): File {
 describe('ImageLabelModal', () => {
   it('renders one input per file', () => {
     const files = [makeFile('a.png'), makeFile('b.png')]
-    render(<ImageLabelModal files={files} onConfirm={vi.fn()} onCancel={vi.fn()} />)
+    render(
+      <ImageLabelModal files={files} onConfirm={vi.fn()} onCancel={vi.fn()} />
+    )
     expect(screen.getAllByRole('textbox')).toHaveLength(2)
   })
 
@@ -21,12 +23,16 @@ describe('ImageLabelModal', () => {
         onCancel={vi.fn()}
       />
     )
-    expect(screen.getByPlaceholderText('strawberry-cake.png')).toBeInTheDocument()
+    expect(
+      screen.getByPlaceholderText('strawberry-cake.png')
+    ).toBeInTheDocument()
   })
 
   it('confirm button is disabled when any label is empty', () => {
     const files = [makeFile('a.png'), makeFile('b.png')]
-    render(<ImageLabelModal files={files} onConfirm={vi.fn()} onCancel={vi.fn()} />)
+    render(
+      <ImageLabelModal files={files} onConfirm={vi.fn()} onCancel={vi.fn()} />
+    )
     const inputs = screen.getAllByRole('textbox')
     fireEvent.change(inputs[0], { target: { value: 'A cake' } })
     // second input still empty
@@ -35,7 +41,9 @@ describe('ImageLabelModal', () => {
 
   it('confirm button is enabled when all labels are filled', () => {
     const files = [makeFile('a.png'), makeFile('b.png')]
-    render(<ImageLabelModal files={files} onConfirm={vi.fn()} onCancel={vi.fn()} />)
+    render(
+      <ImageLabelModal files={files} onConfirm={vi.fn()} onCancel={vi.fn()} />
+    )
     const inputs = screen.getAllByRole('textbox')
     fireEvent.change(inputs[0], { target: { value: 'A cake' } })
     fireEvent.change(inputs[1], { target: { value: 'B cake' } })
@@ -45,7 +53,9 @@ describe('ImageLabelModal', () => {
   it('calls onConfirm with {file, label}[] pairs when confirmed', () => {
     const onConfirm = vi.fn()
     const files = [makeFile('tart.png'), makeFile('pie.png')]
-    render(<ImageLabelModal files={files} onConfirm={onConfirm} onCancel={vi.fn()} />)
+    render(
+      <ImageLabelModal files={files} onConfirm={onConfirm} onCancel={vi.fn()} />
+    )
     const inputs = screen.getAllByRole('textbox')
     fireEvent.change(inputs[0], { target: { value: 'Lemon tart' } })
     fireEvent.change(inputs[1], { target: { value: 'Apple pie' } })
@@ -61,7 +71,11 @@ describe('ImageLabelModal', () => {
     const onConfirm = vi.fn()
     const onCancel = vi.fn()
     render(
-      <ImageLabelModal files={[makeFile()]} onConfirm={onConfirm} onCancel={onCancel} />
+      <ImageLabelModal
+        files={[makeFile()]}
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />
     )
     fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
     expect(onCancel).toHaveBeenCalledOnce()
@@ -70,7 +84,11 @@ describe('ImageLabelModal', () => {
 
   it('enforces max label length of 50 characters on inputs', () => {
     render(
-      <ImageLabelModal files={[makeFile()]} onConfirm={vi.fn()} onCancel={vi.fn()} />
+      <ImageLabelModal
+        files={[makeFile()]}
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+      />
     )
     const input = screen.getByRole('textbox')
     expect(input).toHaveAttribute('maxLength', '50')

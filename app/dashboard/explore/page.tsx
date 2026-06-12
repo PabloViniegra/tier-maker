@@ -43,7 +43,10 @@ export default async function DashboardExplorePage({ searchParams }: Props) {
 
   const userId = session?.user.id ?? null
   const likedIds = userId
-    ? await getUserLikedTemplateIds(userId, items.map((i) => i.id))
+    ? await getUserLikedTemplateIds(
+        userId,
+        items.map((i) => i.id)
+      )
     : []
 
   return (
@@ -65,17 +68,29 @@ export default async function DashboardExplorePage({ searchParams }: Props) {
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <FadeUp delay={0.12} onMount>
-          <Suspense fallback={<div className="h-9 w-full max-w-md rounded-md bg-surface animate-pulse" />}>
+          <Suspense
+            fallback={
+              <div className="h-9 w-full max-w-md animate-pulse rounded-md bg-surface" />
+            }
+          >
             <ExploreSearchInput defaultValue={q} />
           </Suspense>
         </FadeUp>
         <FadeUp delay={0.18} onMount>
-          <Suspense fallback={<div className="h-8 w-[160px] rounded-md bg-surface animate-pulse" />}>
+          <Suspense
+            fallback={
+              <div className="h-8 w-[160px] animate-pulse rounded-md bg-surface" />
+            }
+          >
             <ExploreCategoryFilter categories={categories} value={category} />
           </Suspense>
         </FadeUp>
         <FadeUp delay={0.24} onMount>
-          <Suspense fallback={<div className="h-8 w-[150px] rounded-md bg-surface animate-pulse" />}>
+          <Suspense
+            fallback={
+              <div className="h-8 w-[150px] animate-pulse rounded-md bg-surface" />
+            }
+          >
             <ExploreSortSelect value={sort} />
           </Suspense>
         </FadeUp>

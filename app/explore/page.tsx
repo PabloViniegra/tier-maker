@@ -20,16 +20,19 @@ import { ExplorePagination } from './_components/explore-pagination'
 
 export const metadata: Metadata = {
   title: 'Explore Tier Lists',
-  description: 'Browse and fill community-created tier lists. No account required.',
+  description:
+    'Browse and fill community-created tier lists. No account required.',
   openGraph: {
     title: 'Explore Tier Lists — Tier Maker',
-    description: 'Browse and fill community-created tier lists. No account required.',
+    description:
+      'Browse and fill community-created tier lists. No account required.',
     images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Tier Maker' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Explore Tier Lists — Tier Maker',
-    description: 'Browse and fill community-created tier lists. No account required.',
+    description:
+      'Browse and fill community-created tier lists. No account required.',
     images: ['/og.png'],
   },
 }
@@ -59,7 +62,10 @@ export default async function ExplorePage({ searchParams }: Props) {
 
   const userId = session?.user.id ?? null
   const likedIds = userId
-    ? await getUserLikedTemplateIds(userId, items.map((i) => i.id))
+    ? await getUserLikedTemplateIds(
+        userId,
+        items.map((i) => i.id)
+      )
     : []
 
   return (
@@ -76,12 +82,12 @@ export default async function ExplorePage({ searchParams }: Props) {
 
         <div className="relative mx-auto w-full max-w-6xl px-4 py-6">
           <FadeUp delay={0} onMount>
-            <h1 className="font-heading text-2xl font-semibold text-foreground text-balance">
+            <h1 className="font-heading text-2xl font-semibold text-balance text-foreground">
               Explore Tier Lists
             </h1>
           </FadeUp>
           <FadeUp delay={0.06} onMount>
-            <p className="mt-1 text-sm text-muted-foreground text-pretty">
+            <p className="mt-1 text-sm text-pretty text-muted-foreground">
               {total > 0
                 ? `${total} public tier list${total === 1 ? '' : 's'} from the community`
                 : 'No tier lists found'}
@@ -97,7 +103,10 @@ export default async function ExplorePage({ searchParams }: Props) {
             </FadeUp>
             <FadeUp delay={0.18} onMount>
               <Suspense fallback={<Skeleton className="h-8 w-[160px]" />}>
-                <ExploreCategoryFilter categories={categories} value={category} />
+                <ExploreCategoryFilter
+                  categories={categories}
+                  value={category}
+                />
               </Suspense>
             </FadeUp>
             <FadeUp delay={0.24} onMount>
@@ -110,7 +119,10 @@ export default async function ExplorePage({ searchParams }: Props) {
       </div>
 
       {/* Grid section */}
-      <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:py-8">
+      <main
+        id="main-content"
+        className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:py-8"
+      >
         <ViewTransition>
           <Suspense fallback={<ExploreGridSkeleton />}>
             <ExploreGrid

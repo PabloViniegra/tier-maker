@@ -9,7 +9,10 @@ import {
   MIN_ROW_COUNT,
 } from './tier-list'
 
-const item = (url = 'https://blob.vercel-storage.com/a.png', label = 'A cake') => ({
+const item = (
+  url = 'https://blob.vercel-storage.com/a.png',
+  label = 'A cake'
+) => ({
   url,
   label,
 })
@@ -29,13 +32,17 @@ describe('imageItemSchema', () => {
 
   it(`rejects a label longer than ${MAX_IMAGE_LABEL_LENGTH} characters`, () => {
     expect(
-      imageItemSchema.safeParse(item(undefined, 'x'.repeat(MAX_IMAGE_LABEL_LENGTH + 1))).success
+      imageItemSchema.safeParse(
+        item(undefined, 'x'.repeat(MAX_IMAGE_LABEL_LENGTH + 1))
+      ).success
     ).toBe(false)
   })
 
   it(`accepts a label of exactly ${MAX_IMAGE_LABEL_LENGTH} characters`, () => {
     expect(
-      imageItemSchema.safeParse(item(undefined, 'x'.repeat(MAX_IMAGE_LABEL_LENGTH))).success
+      imageItemSchema.safeParse(
+        item(undefined, 'x'.repeat(MAX_IMAGE_LABEL_LENGTH))
+      ).success
     ).toBe(true)
   })
 })
@@ -70,9 +77,18 @@ describe('createTierListSchema', () => {
   it('accepts items as {url, label} objects in rows and bank', () => {
     const input = {
       ...validInput,
-      bankItems: [item('https://blob.vercel-storage.com/a.png', 'Strawberry cake')],
+      bankItems: [
+        item('https://blob.vercel-storage.com/a.png', 'Strawberry cake'),
+      ],
       rows: validInput.rows.map((r, i) =>
-        i === 0 ? { ...r, items: [item('https://blob.vercel-storage.com/b.png', 'Chocolate tart')] } : r
+        i === 0
+          ? {
+              ...r,
+              items: [
+                item('https://blob.vercel-storage.com/b.png', 'Chocolate tart'),
+              ],
+            }
+          : r
       ),
     }
     expect(createTierListSchema.safeParse(input).success).toBe(true)
@@ -98,26 +114,36 @@ describe('createTierListSchema', () => {
     const rows = validInput.rows.map((r, i) =>
       i === 0 ? { ...r, items: [{ url: 'not-a-url', label: 'ok' }] } : r
     )
-    expect(createTierListSchema.safeParse({ ...validInput, rows }).success).toBe(false)
+    expect(
+      createTierListSchema.safeParse({ ...validInput, rows }).success
+    ).toBe(false)
   })
 
   it('rejects an empty title', () => {
-    expect(createTierListSchema.safeParse({ ...validInput, title: '' }).success).toBe(false)
+    expect(
+      createTierListSchema.safeParse({ ...validInput, title: '' }).success
+    ).toBe(false)
   })
 
   it('rejects a title longer than 80 characters', () => {
     expect(
-      createTierListSchema.safeParse({ ...validInput, title: 'x'.repeat(81) }).success
+      createTierListSchema.safeParse({ ...validInput, title: 'x'.repeat(81) })
+        .success
     ).toBe(false)
   })
 
   it('rejects an empty category', () => {
-    expect(createTierListSchema.safeParse({ ...validInput, category: '' }).success).toBe(false)
+    expect(
+      createTierListSchema.safeParse({ ...validInput, category: '' }).success
+    ).toBe(false)
   })
 
   it('rejects a description longer than 500 characters', () => {
     expect(
-      createTierListSchema.safeParse({ ...validInput, description: 'x'.repeat(501) }).success
+      createTierListSchema.safeParse({
+        ...validInput,
+        description: 'x'.repeat(501),
+      }).success
     ).toBe(false)
   })
 
@@ -129,7 +155,10 @@ describe('createTierListSchema', () => {
 
   it(`rejects fewer than ${MIN_ROW_COUNT} rows`, () => {
     expect(
-      createTierListSchema.safeParse({ ...validInput, rows: validInput.rows.slice(0, MIN_ROW_COUNT - 1) }).success
+      createTierListSchema.safeParse({
+        ...validInput,
+        rows: validInput.rows.slice(0, MIN_ROW_COUNT - 1),
+      }).success
     ).toBe(false)
   })
 
@@ -140,12 +169,18 @@ describe('createTierListSchema', () => {
       color: 'oklch(0.5 0.2 200)',
       items: [],
     }))
-    expect(createTierListSchema.safeParse({ ...validInput, rows: tooMany }).success).toBe(false)
+    expect(
+      createTierListSchema.safeParse({ ...validInput, rows: tooMany }).success
+    ).toBe(false)
   })
 
   it('rejects a row with an empty label', () => {
-    const rows = validInput.rows.map((r, i) => (i === 0 ? { ...r, label: '' } : r))
-    expect(createTierListSchema.safeParse({ ...validInput, rows }).success).toBe(false)
+    const rows = validInput.rows.map((r, i) =>
+      i === 0 ? { ...r, label: '' } : r
+    )
+    expect(
+      createTierListSchema.safeParse({ ...validInput, rows }).success
+    ).toBe(false)
   })
 
   it(`rejects more than ${MAX_ITEM_COUNT} total items (rows + bank)`, () => {
@@ -156,11 +191,16 @@ describe('createTierListSchema', () => {
         (_, i) => item(`https://blob.vercel-storage.com/${i}.png`, `Item ${i}`)
       ),
     }))
-    expect(createTierListSchema.safeParse({ ...validInput, rows: fullRows }).success).toBe(false)
+    expect(
+      createTierListSchema.safeParse({ ...validInput, rows: fullRows }).success
+    ).toBe(false)
   })
 
   it('accepts an optional coverImageUrl', () => {
-    const input = { ...validInput, coverImageUrl: 'https://blob.vercel-storage.com/cover.png' }
+    const input = {
+      ...validInput,
+      coverImageUrl: 'https://blob.vercel-storage.com/cover.png',
+    }
     expect(createTierListSchema.safeParse(input).success).toBe(true)
   })
 

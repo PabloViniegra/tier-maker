@@ -16,8 +16,22 @@ export function TierMakerIcon({
       {...props}
     >
       <rect x={0} y={2} width={20} height={3} fill="var(--color-primary)" />
-      <rect x={0} y={8} width={14} height={3} fill="var(--color-primary)" fillOpacity={0.6} />
-      <rect x={0} y={14} width={8} height={3} fill="var(--color-primary)" fillOpacity={0.3} />
+      <rect
+        x={0}
+        y={8}
+        width={14}
+        height={3}
+        fill="var(--color-primary)"
+        fillOpacity={0.6}
+      />
+      <rect
+        x={0}
+        y={14}
+        width={8}
+        height={3}
+        fill="var(--color-primary)"
+        fillOpacity={0.3}
+      />
     </svg>
   )
 }

@@ -20,14 +20,18 @@ describe('ThemeToggleButton', () => {
   it('renders button even when theme is undefined (pre-hydration, defaults to dark)', () => {
     mockTheme.value = undefined
     render(<ThemeToggleButton />)
-    expect(screen.getByRole('button', { name: /toggle theme/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /toggle theme/i })
+    ).toBeInTheDocument()
     expect(screen.getByTestId('icon-sun')).toBeInTheDocument()
   })
 
   it('renders button with aria-label', () => {
     mockTheme.value = 'dark'
     render(<ThemeToggleButton />)
-    expect(screen.getByRole('button', { name: /toggle theme/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /toggle theme/i })
+    ).toBeInTheDocument()
   })
 
   it('shows Sun icon in dark mode', () => {

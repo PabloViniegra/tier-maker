@@ -30,7 +30,10 @@ export async function getTierFill(key: string): Promise<TierFillDraft | null> {
   return (await db.get(STORE_NAME, key)) ?? null
 }
 
-export async function setTierFill(key: string, draft: TierFillDraft): Promise<void> {
+export async function setTierFill(
+  key: string,
+  draft: TierFillDraft
+): Promise<void> {
   const db = await getDb()
   await db.put(STORE_NAME, draft, key)
 }

@@ -22,7 +22,7 @@ export function MobileTopBar({ user }: { user: SidebarUser }) {
   const pathname = usePathname()
 
   return (
-    <header className="md:hidden sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-surface px-4">
+    <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-surface px-4 md:hidden">
       <Sheet>
         <SheetTrigger
           className={cn(
@@ -35,9 +35,9 @@ export function MobileTopBar({ user }: { user: SidebarUser }) {
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="flex w-[240px] flex-col p-0 bg-surface border-border"
+          className="flex w-[240px] flex-col border-border bg-surface p-0"
         >
-          <SheetHeader className="flex h-12 flex-row items-center gap-2 border-b border-border px-4 space-y-0">
+          <SheetHeader className="flex h-12 flex-row items-center gap-2 space-y-0 border-b border-border px-4">
             <SheetTitle className="flex items-center gap-0">
               <SidebarLogo />
             </SheetTitle>

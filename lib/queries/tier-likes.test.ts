@@ -34,10 +34,7 @@ describe('getUserLikedTemplateIds', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('returns an array of template IDs liked by the user', async () => {
-    mockSelectResultNoLimit([
-      { templateId: 'tpl-a' },
-      { templateId: 'tpl-b' },
-    ])
+    mockSelectResultNoLimit([{ templateId: 'tpl-a' }, { templateId: 'tpl-b' }])
 
     const result = await getUserLikedTemplateIds('user-1')
     expect(result).toEqual(['tpl-a', 'tpl-b'])
@@ -53,7 +50,11 @@ describe('getUserLikedTemplateIds', () => {
   it('scopes the query when templateIds are provided', async () => {
     mockSelectResultNoLimit([{ templateId: 'tpl-a' }])
 
-    const result = await getUserLikedTemplateIds('user-1', ['tpl-a', 'tpl-b', 'tpl-c'])
+    const result = await getUserLikedTemplateIds('user-1', [
+      'tpl-a',
+      'tpl-b',
+      'tpl-c',
+    ])
     expect(result).toEqual(['tpl-a'])
   })
 

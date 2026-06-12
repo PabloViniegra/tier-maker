@@ -6,7 +6,9 @@ import type { TierFillDraft } from '../tier-fill-store'
 const KEY = 'user-123:tier-abc'
 const DRAFT: TierFillDraft = {
   rows: [{ id: 'r1', label: 'S', color: '#ff0000', items: [] }],
-  bankItems: [{ id: 'x1', label: 'A', url: 'https://img/a.jpg', status: 'uploaded' }],
+  bankItems: [
+    { id: 'x1', label: 'A', url: 'https://img/a.jpg', status: 'uploaded' },
+  ],
 }
 
 beforeEach(async () => {

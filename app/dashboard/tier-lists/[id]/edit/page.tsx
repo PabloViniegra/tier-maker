@@ -27,7 +27,7 @@ export default async function EditTierListPage({ params }: Props) {
   if (!data) notFound()
 
   return (
-    <div className='flex flex-col gap-6 p-6'>
+    <div className="flex flex-col gap-6 p-6">
       <Suspense fallback={null}>
         <TierListCreator
           categoryPresets={presets}

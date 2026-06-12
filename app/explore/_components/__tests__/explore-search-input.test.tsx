@@ -47,7 +47,9 @@ describe('ExploreSearchInput', () => {
   })
 
   it('resets page to 1 when search changes', () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3&sort=newest'))
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams('page=3&sort=newest')
+    )
     render(<ExploreSearchInput defaultValue="" />)
     const input = screen.getByRole('searchbox')
     fireEvent.change(input, { target: { value: 'x' } })

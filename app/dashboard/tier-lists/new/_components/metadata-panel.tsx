@@ -1,9 +1,20 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
-import { Check, ChevronDown, ChevronsUpDown, ImagePlus, Loader2, X } from 'lucide-react'
+import {
+  Check,
+  ChevronDown,
+  ChevronsUpDown,
+  ImagePlus,
+  Loader2,
+  X,
+} from 'lucide-react'
 import { toast } from 'sonner'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import {
   Command,
   CommandEmpty,
@@ -17,7 +28,11 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from '@/components/ui/collapsible'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { cn } from '@/lib/utils'
 import {
@@ -51,7 +66,9 @@ export function MetadataPanel({
   )
   const inputTrimmed = categoryInput.trim()
   const isAlreadyPreset =
-    categoryPresets.some((p) => p.toLowerCase() === inputTrimmed.toLowerCase()) ||
+    categoryPresets.some(
+      (p) => p.toLowerCase() === inputTrimmed.toLowerCase()
+    ) ||
     userPresets.some((p) => p.name.toLowerCase() === inputTrimmed.toLowerCase())
 
   function selectCategory(value: string) {
@@ -116,88 +133,100 @@ export function MetadataPanel({
 
   return (
     <section
-      aria-labelledby='metadata-heading'
-      className='flex flex-col gap-4 rounded-lg border border-border bg-surface p-5'
+      aria-labelledby="metadata-heading"
+      className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-5"
     >
-      <header className='flex items-baseline justify-between gap-3'>
-        <h2 id='metadata-heading' className='font-heading text-sm'>
+      <header className="flex items-baseline justify-between gap-3">
+        <h2 id="metadata-heading" className="font-heading text-sm">
           Details
         </h2>
       </header>
 
-      <div className='flex flex-col gap-2'>
-        <div className='flex items-baseline justify-between'>
-          <Label htmlFor='title' className='text-xs font-medium text-muted-foreground'>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-baseline justify-between">
+          <Label
+            htmlFor="title"
+            className="text-xs font-medium text-muted-foreground"
+          >
             Title
           </Label>
-          <span className='text-[11px] text-muted-foreground tabular-nums'>
+          <span className="text-[11px] text-muted-foreground tabular-nums">
             {metadata.title.length}/80
           </span>
         </div>
         <Input
-          id='title'
+          id="title"
           value={metadata.title}
           onChange={(e) => setMetadata({ title: e.target.value })}
-          placeholder='Best movies of all time'
+          placeholder="Best movies of all time"
           maxLength={80}
           required
         />
       </div>
 
-      <div className='grid grid-cols-1 gap-4'>
-        <div className='flex flex-col gap-2'>
-          <Label htmlFor='category' className='text-xs font-medium text-muted-foreground'>
+      <div className="grid grid-cols-1 gap-4">
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="category"
+            className="text-xs font-medium text-muted-foreground"
+          >
             Category
           </Label>
           <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
             <PopoverTrigger
               render={
                 <Button
-                  id='category'
-                  type='button'
-                  variant='outline'
-                  role='combobox'
+                  id="category"
+                  type="button"
+                  variant="outline"
+                  role="combobox"
                   aria-expanded={categoryOpen}
-                  className='w-full justify-between font-normal'
+                  className="w-full justify-between font-normal"
                 />
               }
             >
-              <span className={cn('truncate', !metadata.category && 'text-muted-foreground')}>
+              <span
+                className={cn(
+                  'truncate',
+                  !metadata.category && 'text-muted-foreground'
+                )}
+              >
                 {metadata.category || 'Pick a category'}
               </span>
-              <ChevronsUpDown size={14} className='opacity-50' />
+              <ChevronsUpDown size={14} className="opacity-50" />
             </PopoverTrigger>
             <PopoverContent
-              className='w-[var(--anchor-width)] p-0'
-              align='start'
+              className="w-[var(--anchor-width)] p-0"
+              align="start"
             >
               <Command
                 filter={(value, search) => {
-                  if (value.toLowerCase().includes(search.toLowerCase())) return 1
+                  if (value.toLowerCase().includes(search.toLowerCase()))
+                    return 1
                   return 0
                 }}
               >
                 <CommandInput
                   value={categoryInput}
                   onValueChange={setCategoryInput}
-                  placeholder='Buscar o escribir una categoría...'
+                  placeholder="Buscar o escribir una categoría..."
                 />
                 <CommandList>
                   <CommandEmpty>
-                    <div className='flex flex-col gap-1 p-1'>
+                    <div className="flex flex-col gap-1 p-1">
                       <button
-                        type='button'
+                        type="button"
                         onClick={() => selectCategory(inputTrimmed)}
-                        className='rounded px-2 py-1.5 text-sm text-primary hover:bg-accent hover:text-accent-foreground text-left'
+                        className="rounded px-2 py-1.5 text-left text-sm text-primary hover:bg-accent hover:text-accent-foreground"
                       >
                         Usar &quot;{inputTrimmed}&quot;
                       </button>
                       {inputTrimmed && !isAlreadyPreset && (
                         <button
-                          type='button'
+                          type="button"
                           disabled={isPending}
                           onClick={handleSaveAndUse}
-                          className='rounded px-2 py-1.5 text-sm font-medium text-primary hover:bg-accent hover:text-accent-foreground text-left disabled:opacity-50'
+                          className="rounded px-2 py-1.5 text-left text-sm font-medium text-primary hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
                         >
                           Guardar y usar &quot;{inputTrimmed}&quot;
                         </button>
@@ -206,7 +235,7 @@ export function MetadataPanel({
                   </CommandEmpty>
 
                   {filteredDefaults.length > 0 && (
-                    <CommandGroup heading='Presets'>
+                    <CommandGroup heading="Presets">
                       {filteredDefaults.map((preset) => (
                         <CommandItem
                           key={preset}
@@ -228,29 +257,30 @@ export function MetadataPanel({
                   {filteredUser.length > 0 && (
                     <>
                       {filteredDefaults.length > 0 && <CommandSeparator />}
-                      <CommandGroup heading='Mis categorías'>
+                      <CommandGroup heading="Mis categorías">
                         {filteredUser.map((preset) => (
                           <CommandItem
                             key={preset.id}
                             value={preset.name}
                             onSelect={selectCategory}
-                            className='group'
+                            className="group"
                           >
-                            <span className='flex-1'>{preset.name}</span>
+                            <span className="flex-1">{preset.name}</span>
                             <Check
                               className={cn(
-                                'opacity-0 shrink-0',
-                                metadata.category === preset.name && 'opacity-100'
+                                'shrink-0 opacity-0',
+                                metadata.category === preset.name &&
+                                  'opacity-100'
                               )}
                             />
                             <button
-                              type='button'
+                              type="button"
                               aria-label={`Eliminar preset ${preset.name}`}
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleDeletePreset(preset)
                               }}
-                              className='ml-1 shrink-0 rounded opacity-0 group-hover:opacity-100 hover:text-destructive'
+                              className="ml-1 shrink-0 rounded opacity-0 group-hover:opacity-100 hover:text-destructive"
                             >
                               <X size={12} />
                             </button>
@@ -265,47 +295,50 @@ export function MetadataPanel({
           </Popover>
         </div>
 
-        <div className='flex flex-col gap-2'>
-          <Label htmlFor='cover-image-input' className='text-xs font-medium text-muted-foreground'>
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="cover-image-input"
+            className="text-xs font-medium text-muted-foreground"
+          >
             Cover
           </Label>
           <input
             ref={coverInputRef}
-            id='cover-image-input'
-            type='file'
-            accept='image/jpeg,image/png,image/webp,image/gif'
-            className='sr-only'
+            id="cover-image-input"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="sr-only"
             onChange={handleCoverFileChange}
-            data-testid='cover-file-input'
+            data-testid="cover-file-input"
           />
           {metadata.coverImageUrl ? (
-            <div className='group/cover relative aspect-video w-full overflow-hidden rounded-md border border-border'>
+            <div className="group/cover relative aspect-video w-full overflow-hidden rounded-md border border-border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={metadata.coverImageUrl}
-                alt='Cover image preview'
-                className='h-full w-full object-cover'
+                alt="Cover image preview"
+                className="h-full w-full object-cover"
               />
               <button
-                type='button'
+                type="button"
                 onClick={() => setMetadata({ coverImageUrl: undefined })}
-                className='absolute right-1 top-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/cover:opacity-100 focus-visible:opacity-100 hover:text-foreground'
-                aria-label='Remove cover'
+                className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/cover:opacity-100 hover:text-foreground focus-visible:opacity-100"
+                aria-label="Remove cover"
               >
                 <X size={14} />
               </button>
             </div>
           ) : (
             <Button
-              type='button'
-              variant='outline'
-              size='sm'
-              className='h-8 w-full justify-start gap-2 px-2.5'
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 w-full justify-start gap-2 px-2.5"
               onClick={() => coverInputRef.current?.click()}
               disabled={isUploadingCover}
             >
               {isUploadingCover ? (
-                <Loader2 size={14} className='animate-spin' />
+                <Loader2 size={14} className="animate-spin" />
               ) : (
                 <ImagePlus size={14} />
               )}
@@ -319,31 +352,34 @@ export function MetadataPanel({
         <CollapsibleTrigger
           render={
             <button
-              type='button'
-              className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors'
+              type="button"
+              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
             />
           }
         >
-          <ChevronDown size={12} className='[[data-open]_&]:rotate-180' />
+          <ChevronDown size={12} className="[[data-open]_&]:rotate-180" />
           More details
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className='flex flex-col gap-2 pt-3'>
-            <div className='flex items-baseline justify-between'>
-              <Label htmlFor='description' className='text-xs font-medium text-muted-foreground'>
+          <div className="flex flex-col gap-2 pt-3">
+            <div className="flex items-baseline justify-between">
+              <Label
+                htmlFor="description"
+                className="text-xs font-medium text-muted-foreground"
+              >
                 Description
               </Label>
-              <span className='text-[11px] text-muted-foreground tabular-nums'>
+              <span className="text-[11px] text-muted-foreground tabular-nums">
                 {metadata.description.length}/500
               </span>
             </div>
             <Textarea
-              id='description'
+              id="description"
               value={metadata.description}
               onChange={(e) => setMetadata({ description: e.target.value })}
-              placeholder='A short description of your tier list'
+              placeholder="A short description of your tier list"
               maxLength={500}
-              className='min-h-8 resize-none'
+              className="min-h-8 resize-none"
               rows={1}
             />
           </div>

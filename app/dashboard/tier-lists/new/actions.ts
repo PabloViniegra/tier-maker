@@ -13,8 +13,14 @@ import {
   type CreateTierListInput,
 } from '@/lib/validators/tier-list'
 import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
+import { generateSlug } from '@/lib/utils/slug'
 
-const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+const ALLOWED_MIME = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+])
 const EXT_BY_MIME: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
@@ -88,16 +94,21 @@ export async function createTierListAction(
   }
 
   const data = parsed.data
-  const sidebarItems = [
-    ...data.bankItems,
-    ...data.rows.flatMap((r) => r.items),
-  ]
+  const sidebarItems = [...data.bankItems, ...data.rows.flatMap((r) => r.items)]
+
+  // Generate a unique slug from the title
+  const existingRows = await db
+    .select({ slug: tierTemplates.slug })
+    .from(tierTemplates)
+  const existingSlugs = new Set(existingRows.map((r) => r.slug))
+  const slug = generateSlug(data.title, existingSlugs)
 
   const { id } = await db.transaction(async (tx) => {
     const [tpl] = await tx
       .insert(tierTemplates)
       .values({
         title: data.title,
+        slug,
         description: data.description ?? null,
         category: data.category,
         creatorId: session.user.id,
@@ -127,7 +138,6 @@ export async function createTierListAction(
   return { id }
 }
 
-
 export async function saveUserCategoryPresetAction(
   name: string
 ): Promise<UserCategoryPreset | null> {
@@ -136,7 +146,9 @@ export async function saveUserCategoryPresetAction(
 
   const trimmed = name.trim()
   if (!trimmed || trimmed.length > MAX_CATEGORY_LENGTH) {
-    throw new Error(`Category name must be between 1 and ${MAX_CATEGORY_LENGTH} characters`)
+    throw new Error(
+      `Category name must be between 1 and ${MAX_CATEGORY_LENGTH} characters`
+    )
   }
 
   const [row] = await db
@@ -148,7 +160,9 @@ export async function saveUserCategoryPresetAction(
   return row ?? null
 }
 
-export async function deleteUserCategoryPresetAction(id: string): Promise<void> {
+export async function deleteUserCategoryPresetAction(
+  id: string
+): Promise<void> {
   const session = await getSession()
   if (!session) throw new Error('Unauthenticated')
 

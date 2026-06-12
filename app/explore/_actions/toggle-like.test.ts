@@ -57,7 +57,9 @@ function alreadyLiked() {
 
 function mockInsertChain() {
   mockInsert.mockReturnValue({
-    values: vi.fn().mockReturnValue({ onConflictDoNothing: vi.fn().mockResolvedValue(undefined) }),
+    values: vi.fn().mockReturnValue({
+      onConflictDoNothing: vi.fn().mockResolvedValue(undefined),
+    }),
   })
 }
 

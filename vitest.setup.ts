@@ -8,5 +8,9 @@ process.env.GOOGLE_CLIENT_SECRET = 'test-google-client-secret'
 // Provide a passthrough shim so components using it render correctly in tests.
 if (!('ViewTransition' in React)) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(React as any).ViewTransition = ({ children }: { children: React.ReactNode }) => children
+  ;(React as any).ViewTransition = ({
+    children,
+  }: {
+    children: React.ReactNode
+  }) => children
 }

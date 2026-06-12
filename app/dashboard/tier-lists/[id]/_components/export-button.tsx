@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button'
 
 // Resolved at export time from the live document so dark/light mode is respected.
 function resolvedBg(): string {
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue('--background')
-    .trim() || '#0d0d0d'
+  return (
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--background')
+      .trim() || '#0d0d0d'
+  )
 }
 
 type Props = {
@@ -41,7 +43,10 @@ export function ExportButton({ boardRef, title }: Props) {
       link.href = dataUrl
       link.click()
     } catch (err) {
-      toast.error('Export failed: ' + (err instanceof Error ? err.message : 'Unknown error'))
+      toast.error(
+        'Export failed: ' +
+          (err instanceof Error ? err.message : 'Unknown error')
+      )
     } finally {
       setExporting(false)
     }
@@ -49,13 +54,17 @@ export function ExportButton({ boardRef, title }: Props) {
 
   return (
     <Button
-      variant='outline'
-      size='sm'
+      variant="outline"
+      size="sm"
       onClick={handleExport}
       disabled={exporting}
-      className='gap-1.5'
+      className="gap-1.5"
     >
-      {exporting ? <Loader2 size={14} className='animate-spin' /> : <Download size={14} />}
+      {exporting ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : (
+        <Download size={14} />
+      )}
       Export
     </Button>
   )

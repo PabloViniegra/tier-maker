@@ -63,7 +63,10 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
 
   // Deltas compare current-window vs previous-window counts — not all-time totals
   const totalDelta = formatDelta(stats.totalCurrent, stats.totalPrev)
-  const categoriesDelta = formatDelta(stats.categoriesCurrent, stats.categoriesPrev)
+  const categoriesDelta = formatDelta(
+    stats.categoriesCurrent,
+    stats.categoriesPrev
+  )
 
   return (
     <motion.div
@@ -74,7 +77,11 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
       {statDefs.map(({ label, sublabel, key, icon: Icon }, i) => {
         const hasSeries = key === 'total'
         const delta =
-          key === 'total' ? totalDelta : key === 'categories' ? categoriesDelta : null
+          key === 'total'
+            ? totalDelta
+            : key === 'categories'
+              ? categoriesDelta
+              : null
 
         return (
           <motion.div
@@ -86,7 +93,12 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
             {/* Header row: label + icon */}
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">{label}</p>
-              <Icon size={12} strokeWidth={1.5} className="text-muted-foreground" aria-hidden="true" />
+              <Icon
+                size={12}
+                strokeWidth={1.5}
+                className="text-muted-foreground"
+                aria-hidden="true"
+              />
             </div>
 
             {/* Value + sparkline row */}

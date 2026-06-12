@@ -44,7 +44,11 @@ export const springTransition = {
 
 export const statusFadeVariants: Variants = {
   initial: { opacity: 0, y: -4 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.15, ease: 'easeInOut' } },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.15, ease: 'easeInOut' },
+  },
   exit: { opacity: 0, y: 4, transition: { duration: 0.15, ease: 'easeInOut' } },
 }
 
@@ -83,7 +87,12 @@ export const bentoSpotlightVariants: Variants = {
 export function bentoIconFloat(delay = 0) {
   return {
     y: [0, -3, 0],
-    transition: { repeat: Infinity, duration: 4, ease: 'easeInOut' as const, delay },
+    transition: {
+      repeat: Infinity,
+      duration: 4,
+      ease: 'easeInOut' as const,
+      delay,
+    },
   }
 }
 

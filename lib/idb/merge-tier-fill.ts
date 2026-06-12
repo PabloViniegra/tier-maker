@@ -1,4 +1,8 @@
-import type { TierListDetailSeed, EditorTierRow, TierItem } from '@/lib/stores/tier-editor'
+import type {
+  TierListDetailSeed,
+  EditorTierRow,
+  TierItem,
+} from '@/lib/stores/tier-editor'
 import type { TierFillDraft } from './tier-fill-store'
 import { newId } from '@/lib/utils/new-id'
 
@@ -16,7 +20,9 @@ function collectPlacedUrls(rows: TierFillDraft['rows']): Set<string> {
   return placed
 }
 
-function buildDraftRowMap(rows: TierFillDraft['rows']): Map<string, TierItem[]> {
+function buildDraftRowMap(
+  rows: TierFillDraft['rows']
+): Map<string, TierItem[]> {
   return new Map(rows.map((r) => [r.id, r.items]))
 }
 
@@ -29,7 +35,9 @@ function applyDraftToRows(
     id: r.id,
     label: r.label,
     color: r.color,
-    items: (draftRowMap.get(r.id) ?? []).filter((i) => i.url && serverCatalogue.has(i.url)),
+    items: (draftRowMap.get(r.id) ?? []).filter(
+      (i) => i.url && serverCatalogue.has(i.url)
+    ),
   }))
 }
 
@@ -47,7 +55,12 @@ function newServerBankItems(
 ): TierItem[] {
   return sidebarItems
     .filter((i) => !placedUrls.has(i.url) && !alreadyInBank.has(i.url))
-    .map((item) => ({ id: newId(), url: item.url, label: item.label, status: 'uploaded' as const }))
+    .map((item) => ({
+      id: newId(),
+      url: item.url,
+      label: item.label,
+      status: 'uploaded' as const,
+    }))
 }
 
 export function mergeTierFill(
@@ -56,7 +69,12 @@ export function mergeTierFill(
 ): { rows: EditorTierRow[]; bankItems: TierItem[] } {
   if (!draft) {
     return {
-      rows: seed.rows.map((r) => ({ id: r.id, label: r.label, color: r.color, items: [] })),
+      rows: seed.rows.map((r) => ({
+        id: r.id,
+        label: r.label,
+        color: r.color,
+        items: [],
+      })),
       bankItems: seed.sidebarItems.map((item) => ({
         id: newId(),
         url: item.url,
@@ -72,7 +90,9 @@ export function mergeTierFill(
 
   const rows = applyDraftToRows(seed.rows, draftRowMap, serverCatalogue)
   const surviving = survivingDraftBankItems(draft.bankItems, serverCatalogue)
-  const survivingUrls = new Set(surviving.map((i) => i.url).filter(Boolean) as string[])
+  const survivingUrls = new Set(
+    surviving.map((i) => i.url).filter(Boolean) as string[]
+  )
   const fresh = newServerBankItems(seed.sidebarItems, placedUrls, survivingUrls)
 
   return {

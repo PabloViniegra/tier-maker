@@ -16,7 +16,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!data) return { title: 'Tier List Not Found' }
   return {
     title: `${data.title} — Tier Maker`,
-    description: data.description ?? `Fill the ${data.title} tier list from the community.`,
+    description:
+      data.description ??
+      `Fill the ${data.title} tier list from the community.`,
   }
 }
 

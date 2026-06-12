@@ -59,8 +59,22 @@ describe('getPublicTierListById', () => {
       creator_id: 'uid',
     }
     const rows = [
-      { id: 'r1', templateId: 'tid', label: 'S', color: '#ff0000', order: 0, items: ['https://img.com/a.png'] },
-      { id: 'r2', templateId: 'tid', label: 'A', color: '#00ff00', order: 1, items: [] },
+      {
+        id: 'r1',
+        templateId: 'tid',
+        label: 'S',
+        color: '#ff0000',
+        order: 0,
+        items: ['https://img.com/a.png'],
+      },
+      {
+        id: 'r2',
+        templateId: 'tid',
+        label: 'A',
+        color: '#00ff00',
+        order: 1,
+        items: [],
+      },
     ]
     mockSelect
       .mockReturnValueOnce(makeDbChain([template]))
@@ -72,9 +86,17 @@ describe('getPublicTierListById', () => {
     expect(result!.id).toBe('tid')
     expect(result!.title).toBe('Anime Rankings')
     expect(result!.description).toBe('Best shows')
-    expect(result!.sidebarItems).toEqual(['https://img.com/a.png', 'https://img.com/b.png'])
+    expect(result!.sidebarItems).toEqual([
+      'https://img.com/a.png',
+      'https://img.com/b.png',
+    ])
     expect(result!.rows).toHaveLength(2)
-    expect(result!.rows[0]).toMatchObject({ id: 'r1', label: 'S', color: '#ff0000', order: 0 })
+    expect(result!.rows[0]).toMatchObject({
+      id: 'r1',
+      label: 'S',
+      color: '#ff0000',
+      order: 0,
+    })
   })
 })
 
@@ -91,7 +113,11 @@ describe('getDistinctPublicCategories', () => {
 
   it('returns distinct category strings', async () => {
     mockSelect.mockReturnValue(
-      makeDbChain([{ category: 'Anime' }, { category: 'Sports' }, { category: 'Music' }])
+      makeDbChain([
+        { category: 'Anime' },
+        { category: 'Sports' },
+        { category: 'Music' },
+      ])
     )
     const result = await getDistinctPublicCategories()
     expect(result).toEqual(['Anime', 'Sports', 'Music'])
@@ -103,7 +129,9 @@ describe('getDistinctPublicCategories', () => {
 describe('getPublicTierLists', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  const makeTemplateRow = (overrides: Partial<Record<string, unknown>> = {}) => ({
+  const makeTemplateRow = (
+    overrides: Partial<Record<string, unknown>> = {}
+  ) => ({
     id: 'tid',
     title: 'My List',
     category: 'Games',
@@ -114,9 +142,12 @@ describe('getPublicTierLists', () => {
   })
 
   it('returns items and total', async () => {
-    const rows = [makeTemplateRow(), makeTemplateRow({ id: 'tid2', title: 'Other' })]
+    const rows = [
+      makeTemplateRow(),
+      makeTemplateRow({ id: 'tid2', title: 'Other' }),
+    ]
     mockSelect
-      .mockReturnValueOnce(makeDbChain(rows))           // items query
+      .mockReturnValueOnce(makeDbChain(rows)) // items query
       .mockReturnValueOnce(makeDbChain([{ count: 2 }])) // count query
 
     const result = await getPublicTierLists({ page: 1, pageSize: 12 })
@@ -180,8 +211,12 @@ describe('getAllPublicTierListIds', () => {
   })
 
   it('returns only the id and createdAt fields (minimal projection)', async () => {
-    mockSelect.mockReturnValue(makeDbChain([{ id: 'tid1', createdAt: new Date('2026-01-01') }]))
+    mockSelect.mockReturnValue(
+      makeDbChain([{ id: 'tid1', createdAt: new Date('2026-01-01') }])
+    )
     const result = await getAllPublicTierListIds()
-    expect(Object.keys(result[0])).toEqual(expect.arrayContaining(['id', 'createdAt']))
+    expect(Object.keys(result[0])).toEqual(
+      expect.arrayContaining(['id', 'createdAt'])
+    )
   })
 })

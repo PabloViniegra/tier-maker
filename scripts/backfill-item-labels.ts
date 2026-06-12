@@ -37,4 +37,7 @@ async function backfill() {
   console.log('Done.')
 }
 
-backfill().catch((e) => { console.error(e); process.exit(1) })
+backfill().catch((e) => {
+  console.error(e)
+  process.exit(1)
+})

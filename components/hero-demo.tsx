@@ -97,9 +97,9 @@ export function HeroDemo() {
 
   return (
     <div
-      className='flex flex-col gap-1.5'
-      aria-hidden='true'
-      role='presentation'
+      className="flex flex-col gap-1.5"
+      aria-hidden="true"
+      role="presentation"
     >
       {/* Tier rows */}
       {TIERS.map((tier, tierIndex) => {
@@ -107,31 +107,31 @@ export function HeroDemo() {
         return (
           <motion.div
             key={tier.label}
-            className='flex items-stretch gap-1.5'
+            className="flex items-stretch gap-1.5"
             variants={heroDemoRowRevealVariants}
-            initial='hidden'
-            animate='visible'
+            initial="hidden"
+            animate="visible"
             custom={tierIndex * 0.06}
           >
             {/* Tier label badge */}
             <div
-              className='flex h-8 w-8 shrink-0 items-center justify-center rounded font-heading text-xs font-bold text-white'
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded font-heading text-xs font-bold text-white"
               style={{ background: tier.color }}
             >
               {tier.label}
             </div>
 
             {/* Chips area */}
-            <div className='flex min-h-8 flex-1 flex-wrap items-center gap-1 rounded border border-border bg-background px-1.5'>
-              <AnimatePresence initial={false} mode='popLayout'>
+            <div className="flex min-h-8 flex-1 flex-wrap items-center gap-1 rounded border border-border bg-background px-1.5">
+              <AnimatePresence initial={false} mode="popLayout">
                 {chips.map((chip) => (
                   <motion.span
                     key={chip.id}
                     variants={heroDemoChipVariants}
-                    initial='hidden'
-                    animate='visible'
-                    exit='exit'
-                    className='rounded bg-muted px-2 py-0.5 text-xs text-foreground'
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="rounded bg-muted px-2 py-0.5 text-xs text-foreground"
                   >
                     {chip.label}
                   </motion.span>
@@ -143,7 +143,7 @@ export function HeroDemo() {
       })}
 
       {/* Staging bank */}
-      <div className='mt-1 flex flex-wrap gap-1'>
+      <div className="mt-1 flex flex-wrap gap-1">
         {BANK_LABELS.map((label, i) => {
           const alreadyPlaced = placed.some((c) => c.label === label)
           const isBeingPlaced = placing === i
@@ -155,7 +155,7 @@ export function HeroDemo() {
               key={label}
               variants={heroDemoBankChipVariants}
               animate={isBeingPlaced ? 'placing' : 'idle'}
-              className='rounded border border-border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground'
+              className="rounded border border-border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground"
             >
               {label}
             </motion.span>

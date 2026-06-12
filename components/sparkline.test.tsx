@@ -23,14 +23,18 @@ describe('Sparkline', () => {
   })
 
   it('applies custom width and height', () => {
-    const { container } = render(<Sparkline series={[1, 2, 3]} width={120} height={40} />)
+    const { container } = render(
+      <Sparkline series={[1, 2, 3]} width={120} height={40} />
+    )
     const svg = container.querySelector('svg')
     expect(svg).toHaveAttribute('width', '120')
     expect(svg).toHaveAttribute('height', '40')
   })
 
   it('applies custom className to the SVG', () => {
-    const { container } = render(<Sparkline series={[1, 2, 3]} className="my-class" />)
+    const { container } = render(
+      <Sparkline series={[1, 2, 3]} className="my-class" />
+    )
     expect(container.querySelector('svg')).toHaveClass('my-class')
   })
 

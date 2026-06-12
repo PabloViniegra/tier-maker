@@ -9,10 +9,20 @@ vi.mock('next/navigation', () => ({
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 
 vi.mock('@hello-pangea/dnd', () => ({
-  DragDropContext: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  Droppable: ({ children }: { children: (provided: unknown, snapshot: unknown) => React.ReactNode }) =>
+  DragDropContext: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+  Droppable: ({
+    children,
+  }: {
+    children: (provided: unknown, snapshot: unknown) => React.ReactNode
+  }) =>
     children({ innerRef: vi.fn(), droppableProps: {}, placeholder: null }, {}),
-  Draggable: ({ children }: { children: (provided: unknown) => React.ReactNode }) =>
+  Draggable: ({
+    children,
+  }: {
+    children: (provided: unknown) => React.ReactNode
+  }) =>
     children({ innerRef: vi.fn(), draggableProps: {}, dragHandleProps: {} }),
 }))
 
@@ -27,7 +37,9 @@ vi.mock('./tier-board', () => ({
 }))
 vi.mock('./save-bar', () => ({
   SaveBar: ({ isSaving }: { isSaving: boolean }) => (
-    <button data-testid="save-bar" disabled={isSaving}>Save</button>
+    <button data-testid="save-bar" disabled={isSaving}>
+      Save
+    </button>
   ),
 }))
 
@@ -53,9 +65,7 @@ const seedData = {
   category: 'Anime',
   coverImageUrl: null,
   sidebarItems: [{ url: 'https://blob/a.png', label: 'Naruto' }],
-  rows: [
-    { id: 'row-s', label: 'S', color: '#ff0', order: 0, items: [] },
-  ],
+  rows: [{ id: 'row-s', label: 'S', color: '#ff0', order: 0, items: [] }],
 }
 
 describe('TierListCreator — create mode (no initialData)', () => {
@@ -65,7 +75,9 @@ describe('TierListCreator — create mode (no initialData)', () => {
 
   it('renders "New tier list" heading', () => {
     render(<TierListCreator {...baseProps} />)
-    expect(screen.getByRole('heading', { name: /new tier list/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /new tier list/i })
+    ).toBeInTheDocument()
   })
 
   it('back link points to /dashboard', () => {
@@ -81,18 +93,26 @@ describe('TierListCreator — edit mode (with initialData)', () => {
   })
 
   it('renders "Edit tier list" heading', () => {
-    render(<TierListCreator {...baseProps} initialData={seedData} editId="tpl-1" />)
-    expect(screen.getByRole('heading', { name: /edit tier list/i })).toBeInTheDocument()
+    render(
+      <TierListCreator {...baseProps} initialData={seedData} editId="tpl-1" />
+    )
+    expect(
+      screen.getByRole('heading', { name: /edit tier list/i })
+    ).toBeInTheDocument()
   })
 
   it('back link points to /dashboard/tier-lists', () => {
-    render(<TierListCreator {...baseProps} initialData={seedData} editId="tpl-1" />)
+    render(
+      <TierListCreator {...baseProps} initialData={seedData} editId="tpl-1" />
+    )
     const back = screen.getByRole('link', { name: /back/i })
     expect(back).toHaveAttribute('href', '/dashboard/tier-lists')
   })
 
   it('seeds the store with initialData on mount', () => {
-    render(<TierListCreator {...baseProps} initialData={seedData} editId="tpl-1" />)
+    render(
+      <TierListCreator {...baseProps} initialData={seedData} editId="tpl-1" />
+    )
     const state = useTierEditor.getState()
     expect(state.metadata.title).toBe('My Anime Rankings')
     expect(state.metadata.category).toBe('Anime')

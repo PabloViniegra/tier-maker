@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { useTierEditor, hasPendingUploads, buildSavePayload, type TierListDetailSeed } from './tier-editor'
+import {
+  useTierEditor,
+  hasPendingUploads,
+  buildSavePayload,
+  type TierListDetailSeed,
+} from './tier-editor'
 
 function reset() {
   useTierEditor.getState().reset()
@@ -9,7 +14,12 @@ function snapshot() {
   const s = useTierEditor.getState()
   return {
     metadata: s.metadata,
-    rows: s.rows.map((r) => ({ id: r.id, label: r.label, color: r.color, items: [...r.items] })),
+    rows: s.rows.map((r) => ({
+      id: r.id,
+      label: r.label,
+      color: r.color,
+      items: [...r.items],
+    })),
     bankItems: [...s.bankItems],
   }
 }
@@ -69,7 +79,9 @@ describe('useTierEditor — setMetadata', () => {
   })
 
   it('stores coverImageUrl in metadata', () => {
-    useTierEditor.getState().setMetadata({ coverImageUrl: 'https://blob/cover.png' })
+    useTierEditor
+      .getState()
+      .setMetadata({ coverImageUrl: 'https://blob/cover.png' })
     expect(snapshot().metadata.coverImageUrl).toBe('https://blob/cover.png')
   })
 })
@@ -81,7 +93,11 @@ describe('useTierEditor — bank item lifecycle', () => {
     const id = useTierEditor.getState().addUploadingItem('Chocolate cake')
     const bank = snapshot().bankItems
     expect(bank).toHaveLength(1)
-    expect(bank[0]).toMatchObject({ id, label: 'Chocolate cake', status: 'uploading' })
+    expect(bank[0]).toMatchObject({
+      id,
+      label: 'Chocolate cake',
+      status: 'uploading',
+    })
   })
 
   it('marks an item as uploaded and stores its url', () => {
@@ -125,9 +141,13 @@ describe('useTierEditor — move / reorder', () => {
   it('moves an item from the bank into a row', () => {
     const { a } = seed()
     const rowId = snapshot().rows[0].id
-    useTierEditor
-      .getState()
-      .moveItem({ source: 'bank', sourceIndex: 0, target: 'row', targetId: rowId, targetIndex: 0 })
+    useTierEditor.getState().moveItem({
+      source: 'bank',
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowId,
+      targetIndex: 0,
+    })
     const s = snapshot()
     expect(s.bankItems).toHaveLength(1)
     expect(s.rows[0].items[0]).toMatchObject({
@@ -140,14 +160,36 @@ describe('useTierEditor — move / reorder', () => {
     const { a, b } = seed()
     const rowA = snapshot().rows[0].id
     const rowB = snapshot().rows[1].id
-    useTierEditor.getState().moveItem({ source: 'bank', sourceIndex: 0, target: 'row', targetId: rowA, targetIndex: 0 })
-    useTierEditor.getState().moveItem({ source: 'bank', sourceIndex: 0, target: 'row', targetId: rowB, targetIndex: 0 })
-    useTierEditor
-      .getState()
-      .moveItem({ source: 'row', sourceId: rowA, sourceIndex: 0, target: 'row', targetId: rowA, targetIndex: 0 })
-    useTierEditor
-      .getState()
-      .moveItem({ source: 'row', sourceId: rowA, sourceIndex: 0, target: 'row', targetId: rowB, targetIndex: 1 })
+    useTierEditor.getState().moveItem({
+      source: 'bank',
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowA,
+      targetIndex: 0,
+    })
+    useTierEditor.getState().moveItem({
+      source: 'bank',
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowB,
+      targetIndex: 0,
+    })
+    useTierEditor.getState().moveItem({
+      source: 'row',
+      sourceId: rowA,
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowA,
+      targetIndex: 0,
+    })
+    useTierEditor.getState().moveItem({
+      source: 'row',
+      sourceId: rowA,
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowB,
+      targetIndex: 1,
+    })
 
     const s = snapshot()
     const all = s.rows.flatMap((r) => r.items.map((i) => i.id))
@@ -158,15 +200,28 @@ describe('useTierEditor — move / reorder', () => {
   it('reorders an item within the same row', () => {
     seed()
     const rowId = snapshot().rows[0].id
-    useTierEditor
-      .getState()
-      .moveItem({ source: 'bank', sourceIndex: 0, target: 'row', targetId: rowId, targetIndex: 0 })
-    useTierEditor
-      .getState()
-      .moveItem({ source: 'bank', sourceIndex: 0, target: 'row', targetId: rowId, targetIndex: 1 })
-    useTierEditor
-      .getState()
-      .moveItem({ source: 'row', sourceId: rowId, sourceIndex: 0, target: 'row', targetId: rowId, targetIndex: 1 })
+    useTierEditor.getState().moveItem({
+      source: 'bank',
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowId,
+      targetIndex: 0,
+    })
+    useTierEditor.getState().moveItem({
+      source: 'bank',
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowId,
+      targetIndex: 1,
+    })
+    useTierEditor.getState().moveItem({
+      source: 'row',
+      sourceId: rowId,
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowId,
+      targetIndex: 1,
+    })
 
     const s = snapshot()
     expect(s.rows[0].items.map((i) => i.url)).toEqual([
@@ -178,9 +233,13 @@ describe('useTierEditor — move / reorder', () => {
   it('removes an item from a row', () => {
     seed()
     const rowId = snapshot().rows[0].id
-    useTierEditor
-      .getState()
-      .moveItem({ source: 'bank', sourceIndex: 0, target: 'row', targetId: rowId, targetIndex: 0 })
+    useTierEditor.getState().moveItem({
+      source: 'bank',
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowId,
+      targetIndex: 0,
+    })
     const id = snapshot().rows[0].items[0].id
     useTierEditor.getState().removeItem({ source: 'row', id, rowId })
     expect(snapshot().rows[0].items).toEqual([])
@@ -244,8 +303,11 @@ describe('useTierEditor — removeRow', () => {
     const itemId = useTierEditor.getState().addUploadingItem('Croissant')
     useTierEditor.getState().markItemUploaded(itemId, 'https://blob/a.png')
     useTierEditor.getState().moveItem({
-      source: 'bank', sourceIndex: 0,
-      target: 'row', targetId: rowId, targetIndex: 0,
+      source: 'bank',
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowId,
+      targetIndex: 0,
     })
     expect(snapshot().rows[0].items).toHaveLength(1)
     useTierEditor.getState().removeRow(rowId)
@@ -299,9 +361,13 @@ describe('useTierEditor — selectors', () => {
     useTierEditor.getState().markItemUploaded(a, 'https://blob/a.png')
     useTierEditor.getState().markItemError(b)
     const rowId = useTierEditor.getState().rows[0].id
-    useTierEditor
-      .getState()
-      .moveItem({ source: 'bank', sourceIndex: 0, target: 'row', targetId: rowId, targetIndex: 0 })
+    useTierEditor.getState().moveItem({
+      source: 'bank',
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowId,
+      targetIndex: 0,
+    })
 
     const payload = buildSavePayload(useTierEditor.getState())
 
@@ -309,12 +375,16 @@ describe('useTierEditor — selectors', () => {
     expect(payload.description).toBe('My picks')
     expect(payload.category).toBe('Cinema')
     expect(payload.bankItems).toEqual([])
-    expect(payload.rows[0].items).toEqual([{ url: 'https://blob/a.png', label: 'Lemon tart' }])
+    expect(payload.rows[0].items).toEqual([
+      { url: 'https://blob/a.png', label: 'Lemon tart' },
+    ])
   })
 
   it('buildSavePayload includes coverImageUrl when set', () => {
     useTierEditor.getState().setMetadata({
-      title: 'T', category: 'C', coverImageUrl: 'https://blob/cover.png',
+      title: 'T',
+      category: 'C',
+      coverImageUrl: 'https://blob/cover.png',
     })
     const payload = buildSavePayload(useTierEditor.getState())
     expect(payload.coverImageUrl).toBe('https://blob/cover.png')
@@ -333,7 +403,13 @@ describe('useTierEditor — initFromDb', () => {
       { url: 'https://blob/bank2.png', label: 'Goku' },
     ],
     rows: [
-      { id: 'row-s', label: 'S', color: '#ff0', order: 0, items: [{ url: 'https://blob/placed.png', label: 'Luffy' }] },
+      {
+        id: 'row-s',
+        label: 'S',
+        color: '#ff0',
+        order: 0,
+        items: [{ url: 'https://blob/placed.png', label: 'Luffy' }],
+      },
       { id: 'row-a', label: 'A', color: '#0ff', order: 1, items: [] },
     ],
   }
@@ -352,25 +428,41 @@ describe('useTierEditor — initFromDb', () => {
     const rows = snapshot().rows
     expect(rows).toHaveLength(2)
     expect(rows[0]).toMatchObject({ id: 'row-s', label: 'S', color: '#ff0' })
-    expect(rows[0].items[0]).toMatchObject({ url: 'https://blob/placed.png', label: 'Luffy', status: 'uploaded' })
+    expect(rows[0].items[0]).toMatchObject({
+      url: 'https://blob/placed.png',
+      label: 'Luffy',
+      status: 'uploaded',
+    })
   })
 
   it('seeds bankItems from sidebarItems preserving labels', () => {
     useTierEditor.getState().initFromDb(seed)
     const bank = snapshot().bankItems
     expect(bank).toHaveLength(2)
-    expect(bank[0]).toMatchObject({ url: 'https://blob/bank1.png', label: 'Naruto', status: 'uploaded' })
-    expect(bank[1]).toMatchObject({ url: 'https://blob/bank2.png', label: 'Goku', status: 'uploaded' })
+    expect(bank[0]).toMatchObject({
+      url: 'https://blob/bank1.png',
+      label: 'Naruto',
+      status: 'uploaded',
+    })
+    expect(bank[1]).toMatchObject({
+      url: 'https://blob/bank2.png',
+      label: 'Goku',
+      status: 'uploaded',
+    })
   })
 
   it('seeds coverImageUrl from DB payload', () => {
-    useTierEditor.getState().initFromDb({ ...seed, coverImageUrl: 'https://blob/cover.png' })
+    useTierEditor
+      .getState()
+      .initFromDb({ ...seed, coverImageUrl: 'https://blob/cover.png' })
     expect(snapshot().metadata.coverImageUrl).toBe('https://blob/cover.png')
   })
 
   it('calling initFromDb twice replaces state completely (idempotent seed)', () => {
     useTierEditor.getState().initFromDb(seed)
-    useTierEditor.getState().initFromDb({ ...seed, title: 'Updated', sidebarItems: [] })
+    useTierEditor
+      .getState()
+      .initFromDb({ ...seed, title: 'Updated', sidebarItems: [] })
     const s = snapshot()
     expect(s.metadata.title).toBe('Updated')
     expect(s.bankItems).toHaveLength(0)
@@ -401,8 +493,11 @@ describe('useTierEditor — removeItemEverywhere', () => {
     useTierEditor.getState().markItemUploaded(id, 'https://blob/b.png')
     const rowId = snapshot().rows[0].id
     useTierEditor.getState().moveItem({
-      source: 'bank', sourceIndex: 0,
-      target: 'row', targetId: rowId, targetIndex: 0,
+      source: 'bank',
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowId,
+      targetIndex: 0,
     })
     expect(snapshot().rows[0].items).toHaveLength(1)
     useTierEditor.getState().removeItemEverywhere(id)

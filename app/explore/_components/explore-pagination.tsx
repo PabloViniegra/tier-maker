@@ -23,7 +23,12 @@ function buildPageUrl(searchParams: SearchParams, page: number): string {
   return `?${params.toString()}`
 }
 
-export function ExplorePagination({ total, page, pageSize, searchParams }: Props) {
+export function ExplorePagination({
+  total,
+  page,
+  pageSize,
+  searchParams,
+}: Props) {
   const totalPages = Math.ceil(total / pageSize)
   if (totalPages <= 1) return null
 

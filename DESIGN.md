@@ -3,17 +3,17 @@ version: alpha
 name: tier-maker
 description: Cursor-inspired developer-tool aesthetic built exclusively on Shadcn UI + Tailwind v4. Dark-first, dense, precise.
 colors:
-  primary: "#2E62D4"
-  on-primary: "#FAFAFA"
-  background: "#1A1A1A"
-  surface: "#242424"
-  overlay: "#2E2E2E"
-  foreground: "#E6E6E6"
-  muted: "#313131"
-  muted-fg: "#9C9C9C"
-  border: "#333333"
-  destructive: "#DC4A2A"
-  on-destructive: "#FAFAFA"
+  primary: '#2E62D4'
+  on-primary: '#FAFAFA'
+  background: '#1A1A1A'
+  surface: '#242424'
+  overlay: '#2E2E2E'
+  foreground: '#E6E6E6'
+  muted: '#313131'
+  muted-fg: '#9C9C9C'
+  border: '#333333'
+  destructive: '#DC4A2A'
+  on-destructive: '#FAFAFA'
 typography:
   h1:
     fontFamily: Cal Sans
@@ -72,56 +72,56 @@ spacing:
   2xl: 48px
 components:
   button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.lg}"
+    backgroundColor: '{colors.primary}'
+    textColor: '{colors.on-primary}'
+    rounded: '{rounded.lg}'
     padding: 10px 10px
     height: 32px
   button-primary-hover:
-    backgroundColor: "#2455BF"
+    backgroundColor: '#2455BF'
   button-ghost:
     backgroundColor: transparent
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.lg}"
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.lg}'
     padding: 10px 10px
   button-ghost-hover:
-    backgroundColor: "{colors.muted}"
-    textColor: "{colors.foreground}"
+    backgroundColor: '{colors.muted}'
+    textColor: '{colors.foreground}'
   button-outline:
     backgroundColor: transparent
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.lg}"
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.lg}'
     padding: 10px 10px
   button-outline-hover:
-    backgroundColor: "{colors.muted}"
-    textColor: "{colors.foreground}"
+    backgroundColor: '{colors.muted}'
+    textColor: '{colors.foreground}'
   button-destructive:
     backgroundColor: transparent
-    textColor: "{colors.destructive}"
-    rounded: "{rounded.lg}"
+    textColor: '{colors.destructive}'
+    rounded: '{rounded.lg}'
   input:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.lg}"
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.lg}'
     padding: 6px 12px
     height: 32px
   card:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.lg}"
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.lg}'
     padding: 16px
   popover:
-    backgroundColor: "{colors.overlay}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.lg}"
+    backgroundColor: '{colors.overlay}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.lg}'
     padding: 8px
   badge:
-    backgroundColor: "{colors.muted}"
-    textColor: "{colors.muted-fg}"
-    rounded: "{rounded.sm}"
+    backgroundColor: '{colors.muted}'
+    textColor: '{colors.muted-fg}'
+    rounded: '{rounded.sm}'
     padding: 2px 6px
   separator:
-    backgroundColor: "{colors.border}"
+    backgroundColor: '{colors.border}'
 ---
 
 ## Overview
@@ -191,16 +191,16 @@ Two typefaces. No exceptions.
 
 ### Scale
 
-| Token | Family | Size | Weight | Line-height |
-|---|---|---|---|---|
-| `h1` | Cal Sans | 2rem | 600 | 1.2 |
-| `h2` | Cal Sans | 1.5rem | 600 | 1.25 |
-| `h3` | Cal Sans | 1.25rem | 600 | 1.3 |
-| `h4` | Cal Sans | 1.125rem | 600 | 1.35 |
-| `body-md` | Geist | 0.8125rem (13px) | 400 | 1.4 |
-| `body-sm` | Geist | 0.75rem (12px) | 400 | 1.4 |
-| `label` | Geist | 0.75rem | 500 | 1.4 |
-| `mono` | Geist Mono | 0.8125rem | 400 | 1.4 |
+| Token     | Family     | Size             | Weight | Line-height |
+| --------- | ---------- | ---------------- | ------ | ----------- |
+| `h1`      | Cal Sans   | 2rem             | 600    | 1.2         |
+| `h2`      | Cal Sans   | 1.5rem           | 600    | 1.25        |
+| `h3`      | Cal Sans   | 1.25rem          | 600    | 1.3         |
+| `h4`      | Cal Sans   | 1.125rem         | 600    | 1.35        |
+| `body-md` | Geist      | 0.8125rem (13px) | 400    | 1.4         |
+| `body-sm` | Geist      | 0.75rem (12px)   | 400    | 1.4         |
+| `label`   | Geist      | 0.75rem          | 500    | 1.4         |
+| `mono`    | Geist Mono | 0.8125rem        | 400    | 1.4         |
 
 **Base font size is 13px** set on `body` (`font-size: 0.8125rem`). The
 `html` element stays at 16px to preserve rem-based spacing calculations.
@@ -212,14 +212,14 @@ the density of professional developer tools.
 The spacing scale is built on an 8px base unit, matching Tailwind's
 default 4px grid at the small end.
 
-| Token | Value | Use |
-|---|---|---|
-| `xs` | 4px | Icon gaps, tight inline spacing |
-| `sm` | 8px | Intra-component padding, small gaps |
-| `md` | 16px | Standard component padding, section gaps |
-| `lg` | 24px | Card padding, larger section gaps |
-| `xl` | 32px | Page section spacing |
-| `2xl` | 48px | Major layout zones |
+| Token | Value | Use                                      |
+| ----- | ----- | ---------------------------------------- |
+| `xs`  | 4px   | Icon gaps, tight inline spacing          |
+| `sm`  | 8px   | Intra-component padding, small gaps      |
+| `md`  | 16px  | Standard component padding, section gaps |
+| `lg`  | 24px  | Card padding, larger section gaps        |
+| `xl`  | 32px  | Page section spacing                     |
+| `2xl` | 48px  | Major layout zones                       |
 
 Layouts are information-dense. Prefer `sm`/`md` over `lg`/`xl` for
 component internals. Reserve large spacing for page-level structure.
@@ -228,11 +228,11 @@ component internals. Reserve large spacing for page-level structure.
 
 Depth is expressed through surface color steps — not shadows.
 
-| Level | Token | Color | Usage |
-|---|---|---|---|
-| Base | `background` | `#1A1A1A` | Page canvas |
-| Raised | `surface` | `#242424` | Cards, panels, sidebar |
-| Floating | `overlay` | `#2E2E2E` | Dropdowns, modals, tooltips |
+| Level    | Token        | Color     | Usage                       |
+| -------- | ------------ | --------- | --------------------------- |
+| Base     | `background` | `#1A1A1A` | Page canvas                 |
+| Raised   | `surface`    | `#242424` | Cards, panels, sidebar      |
+| Floating | `overlay`    | `#2E2E2E` | Dropdowns, modals, tooltips |
 
 **Shadows** are minimal. A single overlay shadow token exists for
 floating elements: `0 8px 24px oklch(0 0 0 / 40%)` in dark mode,
@@ -245,13 +245,13 @@ scales — separation comes from color steps, not blur.
 All interactive elements use `rounded.lg` (6px). This is slightly
 rounded but reads as precise and technical rather than soft.
 
-| Token | Value | Usage |
-|---|---|---|
-| `sm` | 2px | Tags, small badges |
-| `md` | 3px | Inner elements, small chips |
-| `lg` | 6px | **Default.** Buttons, inputs, cards, panels |
-| `xl` | 8px | Large cards, modals |
-| `2xl` | 11px | Decorative containers |
+| Token | Value | Usage                                       |
+| ----- | ----- | ------------------------------------------- |
+| `sm`  | 2px   | Tags, small badges                          |
+| `md`  | 3px   | Inner elements, small chips                 |
+| `lg`  | 6px   | **Default.** Buttons, inputs, cards, panels |
+| `xl`  | 8px   | Large cards, modals                         |
+| `2xl` | 11px  | Decorative containers                       |
 
 Never use `rounded-full` for UI controls. Pill-shaped buttons conflict
 with the precise, technical aesthetic. Reserve full rounding for
@@ -309,6 +309,7 @@ metadata labels only.
 ## Do's and Don'ts
 
 **Do:**
+
 - Use `primary` exclusively for primary actions and focus indicators.
 - Use Cal Sans only for headings (`h1`–`h6`). Never for body copy.
 - Default to `ghost` or `outline` buttons. Reserve `primary` for the
@@ -320,6 +321,7 @@ metadata labels only.
   `destructive` for error states.
 
 **Don't:**
+
 - Don't use primary color for decorative or non-interactive elements.
 - Don't introduce new typefaces. The system uses two: Cal Sans and Geist.
 - Don't use `rounded-full` for buttons or inputs.

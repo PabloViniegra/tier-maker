@@ -57,24 +57,24 @@ A modern web platform for creating, customizing, and sharing tier lists. Rank an
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript |
-| UI | React 19, Shadcn UI (base-nova), Tailwind CSS v4 |
-| Animation | Motion (framer-motion successor) |
-| Drag & Drop | @hello-pangea/dnd |
-| State | Zustand |
-| Forms | React Hook Form + Zod |
-| Database | PostgreSQL (Neon Serverless) |
-| ORM | Drizzle ORM |
-| Auth | Better Auth |
-| Image Storage | Vercel Blob |
-| Notifications | Sonner (toast alerts) |
-| Package Manager | pnpm |
-| Testing | Vitest, Testing Library |
-| Linting | ESLint, Prettier |
-| Icons | Lucide React |
+| Layer           | Technology                                       |
+| --------------- | ------------------------------------------------ |
+| Framework       | Next.js 16 (App Router)                          |
+| Language        | TypeScript                                       |
+| UI              | React 19, Shadcn UI (base-nova), Tailwind CSS v4 |
+| Animation       | Motion (framer-motion successor)                 |
+| Drag & Drop     | @hello-pangea/dnd                                |
+| State           | Zustand                                          |
+| Forms           | React Hook Form + Zod                            |
+| Database        | PostgreSQL (Neon Serverless)                     |
+| ORM             | Drizzle ORM                                      |
+| Auth            | Better Auth                                      |
+| Image Storage   | Vercel Blob                                      |
+| Notifications   | Sonner (toast alerts)                            |
+| Package Manager | pnpm                                             |
+| Testing         | Vitest, Testing Library                          |
+| Linting         | ESLint, Prettier                                 |
+| Icons           | Lucide React                                     |
 
 ---
 
@@ -158,19 +158,19 @@ The application will be available at `http://localhost:3000`.
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `pnpm dev` | Start the development server |
-| `pnpm build` | Create a production build |
-| `pnpm start` | Start the production server |
-| `pnpm lint` | Run ESLint |
-| `pnpm format` | Format code with Prettier |
-| `pnpm typecheck` | Run TypeScript type checking |
-| `pnpm test` | Run tests once |
-| `pnpm test:watch` | Run tests in watch mode |
+| Command            | Description                      |
+| ------------------ | -------------------------------- |
+| `pnpm dev`         | Start the development server     |
+| `pnpm build`       | Create a production build        |
+| `pnpm start`       | Start the production server      |
+| `pnpm lint`        | Run ESLint                       |
+| `pnpm format`      | Format code with Prettier        |
+| `pnpm typecheck`   | Run TypeScript type checking     |
+| `pnpm test`        | Run tests once                   |
+| `pnpm test:watch`  | Run tests in watch mode          |
 | `pnpm db:generate` | Generate Drizzle migration files |
-| `pnpm db:migrate` | Run pending migrations |
-| `pnpm db:studio` | Open Drizzle Studio |
+| `pnpm db:migrate`  | Run pending migrations           |
+| `pnpm db:studio`   | Open Drizzle Studio              |
 
 ---
 

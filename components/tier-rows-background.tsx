@@ -8,20 +8,25 @@ const TIERS = [
 
 export function TierRowsBackground() {
   return (
-    <div className='pointer-events-none absolute inset-0 select-none overflow-hidden'>
+    <div className="pointer-events-none absolute inset-0 overflow-hidden select-none">
       {TIERS.map((tier, i) => (
         <div
           key={tier.label}
-          className='absolute flex items-stretch opacity-[0.18] blur-[0.5px]'
-          style={{ top: `${13 + i * 15}%`, left: '-4%', right: '-4%', height: '52px' }}
+          className="absolute flex items-stretch opacity-[0.18] blur-[0.5px]"
+          style={{
+            top: `${13 + i * 15}%`,
+            left: '-4%',
+            right: '-4%',
+            height: '52px',
+          }}
         >
           <div
-            className='flex w-16 shrink-0 items-center justify-center font-heading text-2xl font-bold text-white'
+            className="flex w-16 shrink-0 items-center justify-center font-heading text-2xl font-bold text-white"
             style={{ background: tier.color }}
           >
             {tier.label}
           </div>
-          <div className='flex-1 border border-white/10 bg-white/[0.04]' />
+          <div className="flex-1 border border-white/10 bg-white/[0.04]" />
         </div>
       ))}
     </div>

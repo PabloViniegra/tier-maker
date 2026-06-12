@@ -18,6 +18,7 @@ export const tierTemplates = pgTable(
   {
     id: uuid('id').defaultRandom().primaryKey(),
     title: text('title').notNull(),
+    slug: text('slug').notNull().unique(),
     description: text('description'),
     category: text('category').notNull(),
     creatorId: text('creator_id').references(() => user.id, {
@@ -30,7 +31,11 @@ export const tierTemplates = pgTable(
   },
   (t) => [
     index('tier_templates_creator_id_idx').on(t.creatorId),
-    index('tier_templates_is_public_created_at_idx').on(t.isPublic, t.createdAt),
+    index('tier_templates_is_public_created_at_idx').on(
+      t.isPublic,
+      t.createdAt
+    ),
+    index('tier_templates_slug_idx').on(t.slug),
   ]
 )
 
@@ -46,9 +51,7 @@ export const tierRows = pgTable(
     order: integer('order').notNull(),
     items: jsonb('items').$type<ImageItem[]>().default([]).notNull(),
   },
-  (t) => [
-    index('tier_rows_template_id_idx').on(t.templateId),
-  ]
+  (t) => [index('tier_rows_template_id_idx').on(t.templateId)]
 )
 
 export const userCategoryPresets = pgTable(

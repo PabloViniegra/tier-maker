@@ -35,7 +35,9 @@ describe('saveUserCategoryPresetAction', () => {
 
   it('requires authentication', async () => {
     anonSession()
-    await expect(saveUserCategoryPresetAction('Arquitectura')).rejects.toThrow(/auth/i)
+    await expect(saveUserCategoryPresetAction('Arquitectura')).rejects.toThrow(
+      /auth/i
+    )
   })
 
   it('inserts preset for authenticated user and returns it', async () => {

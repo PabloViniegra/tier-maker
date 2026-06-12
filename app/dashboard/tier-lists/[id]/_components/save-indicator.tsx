@@ -15,7 +15,7 @@ const CONFIG: Record<
 > = {
   saving: {
     label: 'Saving…',
-    icon: <Loader2 size={12} className='animate-spin' />,
+    icon: <Loader2 size={12} className="animate-spin" />,
     className: 'text-muted-foreground',
   },
   saved: {
@@ -34,16 +34,19 @@ export function SaveIndicator({ state }: Props) {
   const config = state !== 'idle' ? CONFIG[state] : null
 
   return (
-    <span role='status' aria-live='polite' className='inline-flex'>
-      <AnimatePresence mode='wait'>
+    <span role="status" aria-live="polite" className="inline-flex">
+      <AnimatePresence mode="wait">
         {config && (
           <motion.span
             key={state}
             variants={statusFadeVariants}
-            initial='initial'
-            animate='animate'
-            exit='exit'
-            className={cn('flex items-center gap-1.5 text-xs font-medium', config.className)}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className={cn(
+              'flex items-center gap-1.5 text-xs font-medium',
+              config.className
+            )}
           >
             {config.icon}
             {config.label}

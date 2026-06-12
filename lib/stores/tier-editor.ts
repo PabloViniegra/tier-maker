@@ -72,7 +72,10 @@ type Actions = {
   removeItem: (input: RemoveItem) => void
   removeItemEverywhere: (id: string) => void
   moveItem: (input: MoveItem) => void
-  updateRow: (id: string, patch: Partial<Pick<EditorTierRow, 'label' | 'color'>>) => void
+  updateRow: (
+    id: string,
+    patch: Partial<Pick<EditorTierRow, 'label' | 'color'>>
+  ) => void
   addRow: () => void
   removeRow: (id: string) => void
   reset: () => void
@@ -144,16 +147,20 @@ export const useTierEditor = create<State & Actions>()((set) => ({
   removeItemEverywhere: (id) =>
     set((s) => ({
       bankItems: s.bankItems.filter((i) => i.id !== id),
-      rows: s.rows.map((r) => ({ ...r, items: r.items.filter((i) => i.id !== id) })),
+      rows: s.rows.map((r) => ({
+        ...r,
+        items: r.items.filter((i) => i.id !== id),
+      })),
     })),
   moveItem: (input) =>
     set((s) => {
-      const { source, sourceId, sourceIndex, target, targetId, targetIndex } = input
+      const { source, sourceId, sourceIndex, target, targetId, targetIndex } =
+        input
 
       const fromList: TierItem[] =
         source === 'bank'
           ? s.bankItems
-          : s.rows.find((r) => r.id === sourceId)?.items ?? []
+          : (s.rows.find((r) => r.id === sourceId)?.items ?? [])
       if (sourceIndex < 0 || sourceIndex >= fromList.length) return s
       const item = fromList[sourceIndex]
 

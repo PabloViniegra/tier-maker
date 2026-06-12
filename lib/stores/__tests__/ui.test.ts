@@ -45,7 +45,10 @@ describe('useUIStore — setSidebarCollapsed', () => {
 
 describe('useUIStore — localStorage rehydration', () => {
   it('restores collapsed state from storage', async () => {
-    localStorage.setItem('ui-preferences', JSON.stringify({ state: { sidebarCollapsed: true }, version: 0 }))
+    localStorage.setItem(
+      'ui-preferences',
+      JSON.stringify({ state: { sidebarCollapsed: true }, version: 0 })
+    )
     await useUIStore.persist.rehydrate()
     expect(useUIStore.getState().sidebarCollapsed).toBe(true)
   })

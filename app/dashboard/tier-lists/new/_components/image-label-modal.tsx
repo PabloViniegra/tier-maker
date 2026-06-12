@@ -35,7 +35,12 @@ export function ImageLabelModal({ files, onConfirm, onCancel }: Props) {
   }
 
   return (
-    <Dialog open onOpenChange={(open) => { if (!open) onCancel() }}>
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onCancel()
+      }}
+    >
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Name your images</DialogTitle>
@@ -44,7 +49,10 @@ export function ImageLabelModal({ files, onConfirm, onCancel }: Props) {
         <div className="flex flex-col gap-4 py-2">
           {files.map((file, i) => (
             <div key={i} className="flex flex-col gap-1.5">
-              <Label htmlFor={`label-${i}`} className="text-xs text-muted-foreground truncate">
+              <Label
+                htmlFor={`label-${i}`}
+                className="truncate text-xs text-muted-foreground"
+              >
                 {file.name}
               </Label>
               <Input
@@ -69,11 +77,7 @@ export function ImageLabelModal({ files, onConfirm, onCancel }: Props) {
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            type="button"
-            onClick={handleConfirm}
-            disabled={!allFilled}
-          >
+          <Button type="button" onClick={handleConfirm} disabled={!allFilled}>
             Upload
           </Button>
         </DialogFooter>

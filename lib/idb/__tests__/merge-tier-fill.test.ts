@@ -46,11 +46,20 @@ describe('mergeTierFill — draft with placed items', () => {
           id: 'r1',
           label: 'S',
           color: '#ff0000',
-          items: [{ id: 'x1', label: 'A', url: 'https://img/a.jpg', status: 'uploaded' }],
+          items: [
+            {
+              id: 'x1',
+              label: 'A',
+              url: 'https://img/a.jpg',
+              status: 'uploaded',
+            },
+          ],
         },
         { id: 'r2', label: 'A', color: '#00ff00', items: [] },
       ],
-      bankItems: [{ id: 'x2', label: 'B', url: 'https://img/b.jpg', status: 'uploaded' }],
+      bankItems: [
+        { id: 'x2', label: 'B', url: 'https://img/b.jpg', status: 'uploaded' },
+      ],
     }
 
     const result = mergeTierFill(baseSeed, draft)
@@ -79,7 +88,14 @@ describe('mergeTierFill — server adds new row', () => {
       rows: [
         {
           id: 'r1',
-          items: [{ id: 'x1', label: 'A', url: 'https://img/a.jpg', status: 'uploaded' }],
+          items: [
+            {
+              id: 'x1',
+              label: 'A',
+              url: 'https://img/a.jpg',
+              status: 'uploaded',
+            },
+          ],
           label: 'S',
           color: '#ff0000',
         },
@@ -114,7 +130,14 @@ describe('mergeTierFill — server removes a row', () => {
         },
         {
           id: 'r2',
-          items: [{ id: 'x2', label: 'B', url: 'https://img/b.jpg', status: 'uploaded' }],
+          items: [
+            {
+              id: 'x2',
+              label: 'B',
+              url: 'https://img/b.jpg',
+              status: 'uploaded',
+            },
+          ],
           label: 'A',
           color: '#00ff00',
         },
@@ -142,8 +165,13 @@ describe('mergeTierFill — server adds new bank item', () => {
       ],
     }
     const draft: TierFillDraft = {
-      rows: [{ id: 'r1', items: [], label: 'S', color: '#ff0000' }, { id: 'r2', items: [], label: 'A', color: '#00ff00' }],
-      bankItems: [{ id: 'x1', label: 'A', url: 'https://img/a.jpg', status: 'uploaded' }],
+      rows: [
+        { id: 'r1', items: [], label: 'S', color: '#ff0000' },
+        { id: 'r2', items: [], label: 'A', color: '#00ff00' },
+      ],
+      bankItems: [
+        { id: 'x1', label: 'A', url: 'https://img/a.jpg', status: 'uploaded' },
+      ],
     }
 
     const result = mergeTierFill(seedWithExtra, draft)
@@ -162,7 +190,10 @@ describe('mergeTierFill — server removes bank item', () => {
       sidebarItems: [{ url: 'https://img/a.jpg', label: 'A' }],
     }
     const draft: TierFillDraft = {
-      rows: [{ id: 'r1', items: [], label: 'S', color: '#ff0000' }, { id: 'r2', items: [], label: 'A', color: '#00ff00' }],
+      rows: [
+        { id: 'r1', items: [], label: 'S', color: '#ff0000' },
+        { id: 'r2', items: [], label: 'A', color: '#00ff00' },
+      ],
       bankItems: [
         { id: 'x1', label: 'A', url: 'https://img/a.jpg', status: 'uploaded' },
         { id: 'x2', label: 'B', url: 'https://img/b.jpg', status: 'uploaded' },
@@ -171,6 +202,8 @@ describe('mergeTierFill — server removes bank item', () => {
 
     const result = mergeTierFill(seedWithoutB, draft)
 
-    expect(result.bankItems.every((i) => i.url !== 'https://img/b.jpg')).toBe(true)
+    expect(result.bankItems.every((i) => i.url !== 'https://img/b.jpg')).toBe(
+      true
+    )
   })
 })

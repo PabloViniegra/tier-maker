@@ -23,7 +23,13 @@ export function SignOutButton({
   }
 
   return (
-    <Button variant='outline' size='sm' className={className} onClick={handleSignOut} {...props}>
+    <Button
+      variant="outline"
+      size="sm"
+      className={className}
+      onClick={handleSignOut}
+      {...props}
+    >
       <LogOut size={14} strokeWidth={1.5} />
       {!iconOnly && 'Sign out'}
     </Button>

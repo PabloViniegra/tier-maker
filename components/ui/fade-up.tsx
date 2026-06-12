@@ -10,7 +10,12 @@ interface FadeUpProps {
   onMount?: boolean
 }
 
-export function FadeUp({ children, delay = 0, className, onMount = false }: FadeUpProps) {
+export function FadeUp({
+  children,
+  delay = 0,
+  className,
+  onMount = false,
+}: FadeUpProps) {
   if (onMount) {
     return (
       <motion.div

@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { DragDropContext } from '@hello-pangea/dnd'
 import { Plus } from 'lucide-react'
-import { useTierEditor, buildSavePayload, hasPendingUploads, type TierListDetailSeed } from '@/lib/stores/tier-editor'
+import {
+  useTierEditor,
+  buildSavePayload,
+  hasPendingUploads,
+  type TierListDetailSeed,
+} from '@/lib/stores/tier-editor'
 import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
 import { MetadataPanel } from './metadata-panel'
 import { ItemBank } from './item-bank'
@@ -44,34 +49,41 @@ export function TierListCreator({
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const openModal = useCallback((files: File[]) => {
-    const { bankItems, rows } = useTierEditor.getState()
-    const filtered: File[] = []
-    for (const file of files) {
-      if (!file.type.startsWith('image/')) {
-        toast.error(`${file.name} is not an image`)
-        continue
+  const openModal = useCallback(
+    (files: File[]) => {
+      const { bankItems, rows } = useTierEditor.getState()
+      const filtered: File[] = []
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) {
+          toast.error(`${file.name} is not an image`)
+          continue
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`${file.name} is larger than 5 MB`)
+          continue
+        }
+        filtered.push(file)
       }
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(`${file.name} is larger than 5 MB`)
-        continue
+      const totalItems =
+        bankItems.length + rows.reduce((n, r) => n + r.items.length, 0)
+      if (totalItems + filtered.length > 30) {
+        toast.error('You can upload at most 30 images per tier list')
+        return
       }
-      filtered.push(file)
-    }
-    const totalItems = bankItems.length + rows.reduce((n, r) => n + r.items.length, 0)
-    if (totalItems + filtered.length > 30) {
-      toast.error('You can upload at most 30 images per tier list')
-      return
-    }
-    if (filtered.length > 0) setPendingFiles(filtered)
-  }, [setPendingFiles])
+      if (filtered.length > 0) setPendingFiles(filtered)
+    },
+    [setPendingFiles]
+  )
 
   const openModalRef = useRef(openModal)
-  useEffect(() => { openModalRef.current = openModal }, [openModal])
+  useEffect(() => {
+    openModalRef.current = openModal
+  }, [openModal])
 
   const handleModalConfirm = useCallback(async (labeled: LabeledFile[]) => {
     setPendingFiles(null)
-    const { addUploadingItem, markItemUploaded, markItemError } = useTierEditor.getState()
+    const { addUploadingItem, markItemUploaded, markItemError } =
+      useTierEditor.getState()
     await Promise.all(
       labeled.map(async ({ file, label }) => {
         const id = addUploadingItem(label)
@@ -148,7 +160,11 @@ export function TierListCreator({
       toast.error('Wait for uploads to finish')
       return
     }
-    if (!isEditMode && current.bankItems.length === 0 && current.rows.every((r) => r.items.length === 0)) {
+    if (
+      !isEditMode &&
+      current.bankItems.length === 0 &&
+      current.rows.every((r) => r.items.length === 0)
+    ) {
       toast.error('Upload at least one image')
       return
     }
@@ -176,7 +192,7 @@ export function TierListCreator({
   }, [router, isEditMode, editId])
 
   return (
-    <div className='flex flex-col gap-6'>
+    <div className="flex flex-col gap-6">
       <PageHeader
         backHref={isEditMode ? '/dashboard/tier-lists' : '/dashboard'}
         title={isEditMode ? 'Edit tier list' : 'New tier list'}
@@ -185,8 +201,11 @@ export function TierListCreator({
       </PageHeader>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className='flex flex-col gap-6 lg:grid lg:grid-cols-[260px_1fr_320px] lg:items-start'>
-          <MetadataPanel categoryPresets={categoryPresets} userPresets={userCategoryPresets} />
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[260px_1fr_320px] lg:items-start">
+          <MetadataPanel
+            categoryPresets={categoryPresets}
+            userPresets={userCategoryPresets}
+          />
           <TierBoard />
           <ItemBank onPickFiles={openModal} />
         </div>
@@ -208,13 +227,15 @@ export function TierListCreator({
 function PageDropOverlay() {
   return (
     <div
-      id='page-dropzone-overlay'
-      className='pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm'
+      id="page-dropzone-overlay"
+      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm"
     >
-      <div className='flex flex-col items-center gap-3 rounded-xl border border-dashed border-primary bg-surface px-10 py-8 shadow-overlay'>
-        <Plus size={28} strokeWidth={1.5} className='text-primary' />
-        <p className='font-heading text-base'>Drop images to upload</p>
-        <p className='text-xs text-muted-foreground'>JPG, PNG, WEBP, GIF · up to 5 MB each</p>
+      <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-primary bg-surface px-10 py-8 shadow-overlay">
+        <Plus size={28} strokeWidth={1.5} className="text-primary" />
+        <p className="font-heading text-base">Drop images to upload</p>
+        <p className="text-xs text-muted-foreground">
+          JPG, PNG, WEBP, GIF · up to 5 MB each
+        </p>
       </div>
     </div>
   )

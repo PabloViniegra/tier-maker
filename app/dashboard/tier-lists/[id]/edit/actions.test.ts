@@ -46,22 +46,24 @@ function mockNotOwned() {
 }
 
 function setupTransaction() {
-  mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
-    const tx = {
-      update: vi.fn().mockReturnValue({
-        set: vi.fn().mockReturnValue({
+  mockTransaction.mockImplementation(
+    async (cb: (tx: unknown) => Promise<unknown>) => {
+      const tx = {
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue(undefined),
+          }),
+        }),
+        delete: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue(undefined),
         }),
-      }),
-      delete: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
-      }),
-      insert: vi.fn().mockReturnValue({
-        values: vi.fn().mockResolvedValue(undefined),
-      }),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockResolvedValue(undefined),
+        }),
+      }
+      return cb(tx)
     }
-    return cb(tx)
-  })
+  )
 }
 
 const validInput = {
@@ -70,7 +72,12 @@ const validInput = {
   category: 'Anime',
   bankItems: [{ url: 'https://blob/bank.png', label: 'Naruto' }],
   rows: [
-    { id: 'row-1', label: 'S', color: '#ff0', items: [{ url: 'https://blob/a.png', label: 'Luffy' }] },
+    {
+      id: 'row-1',
+      label: 'S',
+      color: '#ff0',
+      items: [{ url: 'https://blob/a.png', label: 'Luffy' }],
+    },
     { id: 'row-2', label: 'A', color: '#0ff', items: [] },
   ],
 }
@@ -82,13 +89,17 @@ describe('updateTierListStructureAction', () => {
 
   it('throws Unauthenticated when no session', async () => {
     anonSession()
-    await expect(updateTierListStructureAction('tpl-1', validInput)).rejects.toThrow(/auth/i)
+    await expect(
+      updateTierListStructureAction('tpl-1', validInput)
+    ).rejects.toThrow(/auth/i)
   })
 
   it('throws Not found when tier list belongs to a different user', async () => {
     authedSession('other-user')
     mockNotOwned()
-    await expect(updateTierListStructureAction('tpl-1', validInput)).rejects.toThrow(/not found/i)
+    await expect(
+      updateTierListStructureAction('tpl-1', validInput)
+    ).rejects.toThrow(/not found/i)
   })
 
   it('returns { ok: true } on valid owned update', async () => {
@@ -112,7 +123,9 @@ describe('updateTierListStructureAction', () => {
     mockOwned('tpl-1')
     setupTransaction()
     await updateTierListStructureAction('tpl-1', validInput)
-    expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists/tpl-1')
+    expect(mockRevalidatePath).toHaveBeenCalledWith(
+      '/dashboard/tier-lists/tpl-1'
+    )
     expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
   })
 
@@ -121,7 +134,9 @@ describe('updateTierListStructureAction', () => {
     mockOwned()
     setupTransaction()
     const { description: _description, ...withoutDesc } = validInput // eslint-disable-line @typescript-eslint/no-unused-vars
-    await expect(updateTierListStructureAction('tpl-1', withoutDesc)).resolves.toEqual({ ok: true })
+    await expect(
+      updateTierListStructureAction('tpl-1', withoutDesc)
+    ).resolves.toEqual({ ok: true })
   })
 
   it('accepts input without coverImageUrl (optional field)', async () => {
@@ -129,7 +144,10 @@ describe('updateTierListStructureAction', () => {
     mockOwned()
     setupTransaction()
     await expect(
-      updateTierListStructureAction('tpl-1', { ...validInput, coverImageUrl: undefined })
+      updateTierListStructureAction('tpl-1', {
+        ...validInput,
+        coverImageUrl: undefined,
+      })
     ).resolves.toEqual({ ok: true })
   })
 
@@ -137,6 +155,8 @@ describe('updateTierListStructureAction', () => {
     authedSession()
     mockOwned()
     mockTransaction.mockRejectedValue(new Error('db failure'))
-    await expect(updateTierListStructureAction('tpl-1', validInput)).rejects.toThrow(/db failure/i)
+    await expect(
+      updateTierListStructureAction('tpl-1', validInput)
+    ).rejects.toThrow(/db failure/i)
   })
 })

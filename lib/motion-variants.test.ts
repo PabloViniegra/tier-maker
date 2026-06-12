@@ -46,26 +46,34 @@ describe('fadeUpVariants', () => {
   })
 
   it('visible factory returns opacity 1 and y 0', () => {
-    const visible = (fadeUpVariants.visible as (d: number) => TargetAndTransition)(0)
+    const visible = (
+      fadeUpVariants.visible as (d: number) => TargetAndTransition
+    )(0)
     expect(visible.opacity).toBe(1)
     expect(visible.y).toBe(0)
   })
 
   it('visible transition duration is within design spec (≤ 0.3s)', () => {
-    const visible = (fadeUpVariants.visible as (d: number) => TargetAndTransition)(0)
+    const visible = (
+      fadeUpVariants.visible as (d: number) => TargetAndTransition
+    )(0)
     const transition = visible.transition as { duration: number }
     expect(transition.duration).toBeLessThanOrEqual(0.3)
     expect(transition.duration).toBeGreaterThan(0)
   })
 
   it('visible factory threads delay into transition', () => {
-    const visible = (fadeUpVariants.visible as (d: number) => TargetAndTransition)(0.12)
+    const visible = (
+      fadeUpVariants.visible as (d: number) => TargetAndTransition
+    )(0.12)
     const transition = visible.transition as { delay: number }
     expect(transition.delay).toBe(0.12)
   })
 
   it('visible factory defaults delay to 0', () => {
-    const visible = (fadeUpVariants.visible as (d?: number) => TargetAndTransition)()
+    const visible = (
+      fadeUpVariants.visible as (d?: number) => TargetAndTransition
+    )()
     const transition = visible.transition as { delay: number }
     expect(transition.delay).toBe(0)
   })

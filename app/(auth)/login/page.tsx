@@ -5,7 +5,8 @@ import { AuthForm } from '@/components/auth-form'
 
 export const metadata: Metadata = {
   title: 'Sign In',
-  description: 'Sign in to your Tier Maker account to create and manage your tier lists.',
+  description:
+    'Sign in to your Tier Maker account to create and manage your tier lists.',
 }
 
 export default function LoginPage() {

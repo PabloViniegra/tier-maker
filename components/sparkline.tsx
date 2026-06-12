@@ -12,7 +12,12 @@ interface SparklineProps {
  * Renders nothing for an empty series.
  * Handles single-point and all-equal-value series without division by zero.
  */
-export function Sparkline({ series, width = 64, height = 24, className }: SparklineProps) {
+export function Sparkline({
+  series,
+  width = 64,
+  height = 24,
+  className,
+}: SparklineProps) {
   if (series.length === 0) return null
 
   const min = Math.min(...series)
@@ -26,7 +31,9 @@ export function Sparkline({ series, width = 64, height = 24, className }: Sparkl
   const innerH = height - padY * 2
 
   const toX = (i: number) =>
-    series.length === 1 ? padX + innerW / 2 : padX + (i / (series.length - 1)) * innerW
+    series.length === 1
+      ? padX + innerW / 2
+      : padX + (i / (series.length - 1)) * innerW
 
   const toY = (v: number) =>
     range === 0

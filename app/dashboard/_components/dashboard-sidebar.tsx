@@ -31,7 +31,7 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
         animate={collapsed ? 'collapsed' : 'expanded'}
         initial={false}
         transition={springTransition}
-        className="relative hidden md:flex shrink-0 flex-col border-r border-border bg-surface overflow-visible"
+        className="relative hidden shrink-0 flex-col overflow-visible border-r border-border bg-surface md:flex"
       >
         {/* inner wrapper clips content during animation; aside stays overflow-visible for toggle */}
         <div className="flex flex-1 flex-col overflow-hidden">

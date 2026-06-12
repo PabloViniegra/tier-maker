@@ -6,7 +6,12 @@ vi.mock('next/image', () => ({
     src,
     alt,
     ...props
-  }: { src: string; alt: string; fill?: boolean; sizes?: string } & React.ImgHTMLAttributes<HTMLImageElement>) => (
+  }: {
+    src: string
+    alt: string
+    fill?: boolean
+    sizes?: string
+  } & React.ImgHTMLAttributes<HTMLImageElement>) => (
     // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt={alt} {...props} />
   ),
@@ -24,6 +29,7 @@ import { ExploreCard } from '../explore-card'
 
 const baseData = {
   id: 'xyz-456',
+  slug: 'best-anime-ever',
   title: 'Best Anime Ever',
   category: 'anime',
   itemCount: 10,
@@ -59,13 +65,23 @@ describe('ExploreCard', () => {
   })
 
   it('renders cover image when coverImageUrl is provided', () => {
-    render(<ExploreCard {...baseProps} data={{ ...baseData, coverImageUrl: 'https://blob/cover.png' }} />)
+    render(
+      <ExploreCard
+        {...baseProps}
+        data={{ ...baseData, coverImageUrl: 'https://blob/cover.png' }}
+      />
+    )
     const img = screen.getByRole('img', { name: /best anime ever/i })
     expect(img).toHaveAttribute('src', 'https://blob/cover.png')
   })
 
   it('renders firstItemUrl as fallback when no cover', () => {
-    render(<ExploreCard {...baseProps} data={{ ...baseData, firstItemUrl: 'https://blob/item.png' }} />)
+    render(
+      <ExploreCard
+        {...baseProps}
+        data={{ ...baseData, firstItemUrl: 'https://blob/item.png' }}
+      />
+    )
     const img = screen.getByRole('img')
     expect(img).toHaveAttribute('src', 'https://blob/item.png')
   })
@@ -90,6 +106,8 @@ describe('ExploreCard', () => {
 
   it('does not render like button when user is owner', () => {
     render(<ExploreCard {...baseProps} isOwner />)
-    expect(screen.queryByRole('button', { name: /like/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /like/i })
+    ).not.toBeInTheDocument()
   })
 })

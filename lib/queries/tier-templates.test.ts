@@ -11,6 +11,7 @@ import {
   getRecentTierLists,
   getAllUserTierLists,
   getTierListById,
+  getPublicTierListBySlug,
 } from './tier-templates'
 import { db } from '@/lib/db'
 
@@ -23,7 +24,7 @@ const mockDb = db as unknown as {
 // Call 2 — recent rows: .select().from().where()  (resolves to array)
 function mockStatsQueries(
   aggregateRow: object | undefined,
-  recentRows: { createdAt: Date; category: string }[],
+  recentRows: { createdAt: Date; category: string }[]
 ) {
   const aggregateRows = aggregateRow ? [aggregateRow] : []
   // First call: aggregate query — where() must be a thenable so .then() works
@@ -59,7 +60,10 @@ describe('getUserTierListStats', () => {
   })
 
   it('returns correct all-time total count for user with tier lists', async () => {
-    mockStatsQueries({ total: 3, categories: 2, lastActivity: new Date('2026-06-02') }, [])
+    mockStatsQueries(
+      { total: 3, categories: 2, lastActivity: new Date('2026-06-02') },
+      []
+    )
 
     const result = await getUserTierListStats('user-1')
 
@@ -67,7 +71,10 @@ describe('getUserTierListStats', () => {
   })
 
   it('counts distinct categories (all-time)', async () => {
-    mockStatsQueries({ total: 3, categories: 2, lastActivity: new Date('2026-06-02') }, [])
+    mockStatsQueries(
+      { total: 3, categories: 2, lastActivity: new Date('2026-06-02') },
+      []
+    )
 
     const result = await getUserTierListStats('user-1')
 
@@ -95,13 +102,10 @@ describe('getUserTierListStats', () => {
     const now = new Date()
     const currentDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
     const prevDate = new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000)
-    mockStatsQueries(
-      { total: 2, categories: 2, lastActivity: now },
-      [
-        { createdAt: currentDate, category: 'anime' },
-        { createdAt: prevDate, category: 'games' },
-      ],
-    )
+    mockStatsQueries({ total: 2, categories: 2, lastActivity: now }, [
+      { createdAt: currentDate, category: 'anime' },
+      { createdAt: prevDate, category: 'games' },
+    ])
 
     const result = await getUserTierListStats('user-1')
 
@@ -113,10 +117,9 @@ describe('getUserTierListStats', () => {
     const now = new Date()
     // A date 20 days ago falls in the prev window (14–28 days before now)
     const prevDate = new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000)
-    mockStatsQueries(
-      { total: 1, categories: 1, lastActivity: now },
-      [{ createdAt: prevDate, category: 'anime' }],
-    )
+    mockStatsQueries({ total: 1, categories: 1, lastActivity: now }, [
+      { createdAt: prevDate, category: 'anime' },
+    ])
 
     const result = await getUserTierListStats('user-1')
 
@@ -127,10 +130,9 @@ describe('getUserTierListStats', () => {
     const now = new Date()
     // A date 3 days ago falls in the current window
     const currentDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
-    mockStatsQueries(
-      { total: 1, categories: 1, lastActivity: now },
-      [{ createdAt: currentDate, category: 'anime' }],
-    )
+    mockStatsQueries({ total: 1, categories: 1, lastActivity: now }, [
+      { createdAt: currentDate, category: 'anime' },
+    ])
 
     const result = await getUserTierListStats('user-1')
 
@@ -149,13 +151,10 @@ describe('getUserTierListStats', () => {
       new Date(now.getTime() - 18 * 24 * 60 * 60 * 1000),
       new Date(now.getTime() - 25 * 24 * 60 * 60 * 1000),
     ]
-    mockStatsQueries(
-      { total: 50, categories: 10, lastActivity: now },
-      [
-        ...currentDates.map((d) => ({ createdAt: d, category: 'anime' })),
-        ...prevDates.map((d) => ({ createdAt: d, category: 'games' })),
-      ],
-    )
+    mockStatsQueries({ total: 50, categories: 10, lastActivity: now }, [
+      ...currentDates.map((d) => ({ createdAt: d, category: 'anime' })),
+      ...prevDates.map((d) => ({ createdAt: d, category: 'games' })),
+    ])
 
     const result = await getUserTierListStats('user-1')
 
@@ -169,13 +168,22 @@ describe('getUserTierListStats', () => {
   it('categoriesCurrent counts distinct categories in the current window', async () => {
     const now = new Date()
     const currentRows = [
-      { createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), category: 'anime' },
-      { createdAt: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000), category: 'anime' },
-      { createdAt: new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000), category: 'games' },
+      {
+        createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+        category: 'anime',
+      },
+      {
+        createdAt: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
+        category: 'anime',
+      },
+      {
+        createdAt: new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000),
+        category: 'games',
+      },
     ]
     mockStatsQueries(
       { total: 3, categories: 2, lastActivity: now },
-      currentRows,
+      currentRows
     )
 
     const result = await getUserTierListStats('user-1')
@@ -451,7 +459,13 @@ describe('getTierListById', () => {
   it('returns full detail with ordered rows when id and userId match', async () => {
     mockTemplate(baseTpl)
     mockRows([
-      { id: 'row-1', label: 'S', color: '#ff0', order: 0, items: ['https://blob/x.png'] },
+      {
+        id: 'row-1',
+        label: 'S',
+        color: '#ff0',
+        order: 0,
+        items: ['https://blob/x.png'],
+      },
       { id: 'row-2', label: 'A', color: '#0ff', order: 1, items: [] },
     ])
 
@@ -461,7 +475,11 @@ describe('getTierListById', () => {
     expect(result!.id).toBe('tpl-1')
     expect(result!.title).toBe('Best Anime')
     expect(result!.rows).toHaveLength(2)
-    expect(result!.rows[0]).toMatchObject({ id: 'row-1', label: 'S', items: ['https://blob/x.png'] })
+    expect(result!.rows[0]).toMatchObject({
+      id: 'row-1',
+      label: 'S',
+      items: ['https://blob/x.png'],
+    })
   })
 
   it('returns null when the id does not exist', async () => {
@@ -481,11 +499,116 @@ describe('getTierListById', () => {
   })
 
   it('exposes sidebarItems as the bank', async () => {
-    mockTemplate({ ...baseTpl, sidebarItems: ['https://blob/a.png', 'https://blob/b.png'] })
+    mockTemplate({
+      ...baseTpl,
+      sidebarItems: ['https://blob/a.png', 'https://blob/b.png'],
+    })
     mockRows([])
 
     const result = await getTierListById('tpl-1', 'user-1')
 
-    expect(result!.sidebarItems).toEqual(['https://blob/a.png', 'https://blob/b.png'])
+    expect(result!.sidebarItems).toEqual([
+      'https://blob/a.png',
+      'https://blob/b.png',
+    ])
+  })
+})
+
+describe('getPublicTierListBySlug', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  function mockTemplate(tpl: object) {
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([tpl]),
+        }),
+      }),
+    })
+  }
+
+  function mockNoTemplate() {
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([]),
+        }),
+      }),
+    })
+  }
+
+  function mockRows(rows: object[]) {
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockResolvedValue(rows),
+        }),
+      }),
+    })
+  }
+
+  const baseTpl = {
+    id: 'tpl-1',
+    slug: 'best-anime',
+    title: 'Best Anime',
+    description: null,
+    category: 'anime',
+    sidebarItems: ['https://blob/a.png'],
+    createdAt: new Date('2026-06-01'),
+    creatorId: 'user-1',
+    likeCount: 3,
+  }
+
+  it('returns full detail when slug matches a public tier list', async () => {
+    mockTemplate(baseTpl)
+    mockRows([
+      {
+        id: 'row-1',
+        label: 'S',
+        color: '#ff0',
+        order: 0,
+        items: ['https://blob/x.png'],
+      },
+      { id: 'row-2', label: 'A', color: '#0ff', order: 1, items: [] },
+    ])
+
+    const result = await getPublicTierListBySlug('best-anime')
+
+    expect(result).not.toBeNull()
+    expect(result!.id).toBe('tpl-1')
+    expect(result!.title).toBe('Best Anime')
+    expect(result!.likeCount).toBe(3)
+    expect(result!.rows).toHaveLength(2)
+    expect(result!.rows[0]).toMatchObject({
+      id: 'row-1',
+      label: 'S',
+      items: ['https://blob/x.png'],
+    })
+  })
+
+  it('returns null when slug does not exist', async () => {
+    mockNoTemplate()
+
+    const result = await getPublicTierListBySlug('nonexistent')
+
+    expect(result).toBeNull()
+  })
+
+  it('returns null when the tier list is not public (even if slug exists)', async () => {
+    mockNoTemplate()
+
+    const result = await getPublicTierListBySlug('private-list')
+
+    expect(result).toBeNull()
+  })
+
+  it('returns null when slug exists but template has been deleted', async () => {
+    mockNoTemplate()
+
+    const result = await getPublicTierListBySlug('deleted-list')
+
+    expect(result).toBeNull()
   })
 })

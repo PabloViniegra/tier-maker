@@ -3,7 +3,14 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Heart, Link as LinkIcon, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import {
+  ArrowRight,
+  Heart,
+  Link as LinkIcon,
+  MoreVertical,
+  Pencil,
+  Trash2,
+} from 'lucide-react'
 import { getInitials, getCategoryGradient } from '@/lib/utils/cover-placeholder'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -30,6 +37,7 @@ import { deleteTierList } from '@/app/dashboard/tier-lists/_actions/delete-tier-
 
 export type TierListCardProps = {
   id: string
+  slug: string
   title: string
   category: string
   itemCount: number
@@ -45,6 +53,7 @@ function truncateCategory(cat: string, max = 20): string {
 
 export function TierListCard({
   id,
+  slug,
   title,
   category,
   itemCount,
@@ -65,12 +74,15 @@ export function TierListCard({
   return (
     <div
       className={cn(
-        'flex flex-col gap-3 rounded-lg border border-border bg-surface overflow-hidden transition-colors duration-200 hover:border-primary/20 hover:bg-overlay',
+        'flex flex-col gap-3 overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-200 hover:border-primary/20 hover:bg-overlay',
         className
       )}
       style={style}
     >
-      <Link href={fillHref} className="relative aspect-video w-full overflow-hidden bg-muted block">
+      <Link
+        href={fillHref}
+        className="relative block aspect-video w-full overflow-hidden bg-muted"
+      >
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -82,10 +94,10 @@ export function TierListCard({
         ) : (
           <div
             data-testid="card-cover-placeholder"
-            className="h-full w-full flex items-center justify-center"
+            className="flex h-full w-full items-center justify-center"
             style={{ background: getCategoryGradient(category) }}
           >
-            <span className="text-white font-bold text-3xl select-none drop-shadow">
+            <span className="text-3xl font-bold text-white drop-shadow select-none">
               {getInitials(title)}
             </span>
           </div>
@@ -96,11 +108,11 @@ export function TierListCard({
         <div className="flex items-center justify-between gap-2">
           <Badge
             variant="secondary"
-            className="h-5 text-[10px] max-w-[120px] truncate"
+            className="h-5 max-w-[120px] truncate text-[10px]"
           >
             {truncateCategory(category)}
           </Badge>
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex shrink-0 items-center gap-1">
             <span className="text-xs text-muted-foreground">
               {formatRelativeDate(createdAt)}
             </span>
@@ -113,14 +125,19 @@ export function TierListCard({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[7rem]">
                 <DropdownMenuItem>
-                  <Link href={editHref} className="flex items-center gap-2 w-full">
+                  <Link
+                    href={editHref}
+                    className="flex w-full items-center gap-2"
+                  >
                     <Pencil size={13} />
                     Edit
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/explore/${id}`)
+                    navigator.clipboard.writeText(
+                      `${window.location.origin}/explore/${slug}`
+                    )
                     toast.success('Link copied')
                   }}
                 >
@@ -139,7 +156,9 @@ export function TierListCard({
           </div>
         </div>
 
-        <p className="text-sm font-medium text-foreground leading-snug">{title}</p>
+        <p className="text-sm leading-snug font-medium text-foreground">
+          {title}
+        </p>
 
         <Separator />
 
@@ -169,14 +188,18 @@ export function TierListCard({
         </div>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={(open) => {
-        if (!isPending) setDialogOpen(open)
-      }}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          if (!isPending) setDialogOpen(open)
+        }}
+      >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Delete tier list</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete <strong>{title}</strong>? This action cannot be undone.
+              Are you sure you want to delete <strong>{title}</strong>? This
+              action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

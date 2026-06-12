@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { DragDropContext } from '@hello-pangea/dnd'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -12,7 +12,9 @@ import { ExportButton } from '@/app/dashboard/tier-lists/[id]/_components/export
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useTierFillPersistence } from '@/lib/hooks/use-tier-fill-persistence'
+import { PublicTierBoard } from './public-tier-board'
 import type { TierListDetailSeed } from '@/lib/stores/tier-editor'
+import type { PublicTierRowData } from './public-tier-row'
 
 type Props = {
   tierId: string
@@ -20,14 +22,46 @@ type Props = {
   backHref?: string
 }
 
+function deriveRowsForPersistence(
+  data: TierListDetailSeed
+): PublicTierRowData[] {
+  return data.rows.map((r) => ({
+    id: r.id,
+    label: r.label,
+    color: r.color,
+    order: r.order,
+    items: r.items.map((item) => ({
+      url: item.url ?? '',
+      label: item.label,
+    })),
+  }))
+}
+
 export function PublicTierFill({ tierId, data, backHref = '/explore' }: Props) {
   const boardRef = useRef<HTMLElement>(null)
   const { data: session } = useSession()
   const userId = session?.user?.id ?? null
+  const [hydrated, setHydrated] = useState(false)
 
+  // Initialize Zustand store + IndexedDB persistence in the background.
   useTierFillPersistence(tierId, userId, data)
 
+  // After the initial client render, swap to the interactive board.
+  // Using useEffect (post-paint) instead of useLayoutEffect (pre-paint) so
+  // crawlers/bots see the static HTML in the initial response, but real users
+  // get a fast hydration without blocking the first paint.
+  useEffect(() => {
+    setHydrated(true)
+  }, [])
+
   const { onDragEnd } = useTierDnd()
+
+  // Derive static props once — used for the non-hydrated phase only.
+  const rows: PublicTierRowData[] = deriveRowsForPersistence(data)
+  const sidebarItems = data.sidebarItems.map((item) => ({
+    url: item.url ?? '',
+    label: item.label,
+  }))
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col">
@@ -48,14 +82,30 @@ export function PublicTierFill({ tierId, data, backHref = '/explore' }: Props) {
         <ExportButton boardRef={boardRef} title={data.title} />
       </header>
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <TierBoard rowMinHeight="24" boardRef={boardRef} />
-        </div>
-        <div className="shrink-0">
-          <ItemBankStrip />
-        </div>
-      </DragDropContext>
+      {hydrated ? (
+        <DragDropContext onDragEnd={onDragEnd}>
+          {/* Announce drag operations to screen readers */}
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+            id="dnd-announcements"
+          />
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <TierBoard rowMinHeight="24" boardRef={boardRef} />
+          </div>
+          <div className="shrink-0">
+            <ItemBankStrip />
+          </div>
+        </DragDropContext>
+      ) : (
+        <PublicTierBoard
+          rows={rows}
+          sidebarItems={sidebarItems}
+          boardRef={boardRef}
+        />
+      )}
     </div>
   )
 }

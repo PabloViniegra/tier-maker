@@ -2,12 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-const { mockPush, mockToastError, mockSignInEmail, mockSignUpEmail } = vi.hoisted(() => ({
-  mockPush: vi.fn(),
-  mockToastError: vi.fn(),
-  mockSignInEmail: vi.fn(),
-  mockSignUpEmail: vi.fn(),
-}))
+const { mockPush, mockToastError, mockSignInEmail, mockSignUpEmail } =
+  vi.hoisted(() => ({
+    mockPush: vi.fn(),
+    mockToastError: vi.fn(),
+    mockSignInEmail: vi.fn(),
+    mockSignUpEmail: vi.fn(),
+  }))
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
@@ -57,7 +58,10 @@ describe('AuthForm — login mode', () => {
   })
 
   it('calls signIn with correct data on valid submit', async () => {
-    mockSignInEmail.mockResolvedValue({ data: { session: {} }, error: null } as never)
+    mockSignInEmail.mockResolvedValue({
+      data: { session: {} },
+      error: null,
+    } as never)
 
     render(<AuthForm mode="login" />)
     await user.type(screen.getByLabelText(/email/i), 'user@example.com')
@@ -75,7 +79,10 @@ describe('AuthForm — login mode', () => {
   })
 
   it('redirects to dashboard on successful login', async () => {
-    mockSignInEmail.mockResolvedValue({ data: { session: {} }, error: null } as never)
+    mockSignInEmail.mockResolvedValue({
+      data: { session: {} },
+      error: null,
+    } as never)
 
     render(<AuthForm mode="login" />)
     await user.type(screen.getByLabelText(/email/i), 'user@example.com')
@@ -132,7 +139,9 @@ describe('AuthForm — register mode', () => {
     expect(screen.getByLabelText(/confirm password/i)).toBeDisabled()
     expect(screen.getByRole('button', { name: /sign up/i })).toBeDisabled()
 
-    expect(screen.getByText(/email registration is temporarily disabled/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/email registration is temporarily disabled/i)
+    ).toBeInTheDocument()
     expect(screen.getByText(/please sign up with google/i)).toBeInTheDocument()
   })
 

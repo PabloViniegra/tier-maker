@@ -25,12 +25,18 @@ interface EmptyStateProps {
  * - `onClick` (CtaButton): rendered as a `<button>` — requires a Client Component
  *   parent because functions are not serializable across the RSC boundary.
  */
-export function EmptyState({ icon: Icon, title, description, cta, className }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  cta,
+  className,
+}: EmptyStateProps) {
   return (
     <div
       className={cn(
         'relative flex flex-col items-center gap-4 overflow-hidden rounded-lg border border-dashed border-border p-12 text-center',
-        className,
+        className
       )}
     >
       {/* Decorative tier-rows motif */}
@@ -42,12 +48,17 @@ export function EmptyState({ icon: Icon, title, description, cta, className }: E
 
         <div className="flex flex-col gap-1">
           <h3 className="font-heading text-base text-balance">{title}</h3>
-          <p className="text-sm text-muted-foreground text-pretty">{description}</p>
+          <p className="text-sm text-pretty text-muted-foreground">
+            {description}
+          </p>
         </div>
 
-        {cta && (
-          cta.href ? (
-            <Link href={cta.href} className={cn(buttonVariants({ size: 'sm' }))}>
+        {cta &&
+          (cta.href ? (
+            <Link
+              href={cta.href}
+              className={cn(buttonVariants({ size: 'sm' }))}
+            >
               {cta.label}
             </Link>
           ) : (
@@ -58,8 +69,7 @@ export function EmptyState({ icon: Icon, title, description, cta, className }: E
             >
               {cta.label}
             </button>
-          )
-        )}
+          ))}
       </div>
     </div>
   )

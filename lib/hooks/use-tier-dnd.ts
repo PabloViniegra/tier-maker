@@ -3,10 +3,7 @@
 import { useCallback } from 'react'
 import type { DropResult } from '@hello-pangea/dnd'
 import { useTierEditor } from '@/lib/stores/tier-editor'
-import {
-  BANK_DROPPABLE,
-  rowIdFromDroppableId,
-} from './tier-dnd-constants'
+import { BANK_DROPPABLE, rowIdFromDroppableId } from './tier-dnd-constants'
 
 export function useTierDnd() {
   const onDragEnd = useCallback((result: DropResult) => {
@@ -26,7 +23,9 @@ export function useTierDnd() {
       sourceId: fromBank ? undefined : rowIdFromDroppableId(source.droppableId),
       sourceIndex: source.index,
       target: toBank ? 'bank' : 'row',
-      targetId: toBank ? undefined : rowIdFromDroppableId(destination.droppableId),
+      targetId: toBank
+        ? undefined
+        : rowIdFromDroppableId(destination.droppableId),
       targetIndex: destination.index,
     })
   }, [])

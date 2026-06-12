@@ -29,7 +29,10 @@ export function useExploreFilters() {
     (cat: string | null) => push('category', cat === 'all' ? null : cat),
     [push]
   )
-  const setSort = useCallback((sort: ExploreSort | null) => push('sort', sort), [push])
+  const setSort = useCallback(
+    (sort: ExploreSort | null) => push('sort', sort),
+    [push]
+  )
 
   return { setSearch, setCategory, setSort }
 }

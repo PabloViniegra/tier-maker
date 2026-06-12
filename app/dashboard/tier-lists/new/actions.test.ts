@@ -2,14 +2,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('server-only', () => ({}))
 
-const { mockPut, mockRevalidatePath, mockRevalidateTag, mockGetSession, mockTransaction } =
-  vi.hoisted(() => ({
-    mockPut: vi.fn(),
-    mockRevalidatePath: vi.fn(),
-    mockRevalidateTag: vi.fn(),
-    mockGetSession: vi.fn(),
-    mockTransaction: vi.fn(),
-  }))
+const {
+  mockPut,
+  mockRevalidatePath,
+  mockRevalidateTag,
+  mockGetSession,
+  mockTransaction,
+  mockSelect,
+} = vi.hoisted(() => ({
+  mockPut: vi.fn(),
+  mockRevalidatePath: vi.fn(),
+  mockRevalidateTag: vi.fn(),
+  mockGetSession: vi.fn(),
+  mockTransaction: vi.fn(),
+  mockSelect: vi.fn(),
+}))
 
 vi.mock('@vercel/blob', () => ({
   put: mockPut,
@@ -27,6 +34,7 @@ vi.mock('@/lib/session', () => ({
 vi.mock('@/lib/db', () => ({
   db: {
     transaction: mockTransaction,
+    select: mockSelect,
   },
 }))
 
@@ -47,15 +55,23 @@ function anonSession() {
 }
 
 function setupTransaction(templateId = 'tpl-1') {
-  mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
-    const tx = {
-      insert: vi.fn().mockReturnValue({
-        values: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([{ id: templateId }]),
+  mockTransaction.mockImplementation(
+    async (cb: (tx: unknown) => Promise<unknown>) => {
+      const tx = {
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: templateId }]),
+          }),
         }),
-      }),
+      }
+      return cb(tx)
     }
-    return cb(tx)
+  )
+}
+
+function setupSelectSlugs(slugs: string[] = []) {
+  mockSelect.mockReturnValue({
+    from: vi.fn().mockResolvedValue(slugs.map((s) => ({ slug: s }))),
   })
 }
 
@@ -146,13 +162,16 @@ describe('createTierListAction', () => {
 
   it('wraps inserts in a transaction and revalidates the dashboard', async () => {
     authedSession()
+    setupSelectSlugs()
     setupTransaction('tpl-1')
 
     const result = await createTierListAction({
       ...validInput,
       bankItems: [{ url: 'https://blob/a.png', label: 'A cake' }],
       rows: validInput.rows.map((r, i) =>
-        i === 0 ? { ...r, items: [{ url: 'https://blob/b.png', label: 'B cake' }] } : r
+        i === 0
+          ? { ...r, items: [{ url: 'https://blob/b.png', label: 'B cake' }] }
+          : r
       ),
     })
 
@@ -163,9 +182,12 @@ describe('createTierListAction', () => {
 
   it('propagates transaction errors without orphaned data', async () => {
     authedSession()
+    setupSelectSlugs()
     mockTransaction.mockRejectedValue(new Error('db failure'))
 
-    await expect(createTierListAction(validInput)).rejects.toThrow(/db failure/i)
+    await expect(createTierListAction(validInput)).rejects.toThrow(
+      /db failure/i
+    )
   })
 
   it('rejects payloads with too many items', async () => {
@@ -188,6 +210,8 @@ describe('getCategoryPresets', () => {
 
   it('returns only non-empty strings', async () => {
     const presets = await getCategoryPresets()
-    expect(presets.every((p) => typeof p === 'string' && p.length > 0)).toBe(true)
+    expect(presets.every((p) => typeof p === 'string' && p.length > 0)).toBe(
+      true
+    )
   })
 })

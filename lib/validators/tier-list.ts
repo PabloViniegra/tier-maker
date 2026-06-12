@@ -49,16 +49,14 @@ export const createTierListSchema = z
     description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
     category: z.string().min(1).max(MAX_CATEGORY_LENGTH),
     coverImageUrl: z.string().url().optional(),
-    rows: z
-      .array(tierRowSchema)
-      .min(MIN_ROW_COUNT)
-      .max(MAX_ROW_COUNT),
+    rows: z.array(tierRowSchema).min(MIN_ROW_COUNT).max(MAX_ROW_COUNT),
     bankItems: z.array(imageItemSchema).max(MAX_ITEM_COUNT),
   })
   .refine(
     (val) => {
       const total =
-        val.bankItems.length + val.rows.reduce((sum, r) => sum + r.items.length, 0)
+        val.bankItems.length +
+        val.rows.reduce((sum, r) => sum + r.items.length, 0)
       return total <= MAX_ITEM_COUNT
     },
     { message: `Total items must be <= ${MAX_ITEM_COUNT}` }
@@ -74,7 +72,9 @@ export const updateTierListPayloadSchema = z
   })
   .refine(
     (val) => {
-      const total = val.bankItems.length + val.rows.reduce((sum, r) => sum + r.items.length, 0)
+      const total =
+        val.bankItems.length +
+        val.rows.reduce((sum, r) => sum + r.items.length, 0)
       return total <= MAX_ITEM_COUNT
     },
     { message: `Total items must be <= ${MAX_ITEM_COUNT}` }
@@ -94,12 +94,12 @@ export const imageUploadSchema = z.object({
 export type ImageUploadInput = z.infer<typeof imageUploadSchema>
 
 export function defaultTierRows(): TierRow[] {
-  return (Object.entries(TIER_COLORS) as [keyof typeof TIER_COLORS, string][]).map(
-    ([label, color]) => ({
-      id: `tier-${label.toLowerCase()}`,
-      label,
-      color,
-      items: [],
-    })
-  )
+  return (
+    Object.entries(TIER_COLORS) as [keyof typeof TIER_COLORS, string][]
+  ).map(([label, color]) => ({
+    id: `tier-${label.toLowerCase()}`,
+    label,
+    color,
+    items: [],
+  }))
 }

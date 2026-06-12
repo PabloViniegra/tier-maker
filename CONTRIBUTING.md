@@ -101,13 +101,13 @@ pnpm dev
 
 Create a branch from `main` using a descriptive name:
 
-| Type | Format | Example |
-|---|---|---|
-| Feature | `feat/<short-description>` | `feat/dark-mode-toggle` |
-| Bug fix | `fix/<short-description>` | `fix/drag-drop-offset` |
-| Docs | `docs/<short-description>` | `docs/update-readme` |
+| Type     | Format                         | Example                        |
+| -------- | ------------------------------ | ------------------------------ |
+| Feature  | `feat/<short-description>`     | `feat/dark-mode-toggle`        |
+| Bug fix  | `fix/<short-description>`      | `fix/drag-drop-offset`         |
+| Docs     | `docs/<short-description>`     | `docs/update-readme`           |
 | Refactor | `refactor/<short-description>` | `refactor/extract-auth-module` |
-| Test | `test/<short-description>` | `test/tier-editor-store` |
+| Test     | `test/<short-description>`     | `test/tier-editor-store`       |
 
 ### Making Changes
 

@@ -1,25 +1,33 @@
 import { cache, ViewTransition } from 'react'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getSession } from '@/lib/session'
-import { getPublicTierListById } from '@/lib/queries/tier-templates'
+import { getPublicTierListBySlug, getPublicTierListById } from '@/lib/queries/tier-templates'
 import { getIsLiked } from '@/lib/queries/tier-likes'
 import { LikeButton } from '@/components/like-button'
 import { ExploreHeader } from '../_components/explore-header'
 import { AnonymousCTABanner } from '../_components/anonymous-cta-banner'
 import { PublicTierFill } from '../_components/public-tier-fill'
 
-const getPublicTierList = cache(getPublicTierListById)
+const getPublicTierList = cache(getPublicTierListBySlug)
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+function isUuid(value: string) {
+  return UUID_RE.test(value)
+}
 
 type Props = {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params
-  const data = await getPublicTierList(id)
+  const { slug } = await params
+  const data = await getPublicTierList(slug)
   if (!data) return { title: 'Tier List Not Found' }
-  const description = data.description ?? `Fill the ${data.title} tier list from the community.`
+  const description =
+    data.description ?? `Fill the ${data.title} tier list from the community.`
   return {
     title: data.title,
     description,
@@ -39,13 +47,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PublicTierFillPage({ params }: Props) {
-  const { id } = await params
-  const [session, data] = await Promise.all([getSession(), getPublicTierList(id)])
+  const { slug } = await params
+
+  // Legacy redirect: old UUID-based URLs are permanent-redirected (301) to the
+  // new slug-based canonical URL.
+  if (isUuid(slug)) {
+    const data = await getPublicTierListById(slug)
+    if (!data) notFound()
+    permanentRedirect(`/explore/${data.slug}`)
+  }
+
+  const [session, data] = await Promise.all([
+    getSession(),
+    getPublicTierList(slug),
+  ])
 
   if (!data) notFound()
 
   const userId = session?.user.id ?? null
-  const isLiked = userId ? await getIsLiked(userId, id) : false
+  const isLiked = userId ? await getIsLiked(userId, data.id) : false
   const isOwner = userId !== null && data.creatorId === userId
 
   return (
@@ -54,10 +74,12 @@ export default async function PublicTierFillPage({ params }: Props) {
       {!session && <AnonymousCTABanner />}
 
       <div className="flex items-center justify-between border-b border-border bg-surface px-4 py-2">
-        <h1 className="truncate text-sm font-medium text-foreground">{data.title}</h1>
+        <h1 className="truncate text-sm font-medium text-foreground">
+          {data.title}
+        </h1>
         {!isOwner && (
           <LikeButton
-            templateId={id}
+            templateId={data.id}
             initialCount={data.likeCount}
             initialIsLiked={isLiked}
             isAuthenticated={!!session}
@@ -66,9 +88,9 @@ export default async function PublicTierFillPage({ params }: Props) {
       </div>
 
       <main id="main-content" className="flex-1 overflow-hidden">
-        <ViewTransition name={`tier-cover-${id}`}>
+        <ViewTransition name={`tier-cover-${data.id}`}>
           <PublicTierFill
-            tierId={id}
+            tierId={data.id}
             data={{
               title: data.title,
               description: data.description,

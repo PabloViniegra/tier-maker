@@ -6,13 +6,21 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 import { TierListCard, type TierListCardProps } from './tier-list-card'
 import { EmptyState } from '@/components/empty-state'
-import { fadeUpVariants, staggerIndex, STAGGER_DELAY, cardLiftVariants } from '@/lib/motion-variants'
+import {
+  fadeUpVariants,
+  staggerIndex,
+  STAGGER_DELAY,
+  cardLiftVariants,
+} from '@/lib/motion-variants'
 
 export function TierListGridSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="flex flex-col gap-3 rounded-lg border border-border bg-surface overflow-hidden">
+        <div
+          key={i}
+          className="flex flex-col gap-3 overflow-hidden rounded-lg border border-border bg-surface"
+        >
           <Skeleton className="aspect-video w-full rounded-none" />
           <div className="flex flex-col gap-3 px-4 pb-4">
             <div className="flex items-center justify-between">
@@ -32,7 +40,11 @@ export function TierListGridSkeleton() {
   )
 }
 
-export function TierListGrid({ tierLists }: { tierLists: TierListCardProps[] }) {
+export function TierListGrid({
+  tierLists,
+}: {
+  tierLists: TierListCardProps[]
+}) {
   if (tierLists.length === 0) {
     return (
       <motion.div

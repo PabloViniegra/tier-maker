@@ -24,7 +24,11 @@ import {
   ColorPickerOutput,
   ColorPickerSelection,
 } from '@/components/ui/color-picker'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 
 type TierRowChipProps = {
   label: string
@@ -36,7 +40,15 @@ type TierRowChipProps = {
   onRemove: () => void
 }
 
-function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, onColorChange, onRemove }: TierRowChipProps) {
+function TierRowChip({
+  label,
+  color,
+  canRemove,
+  height = '16',
+  onLabelChange,
+  onColorChange,
+  onRemove,
+}: TierRowChipProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(label)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -62,7 +74,10 @@ function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, on
 
   return (
     <div
-      className={cn('group/chip relative flex shrink-0 items-center justify-center rounded font-heading text-sm font-bold text-white', chipCls)}
+      className={cn(
+        'group/chip relative flex shrink-0 items-center justify-center rounded font-heading text-sm font-bold text-white',
+        chipCls
+      )}
       style={{ background: color }}
       aria-label={`Tier ${label}`}
     >
@@ -76,20 +91,23 @@ function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, on
             if (e.key === 'Enter') confirmEdit()
             if (e.key === 'Escape') cancelEdit()
           }}
-          className='w-[4.5rem] rounded bg-transparent text-center text-xs font-bold text-white outline-none placeholder:text-white/60 focus-visible:ring-2 focus-visible:ring-white/60'
+          className="w-[4.5rem] rounded bg-transparent text-center text-xs font-bold text-white outline-none placeholder:text-white/60 focus-visible:ring-2 focus-visible:ring-white/60"
           maxLength={20}
-          aria-label='Edit tier label'
+          aria-label="Edit tier label"
         />
       ) : (
         <span
-          role='button'
+          role="button"
           tabIndex={0}
           onDoubleClick={startEdit}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startEdit() }
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              startEdit()
+            }
           }}
-          className='line-clamp-2 cursor-text select-none break-words rounded px-1 text-center text-xs leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60'
-          title='Double-click or press Enter to rename'
+          className="line-clamp-2 cursor-text rounded px-1 text-center text-xs leading-tight break-words select-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+          title="Double-click or press Enter to rename"
         >
           {label}
         </span>
@@ -97,28 +115,28 @@ function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, on
 
       <Popover>
         <PopoverTrigger
-          aria-label='Change tier color'
-          className='absolute bottom-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-sm border border-white/30 bg-black/20 text-white opacity-0 transition-opacity group-hover/chip:opacity-100 hover:bg-black/40 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60'
+          aria-label="Change tier color"
+          className="absolute right-0.5 bottom-0.5 flex h-4 w-4 items-center justify-center rounded-sm border border-white/30 bg-black/20 text-white opacity-0 transition-opacity group-hover/chip:opacity-100 hover:bg-black/40 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
         >
           <Palette size={9} aria-hidden />
         </PopoverTrigger>
         <PopoverContent
-          side='right'
+          side="right"
           sideOffset={8}
-          align='start'
-          className='w-64 p-3'
+          align="start"
+          className="w-64 p-3"
           initialFocus={false}
         >
           <ColorPicker value={color} onChange={onColorChange}>
             <ColorPickerSelection />
-            <div className='flex items-center gap-2'>
+            <div className="flex items-center gap-2">
               <ColorPickerEyeDropper />
-              <div className='flex w-full flex-col gap-2'>
+              <div className="flex w-full flex-col gap-2">
                 <ColorPickerHue />
                 <ColorPickerAlpha />
               </div>
             </div>
-            <div className='flex flex-col gap-1.5'>
+            <div className="flex flex-col gap-1.5">
               <ColorPickerOutput />
               <ColorPickerFormat />
             </div>
@@ -127,14 +145,14 @@ function TierRowChip({ label, color, canRemove, height = '16', onLabelChange, on
       </Popover>
 
       <button
-        type='button'
+        type="button"
         onClick={onRemove}
         disabled={!canRemove}
         className={cn(
-          'absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-border bg-background text-muted-foreground opacity-0 transition-opacity group-hover/chip:opacity-100 focus-visible:opacity-100',
+          'absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-border bg-background text-muted-foreground opacity-0 transition-opacity group-hover/chip:opacity-100 focus-visible:opacity-100',
           !canRemove && 'cursor-not-allowed opacity-0'
         )}
-        aria-label='Remove row'
+        aria-label="Remove row"
       >
         <X size={9} />
       </button>
@@ -160,12 +178,15 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
   const imgSize = lg ? 80 : 48
 
   return (
-    <section ref={boardRef as React.RefObject<HTMLElement>} className='flex flex-col gap-1.5'>
+    <section
+      ref={boardRef as React.RefObject<HTMLElement>}
+      className="flex flex-col gap-1.5"
+    >
       {rows.map((row) => (
         <div
           key={row.id}
-          className='flex items-stretch gap-1.5'
-          data-testid='tier-row'
+          className="flex items-stretch gap-1.5"
+          data-testid="tier-row"
         >
           <TierRowChip
             label={row.label}
@@ -176,44 +197,60 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
             onColorChange={(color) => updateRow(row.id, { color })}
             onRemove={() => removeRow(row.id)}
           />
-          <Droppable droppableId={droppableIdForRow(row.id)} direction='horizontal'>
+          <Droppable
+            droppableId={droppableIdForRow(row.id)}
+            direction="horizontal"
+          >
             {(provided, snapshot) => (
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
+                role="list"
+                aria-label={`${row.label} tier items`}
                 className={cn(
                   `flex ${rowHeightCls} flex-1 flex-wrap items-center gap-1.5 rounded border border-border bg-surface px-2 py-1.5 transition-colors`,
                   snapshot.isDraggingOver && 'border-primary/40 bg-primary/5'
                 )}
-                data-testid='tier-row-droppable'
+                data-testid="tier-row-droppable"
               >
                 {row.items.length === 0 && !snapshot.isDraggingOver && (
-                  <span className='text-xs text-muted-foreground'>
+                  <span className="text-xs text-muted-foreground">
                     Drag items here
                   </span>
                 )}
                 <TooltipProvider>
                   {row.items.map((item, index) => (
-                    <Draggable key={item.id} draggableId={item.id} index={index} disableInteractiveElementBlocking>
+                    <Draggable
+                      key={item.id}
+                      draggableId={item.id}
+                      index={index}
+                      disableInteractiveElementBlocking
+                    >
                       {(dragProvided, dragSnapshot) => (
                         <div
                           ref={dragProvided.innerRef}
                           {...dragProvided.draggableProps}
                           {...dragProvided.dragHandleProps}
-                          className={cn('group/item relative shrink-0', itemCls)}
-                          data-testid='row-item'
+                          className={cn(
+                            'group/item relative shrink-0 rounded-sm',
+                            itemCls,
+                            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none'
+                          )}
+                          data-testid="row-item"
                         >
                           <motion.div
                             initial={false}
                             variants={dragActiveVariants}
-                            animate={dragSnapshot.isDragging ? 'dragging' : 'idle'}
-                            className='relative h-full w-full overflow-hidden rounded border border-border bg-background'
+                            animate={
+                              dragSnapshot.isDragging ? 'dragging' : 'idle'
+                            }
+                            className="relative h-full w-full overflow-hidden rounded border border-border bg-background"
                           >
                             {item.status === 'uploaded' && item.url ? (
                               <Tooltip>
                                 <TooltipTrigger
                                   render={<span />}
-                                  className='block h-full w-full'
+                                  className="block h-full w-full"
                                   aria-label={item.label}
                                 >
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -222,27 +259,31 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
                                     alt={item.label}
                                     width={imgSize}
                                     height={imgSize}
-                                    className='h-full w-full object-cover'
+                                    className="h-full w-full object-cover"
                                     draggable={false}
                                   />
                                 </TooltipTrigger>
                                 <TooltipContent>{item.label}</TooltipContent>
                               </Tooltip>
                             ) : item.status === 'uploading' ? (
-                              <div className='flex h-full w-full items-center justify-center text-muted-foreground'>
-                                <Loader2 size={12} className='animate-spin' />
+                              <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                                <Loader2 size={12} className="animate-spin" />
                               </div>
                             ) : (
-                              <div className='flex h-full w-full items-center justify-center bg-destructive/20 text-destructive'>
+                              <div className="flex h-full w-full items-center justify-center bg-destructive/20 text-destructive">
                                 <X size={12} />
                               </div>
                             )}
                             <button
-                              type='button'
+                              type="button"
                               onClick={() =>
-                                removeItem({ source: 'row', id: item.id, rowId: row.id })
+                                removeItem({
+                                  source: 'row',
+                                  id: item.id,
+                                  rowId: row.id,
+                                })
                               }
-                              className='absolute right-0 top-0 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 focus-visible:opacity-100 hover:text-foreground'
+                              className="absolute top-0 right-0 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-foreground focus-visible:opacity-100"
                               aria-label={`Remove ${item.label}`}
                             >
                               <X size={10} />
@@ -262,11 +303,11 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
 
       {rows.length < 10 && (
         <Button
-          type='button'
-          variant='ghost'
-          size='sm'
+          type="button"
+          variant="ghost"
+          size="sm"
           onClick={addRow}
-          className='mt-1 w-fit gap-1.5 text-muted-foreground hover:text-foreground'
+          className="mt-1 w-fit gap-1.5 text-muted-foreground hover:text-foreground"
         >
           <Plus size={14} />
           Add row

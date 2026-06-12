@@ -1,7 +1,19 @@
 import 'server-only'
 import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
-import { eq, desc, count, countDistinct, max, and, asc, or, ilike, sql, gte } from 'drizzle-orm'
+import {
+  eq,
+  desc,
+  count,
+  countDistinct,
+  max,
+  and,
+  asc,
+  or,
+  ilike,
+  sql,
+  gte,
+} from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierRows, tierTemplates, tierLikes } from '@/lib/db/schema'
 import { user } from '@/lib/db/schema/auth'
@@ -12,9 +24,9 @@ import { bucketByDay } from '@/lib/utils/stats-series'
 
 const sidebarItemCount = sql<number>`COALESCE(jsonb_array_length(${tierTemplates.sidebarItems}), 0)`
 
-
 export type TierListSummary = {
   id: string
+  slug: string
   title: string
   category: string
   itemCount: number
@@ -45,10 +57,16 @@ export type TierListStats = {
 // unstable_cache is intentionally NOT used here: mutations call revalidatePath('/dashboard')
 // rather than a user-scoped tag, so wiring a cache tag would require invasive changes to all
 // mutation actions. cache() gives per-request dedup with zero stale-data risk.
-export const getUserTierListStats = cache(async function getUserTierListStats(userId: string): Promise<TierListStats> {
+export const getUserTierListStats = cache(async function getUserTierListStats(
+  userId: string
+): Promise<TierListStats> {
   const now = new Date()
-  const windowStart = new Date(now.getTime() - STATS_WINDOW_DAYS * 24 * 60 * 60 * 1000)
-  const prevWindowStart = new Date(windowStart.getTime() - STATS_WINDOW_DAYS * 24 * 60 * 60 * 1000)
+  const windowStart = new Date(
+    now.getTime() - STATS_WINDOW_DAYS * 24 * 60 * 60 * 1000
+  )
+  const prevWindowStart = new Date(
+    windowStart.getTime() - STATS_WINDOW_DAYS * 24 * 60 * 60 * 1000
+  )
 
   const [aggregateRow, recentRows] = await Promise.all([
     db
@@ -70,23 +88,29 @@ export const getUserTierListStats = cache(async function getUserTierListStats(us
         category: tierTemplates.category,
       })
       .from(tierTemplates)
-      .where(and(eq(tierTemplates.creatorId, userId), gte(tierTemplates.createdAt, prevWindowStart)))
+      .where(
+        and(
+          eq(tierTemplates.creatorId, userId),
+          gte(tierTemplates.createdAt, prevWindowStart)
+        )
+      )
       .limit(2000),
   ])
 
   const currentWindowRows = recentRows.filter((r) => r.createdAt >= windowStart)
   const prevWindowRows = recentRows.filter(
-    (r) => r.createdAt >= prevWindowStart && r.createdAt < windowStart,
+    (r) => r.createdAt >= prevWindowStart && r.createdAt < windowStart
   )
 
   const totalSeries = bucketByDay(
     currentWindowRows.map((r) => r.createdAt),
     STATS_WINDOW_DAYS,
-    now,
+    now
   )
   const totalCurrent = currentWindowRows.length
   const totalPrev = prevWindowRows.length
-  const categoriesCurrent = new Set(currentWindowRows.map((r) => r.category)).size
+  const categoriesCurrent = new Set(currentWindowRows.map((r) => r.category))
+    .size
   const categoriesPrev = new Set(prevWindowRows.map((r) => r.category)).size
 
   return {
@@ -122,6 +146,7 @@ export async function getRecentTierLists(
   const rows = await db
     .select({
       id: tierTemplates.id,
+      slug: tierTemplates.slug,
       title: tierTemplates.title,
       category: tierTemplates.category,
       itemCount: sidebarItemCount,
@@ -136,6 +161,7 @@ export async function getRecentTierLists(
 
   return rows.map((r) => ({
     id: r.id,
+    slug: r.slug,
     title: r.title,
     category: r.category,
     itemCount: r.itemCount ?? 0,
@@ -151,6 +177,7 @@ export async function getAllUserTierLists(
   const rows = await db
     .select({
       id: tierTemplates.id,
+      slug: tierTemplates.slug,
       title: tierTemplates.title,
       category: tierTemplates.category,
       itemCount: sidebarItemCount,
@@ -166,6 +193,7 @@ export async function getAllUserTierLists(
 
   return rows.map((r) => ({
     id: r.id,
+    slug: r.slug,
     title: r.title,
     category: r.category,
     itemCount: r.itemCount ?? 0,
@@ -178,6 +206,7 @@ export async function getAllUserTierLists(
 
 export type TierListDetail = {
   id: string
+  slug: string
   title: string
   description: string | null
   category: string
@@ -218,6 +247,7 @@ export async function getPublicTierListById(
     db
       .select({
         id: tierTemplates.id,
+        slug: tierTemplates.slug,
         title: tierTemplates.title,
         description: tierTemplates.description,
         category: tierTemplates.category,
@@ -240,6 +270,56 @@ export async function getPublicTierListById(
 
   return {
     id: tpl.id,
+    slug: tpl.slug,
+    title: tpl.title,
+    description: tpl.description,
+    category: tpl.category,
+    coverImageUrl: tpl.coverImageUrl ?? null,
+    sidebarItems: tpl.sidebarItems,
+    createdAt: tpl.createdAt,
+    creatorId: tpl.creatorId ?? null,
+    likeCount: tpl.likeCount ?? 0,
+    rows: rows.map((r) => ({
+      id: r.id,
+      label: r.label,
+      color: r.color,
+      order: r.order,
+      items: r.items ?? [],
+    })),
+  }
+}
+
+export async function getPublicTierListBySlug(
+  slug: string
+): Promise<TierListDetail | null> {
+  const [tpl] = await db
+    .select({
+      id: tierTemplates.id,
+      slug: tierTemplates.slug,
+      title: tierTemplates.title,
+      description: tierTemplates.description,
+      category: tierTemplates.category,
+      coverImageUrl: tierTemplates.coverImageUrl,
+      sidebarItems: tierTemplates.sidebarItems,
+      createdAt: tierTemplates.createdAt,
+      creatorId: tierTemplates.creatorId,
+      likeCount: likeCountExpr,
+    })
+    .from(tierTemplates)
+    .where(and(eq(tierTemplates.slug, slug), eq(tierTemplates.isPublic, true)))
+    .limit(1)
+
+  if (!tpl) return null
+
+  const rows = await db
+    .select()
+    .from(tierRows)
+    .where(eq(tierRows.templateId, tpl.id))
+    .orderBy(asc(tierRows.order))
+
+  return {
+    id: tpl.id,
+    slug: tpl.slug,
     title: tpl.title,
     description: tpl.description,
     category: tpl.category,
@@ -274,7 +354,9 @@ export const getDistinctPublicCategories = unstable_cache(
 )
 
 export const getPublicTierLists = unstable_cache(
-  async (params: PublicTierListsParams): Promise<{ items: PublicTierListSummary[]; total: number }> => {
+  async (
+    params: PublicTierListsParams
+  ): Promise<{ items: PublicTierListSummary[]; total: number }> => {
     const { q, category, sort = 'newest', page, pageSize } = params
 
     const conditions = and(
@@ -301,6 +383,7 @@ export const getPublicTierLists = unstable_cache(
       db
         .select({
           id: tierTemplates.id,
+          slug: tierTemplates.slug,
           title: tierTemplates.title,
           category: tierTemplates.category,
           itemCount: sidebarItemCount,
@@ -317,15 +400,13 @@ export const getPublicTierLists = unstable_cache(
         .orderBy(orderCol)
         .limit(pageSize)
         .offset((page - 1) * pageSize),
-      db
-        .select({ count: count() })
-        .from(tierTemplates)
-        .where(conditions),
+      db.select({ count: count() }).from(tierTemplates).where(conditions),
     ])
 
     return {
       items: rows.map((r) => ({
         id: r.id,
+        slug: r.slug,
         title: r.title,
         category: r.category,
         itemCount: r.itemCount ?? 0,
@@ -351,7 +432,9 @@ export async function getTierListById(
     db
       .select()
       .from(tierTemplates)
-      .where(and(eq(tierTemplates.id, id), eq(tierTemplates.creatorId, userId))),
+      .where(
+        and(eq(tierTemplates.id, id), eq(tierTemplates.creatorId, userId))
+      ),
     db
       .select()
       .from(tierRows)
@@ -363,6 +446,7 @@ export async function getTierListById(
 
   return {
     id: tpl.id,
+    slug: tpl.slug,
     title: tpl.title,
     description: tpl.description,
     category: tpl.category,
@@ -381,14 +465,22 @@ export async function getTierListById(
   }
 }
 
-export async function getAllPublicTierListIds(): Promise<{ id: string; createdAt: Date }[]> {
+export async function getAllPublicTierListIds(): Promise<
+  { id: string; slug: string; createdAt: Date }[]
+> {
   return db
-    .select({ id: tierTemplates.id, createdAt: tierTemplates.createdAt })
+    .select({
+      id: tierTemplates.id,
+      slug: tierTemplates.slug,
+      createdAt: tierTemplates.createdAt,
+    })
     .from(tierTemplates)
     .where(eq(tierTemplates.isPublic, true))
 }
 
-export async function getTemplateCreatorId(templateId: string): Promise<string | null> {
+export async function getTemplateCreatorId(
+  templateId: string
+): Promise<string | null> {
   const [row] = await db
     .select({ creatorId: tierTemplates.creatorId })
     .from(tierTemplates)

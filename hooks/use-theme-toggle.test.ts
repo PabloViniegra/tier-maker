@@ -30,7 +30,8 @@ describe('useThemeToggle', () => {
 
   it('toggleTheme calls startViewTransition when available', () => {
     const mockSVT = vi.fn((cb: () => void) => cb())
-    document.startViewTransition = mockSVT as unknown as Document['startViewTransition']
+    document.startViewTransition =
+      mockSVT as unknown as Document['startViewTransition']
 
     const { result } = renderHook(() => useThemeToggle())
     act(() => result.current.toggleTheme())

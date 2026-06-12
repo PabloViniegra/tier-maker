@@ -12,14 +12,26 @@ describe('SiteFooter', () => {
   it('renders navigation links to explore, sign in, and get started', () => {
     render(<SiteFooter />)
     const nav = screen.getByRole('navigation', { name: /footer/i })
-    expect(within(nav).getByRole('link', { name: /explore/i })).toHaveAttribute('href', '/explore')
-    expect(within(nav).getByRole('link', { name: /sign in/i })).toHaveAttribute('href', '/login')
-    expect(within(nav).getByRole('link', { name: /get started/i })).toHaveAttribute('href', '/register')
+    expect(within(nav).getByRole('link', { name: /explore/i })).toHaveAttribute(
+      'href',
+      '/explore'
+    )
+    expect(within(nav).getByRole('link', { name: /sign in/i })).toHaveAttribute(
+      'href',
+      '/login'
+    )
+    expect(
+      within(nav).getByRole('link', { name: /get started/i })
+    ).toHaveAttribute('href', '/register')
   })
 
-  it('renders terms of service and privacy policy triggers', () => {
+  it('renders terms of service and privacy policy links', () => {
     render(<SiteFooter />)
-    expect(screen.getByRole('button', { name: /terms of service/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /privacy policy/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: /terms of service/i })
+    ).toHaveAttribute('href', '/terms')
+    expect(
+      screen.getByRole('link', { name: /privacy policy/i })
+    ).toHaveAttribute('href', '/privacy')
   })
 })

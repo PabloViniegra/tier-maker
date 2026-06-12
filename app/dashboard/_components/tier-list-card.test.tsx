@@ -1,32 +1,69 @@
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 
-const { mockDeleteTierList, mockToastSuccess, mockToastError } = vi.hoisted(() => ({
-  mockDeleteTierList: vi.fn().mockResolvedValue({ ok: true }),
-  mockToastSuccess: vi.fn(),
-  mockToastError: vi.fn(),
-}))
+const { mockDeleteTierList, mockToastSuccess, mockToastError } = vi.hoisted(
+  () => ({
+    mockDeleteTierList: vi.fn().mockResolvedValue({ ok: true }),
+    mockToastSuccess: vi.fn(),
+    mockToastError: vi.fn(),
+  })
+)
 
 vi.mock('sonner', () => ({
   toast: { success: mockToastSuccess, error: mockToastError },
 }))
 
 vi.mock('next/image', () => ({
-  default: ({ src, alt, ...props }: { src: string; alt: string; fill?: boolean; sizes?: string } & React.ImgHTMLAttributes<HTMLImageElement>) => (
+  default: ({
+    src,
+    alt,
+    ...props
+  }: {
+    src: string
+    alt: string
+    fill?: boolean
+    sizes?: string
+  } & React.ImgHTMLAttributes<HTMLImageElement>) => (
     // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt={alt} {...props} />
   ),
 }))
 
 vi.mock('@/components/ui/dropdown-menu', () => ({
-  DropdownMenu: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  DropdownMenuTrigger: ({ children, ...props }: React.HTMLAttributes<HTMLButtonElement> & { children: React.ReactNode }) => (
-    <button type="button" {...props}>{children}</button>
+  DropdownMenu: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
   ),
-  DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  DropdownMenuItem: ({ children, onSelect, ...props }: { children: React.ReactNode; onSelect?: () => void } & React.HTMLAttributes<HTMLDivElement>) => (
-    <div onClick={onSelect} {...props}>{children}</div>
+  DropdownMenuTrigger: ({
+    children,
+    ...props
+  }: React.HTMLAttributes<HTMLButtonElement> & {
+    children: React.ReactNode
+  }) => (
+    <button type="button" {...props}>
+      {children}
+    </button>
+  ),
+  DropdownMenuContent: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  DropdownMenuItem: ({
+    children,
+    onSelect,
+    ...props
+  }: {
+    children: React.ReactNode
+    onSelect?: () => void
+  } & React.HTMLAttributes<HTMLDivElement>) => (
+    <div onClick={onSelect} {...props}>
+      {children}
+    </div>
   ),
 }))
 
@@ -34,26 +71,77 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
 let capturedOnOpenChange: ((open: boolean) => void) | undefined
 
 vi.mock('@/components/ui/dialog', () => {
-  const DialogCtx = React.createContext<{ onOpenChange?: (open: boolean) => void }>({})
+  const DialogCtx = React.createContext<{
+    onOpenChange?: (open: boolean) => void
+  }>({})
 
   return {
-    Dialog: ({ open, onOpenChange, children, ...props }: { open?: boolean; onOpenChange?: (open: boolean) => void; children: React.ReactNode; [key: string]: unknown }) => {
+    Dialog: ({
+      open,
+      onOpenChange,
+      children,
+      ...props
+    }: {
+      open?: boolean
+      onOpenChange?: (open: boolean) => void
+      children: React.ReactNode
+      [key: string]: unknown
+    }) => {
       capturedOnOpenChange = onOpenChange
-      return React.createElement(DialogCtx.Provider, { value: { onOpenChange } },
-        open ? React.createElement('div', { 'data-testid': 'delete-dialog', ...props }, children) : null
+      return React.createElement(
+        DialogCtx.Provider,
+        { value: { onOpenChange } },
+        open
+          ? React.createElement(
+              'div',
+              { 'data-testid': 'delete-dialog', ...props },
+              children
+            )
+          : null
       )
     },
-    DialogContent: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) =>
-      React.createElement('div', props, children),
-    DialogHeader: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) =>
-      React.createElement('div', props, children),
-    DialogTitle: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) =>
-      React.createElement('h2', props, children),
-    DialogDescription: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) =>
-      React.createElement('p', props, children),
-    DialogFooter: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) =>
-      React.createElement('div', props, children),
-    DialogClose: ({ render, ...props }: { render?: React.ReactElement<Record<string, unknown>>; [key: string]: unknown }) => {
+    DialogContent: ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode
+      [key: string]: unknown
+    }) => React.createElement('div', props, children),
+    DialogHeader: ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode
+      [key: string]: unknown
+    }) => React.createElement('div', props, children),
+    DialogTitle: ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode
+      [key: string]: unknown
+    }) => React.createElement('h2', props, children),
+    DialogDescription: ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode
+      [key: string]: unknown
+    }) => React.createElement('p', props, children),
+    DialogFooter: ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode
+      [key: string]: unknown
+    }) => React.createElement('div', props, children),
+    DialogClose: ({
+      render,
+      ...props
+    }: {
+      render?: React.ReactElement<Record<string, unknown>>
+      [key: string]: unknown
+    }) => {
       const { onOpenChange } = React.useContext(DialogCtx)
       if (render) {
         const renderProps = (render.props ?? {}) as Record<string, unknown>
@@ -82,6 +170,7 @@ import { TierListCard } from './tier-list-card'
 
 const baseProps = {
   id: 'abc-123',
+  slug: 'my-anime-rankings',
   title: 'My Anime Rankings',
   category: 'anime',
   itemCount: 23,
@@ -136,7 +225,9 @@ describe('TierListCard', () => {
   })
 
   it('renders the cover image when coverImageUrl is provided', () => {
-    render(<TierListCard {...baseProps} coverImageUrl="https://blob/cover.png" />)
+    render(
+      <TierListCard {...baseProps} coverImageUrl="https://blob/cover.png" />
+    )
     const img = screen.getByRole('img', { name: /my anime rankings/i })
     expect(img).toHaveAttribute('src', 'https://blob/cover.png')
   })
@@ -179,7 +270,10 @@ describe('TierListCard', () => {
   it('"Edit" links to the edit route', () => {
     render(<TierListCard {...baseProps} />)
     const editLink = screen.getByRole('link', { name: /^edit$/i })
-    expect(editLink).toHaveAttribute('href', '/dashboard/tier-lists/abc-123/edit')
+    expect(editLink).toHaveAttribute(
+      'href',
+      '/dashboard/tier-lists/abc-123/edit'
+    )
   })
 
   it('renders "Delete" option in the card menu', () => {
@@ -223,8 +317,8 @@ describe('TierListCard', () => {
       expect(screen.getByTestId('delete-dialog')).toBeInTheDocument()
     })
     const deleteButtons = screen.getAllByText('Delete')
-    const confirmDeleteButton = deleteButtons.find(
-      (el) => el.closest('[data-testid="delete-dialog"]')
+    const confirmDeleteButton = deleteButtons.find((el) =>
+      el.closest('[data-testid="delete-dialog"]')
     )
     expect(confirmDeleteButton).toBeTruthy()
     fireEvent.click(confirmDeleteButton!)
@@ -248,8 +342,8 @@ describe('TierListCard', () => {
     })
 
     const deleteButtons = screen.getAllByText('Delete')
-    const confirmDeleteButton = deleteButtons.find(
-      (el) => el.closest('[data-testid="delete-dialog"]')
+    const confirmDeleteButton = deleteButtons.find((el) =>
+      el.closest('[data-testid="delete-dialog"]')
     )
     fireEvent.click(confirmDeleteButton!)
 
@@ -280,8 +374,8 @@ describe('TierListCard', () => {
     })
 
     const deleteButtons = screen.getAllByText('Delete')
-    const confirmDeleteButton = deleteButtons.find(
-      (el) => el.closest('[data-testid="delete-dialog"]')
+    const confirmDeleteButton = deleteButtons.find((el) =>
+      el.closest('[data-testid="delete-dialog"]')
     )
     fireEvent.click(confirmDeleteButton!)
 
@@ -310,8 +404,8 @@ describe('TierListCard', () => {
     })
 
     const deleteButtons = screen.getAllByText('Delete')
-    const confirmDeleteButton = deleteButtons.find(
-      (el) => el.closest('[data-testid="delete-dialog"]')
+    const confirmDeleteButton = deleteButtons.find((el) =>
+      el.closest('[data-testid="delete-dialog"]')
     )
     fireEvent.click(confirmDeleteButton!)
 
@@ -333,8 +427,8 @@ describe('TierListCard', () => {
     })
 
     const deleteButtons = screen.getAllByText('Delete')
-    const confirmDeleteButton = deleteButtons.find(
-      (el) => el.closest('[data-testid="delete-dialog"]')
+    const confirmDeleteButton = deleteButtons.find((el) =>
+      el.closest('[data-testid="delete-dialog"]')
     )
     fireEvent.click(confirmDeleteButton!)
 

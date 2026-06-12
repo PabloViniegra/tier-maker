@@ -1,13 +1,22 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { SidebarNav, SidebarUserProfile, getInitials, navItems } from './sidebar-content'
+import {
+  SidebarNav,
+  SidebarUserProfile,
+  getInitials,
+  navItems,
+} from './sidebar-content'
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
   usePathname: () => '/',
 }))
 
-const mockUser = { name: 'Pablo García', email: 'pablo@example.com', image: null }
+const mockUser = {
+  name: 'Pablo García',
+  email: 'pablo@example.com',
+  image: null,
+}
 
 describe('SidebarNav', () => {
   it('renders an Explore link pointing to /dashboard/explore', () => {
@@ -25,7 +34,9 @@ describe('SidebarNav', () => {
   })
 
   it('marks Explore active on a nested /dashboard/explore/[id] route', () => {
-    render(<SidebarNav pathname="/dashboard/explore/abc-123" collapsed={false} />)
+    render(
+      <SidebarNav pathname="/dashboard/explore/abc-123" collapsed={false} />
+    )
     const link = screen.getByRole('link', { name: /explore/i })
     expect(link).toHaveClass('text-foreground')
     expect(link).not.toHaveClass('text-muted-foreground')
@@ -33,8 +44,13 @@ describe('SidebarNav', () => {
 
   it('keeps Dashboard and My Tier Lists links unchanged', () => {
     render(<SidebarNav pathname="/dashboard" collapsed={false} />)
-    expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute('href', '/dashboard')
-    expect(screen.getByRole('link', { name: /my tier lists/i })).toHaveAttribute('href', '/dashboard/tier-lists')
+    expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute(
+      'href',
+      '/dashboard'
+    )
+    expect(
+      screen.getByRole('link', { name: /my tier lists/i })
+    ).toHaveAttribute('href', '/dashboard/tier-lists')
   })
 
   it('does not mark Dashboard active on /dashboard/tier-lists', () => {

@@ -14,8 +14,11 @@ export default async function NewTierListPage() {
   ])
 
   return (
-    <div className='flex flex-col gap-6 p-6'>
-      <TierListCreator categoryPresets={presets} userCategoryPresets={userPresets} />
+    <div className="flex flex-col gap-6 p-6">
+      <TierListCreator
+        categoryPresets={presets}
+        userCategoryPresets={userPresets}
+      />
     </div>
   )
 }

@@ -9,7 +9,9 @@ import { getTemplateCreatorId } from '@/lib/queries/tier-templates'
 import { getIsLiked } from '@/lib/queries/tier-likes'
 import { CACHE_TAGS } from '@/lib/cache-tags'
 
-export async function toggleLike(templateId: string): Promise<{ liked: boolean }> {
+export async function toggleLike(
+  templateId: string
+): Promise<{ liked: boolean }> {
   const session = await getSession()
   if (!session) throw new Error('Authentication required')
 
@@ -19,12 +21,18 @@ export async function toggleLike(templateId: string): Promise<{ liked: boolean }
   ])
 
   if (creatorId === null) throw new Error('Tier list not found')
-  if (creatorId === session.user.id) throw new Error('Cannot like your own tier list')
+  if (creatorId === session.user.id)
+    throw new Error('Cannot like your own tier list')
 
   if (alreadyLiked) {
     await db
       .delete(tierLikes)
-      .where(and(eq(tierLikes.userId, session.user.id), eq(tierLikes.templateId, templateId)))
+      .where(
+        and(
+          eq(tierLikes.userId, session.user.id),
+          eq(tierLikes.templateId, templateId)
+        )
+      )
     revalidateTag(CACHE_TAGS.publicTierLists, {})
     return { liked: false }
   }

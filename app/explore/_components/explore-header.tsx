@@ -27,10 +27,7 @@ export function ExploreHeader({ isLoggedIn }: Props) {
             Go to Dashboard
           </Link>
         ) : (
-          <Link
-            href="/login"
-            className={cn(buttonVariants({ size: 'sm' }))}
-          >
+          <Link href="/login" className={cn(buttonVariants({ size: 'sm' }))}>
             Sign in
           </Link>
         )}

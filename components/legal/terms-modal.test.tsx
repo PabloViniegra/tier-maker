@@ -7,7 +7,9 @@ import { TermsModal } from './terms-modal'
 describe('TermsModal', () => {
   it('renders a trigger labelled "Terms of Service"', () => {
     render(<TermsModal />)
-    expect(screen.getByRole('button', { name: /terms of service/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /terms of service/i })
+    ).toBeInTheDocument()
   })
 
   it('does not show the modal content until the trigger is activated', () => {
@@ -22,9 +24,13 @@ describe('TermsModal', () => {
 
     const dialog = await screen.findByRole('dialog')
     expect(dialog).toBeInTheDocument()
-    expect(within(dialog).getByRole('heading', { name: /terms of service/i })).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole('heading', { name: /terms of service/i })
+    ).toBeInTheDocument()
     expect(within(dialog).getByText(/^last updated/i)).toBeInTheDocument()
-    expect(within(dialog).getByRole('heading', { name: /acceptance of terms/i })).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole('heading', { name: /acceptance of terms/i })
+    ).toBeInTheDocument()
   })
 
   it('closes the dialog when the close button is activated', async () => {

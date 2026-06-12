@@ -12,12 +12,12 @@ export function SaveBar({
 }) {
   return (
     <Button
-      type='button'
-      size='sm'
+      type="button"
+      size="sm"
       onClick={onSave}
       disabled={isSaving}
-      className='gap-2'
-      data-testid='save-button'
+      className="gap-2"
+      data-testid="save-button"
     >
       <Save size={14} />
       {isSaving ? 'Saving…' : 'Save tier list'}

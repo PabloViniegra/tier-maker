@@ -19,14 +19,30 @@ type Props = {
   style?: React.CSSProperties
 }
 
-export function ExploreCard({ data, isLiked, isOwner, isAuthenticated, style }: Props) {
-  const { id, title, category, itemCount, createdAt, creatorName, coverImageUrl, firstItemUrl, likeCount } = data
+export function ExploreCard({
+  data,
+  isLiked,
+  isOwner,
+  isAuthenticated,
+  style,
+}: Props) {
+  const {
+    id,
+    title,
+    category,
+    itemCount,
+    createdAt,
+    creatorName,
+    coverImageUrl,
+    firstItemUrl,
+    likeCount,
+  } = data
   const imageUrl = coverImageUrl ?? firstItemUrl ?? null
-  const href = `/explore/${id}`
+  const href = `/explore/${data.slug}`
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface overflow-hidden transition-colors duration-200 hover:border-primary/20 hover:bg-overlay"
+      className="flex flex-col gap-3 overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-200 hover:border-primary/20 hover:bg-overlay"
       style={style}
     >
       <Link href={href} className="block">
@@ -43,10 +59,10 @@ export function ExploreCard({ data, isLiked, isOwner, isAuthenticated, style }: 
             ) : (
               <div
                 data-testid="card-cover-placeholder"
-                className="h-full w-full flex items-center justify-center"
+                className="flex h-full w-full items-center justify-center"
                 style={{ background: getCategoryGradient(category) }}
               >
-                <span className="text-white font-bold text-3xl select-none drop-shadow">
+                <span className="text-3xl font-bold text-white drop-shadow select-none">
                   {getInitials(title)}
                 </span>
               </div>
@@ -57,7 +73,10 @@ export function ExploreCard({ data, isLiked, isOwner, isAuthenticated, style }: 
 
       <div className="flex flex-col gap-3 px-4 pb-4">
         <div className="flex items-center justify-between gap-2">
-          <Badge variant="secondary" className="h-5 max-w-[120px] truncate text-[10px]">
+          <Badge
+            variant="secondary"
+            className="h-5 max-w-[120px] truncate text-[10px]"
+          >
             {category.length > 20 ? category.slice(0, 20) + '…' : category}
           </Badge>
           <span className="shrink-0 text-xs text-muted-foreground">
@@ -66,7 +85,9 @@ export function ExploreCard({ data, isLiked, isOwner, isAuthenticated, style }: 
         </div>
 
         <Link href={href}>
-          <p className="text-sm font-medium leading-snug text-foreground hover:underline">{title}</p>
+          <p className="text-sm leading-snug font-medium text-foreground hover:underline">
+            {title}
+          </p>
         </Link>
 
         <Separator />

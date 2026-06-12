@@ -18,7 +18,9 @@ type Props = {
   data: TierListDetailSeed
 }
 
-function buildUpdatePayload(state: ReturnType<typeof useTierEditor.getState>): UpdateTierListPayload {
+function buildUpdatePayload(
+  state: ReturnType<typeof useTierEditor.getState>
+): UpdateTierListPayload {
   return {
     coverImageUrl: state.metadata.coverImageUrl,
     bankItems: state.bankItems
@@ -81,8 +83,8 @@ export function TierListEditor({ id, data }: Props) {
   const { onDragEnd } = useTierDnd()
 
   return (
-    <div className='flex h-[calc(100vh-4rem)] flex-col'>
-      <PageHeader backHref='/dashboard/tier-lists' title={data.title}>
+    <div className="flex h-[calc(100vh-4rem)] flex-col">
+      <PageHeader backHref="/dashboard/tier-lists" title={data.title}>
         <SaveIndicator state={saveState} />
         <ExportButton boardRef={boardRef} title={data.title} />
       </PageHeader>
@@ -90,12 +92,12 @@ export function TierListEditor({ id, data }: Props) {
       {/* Single DragDropContext wraps both board and bank */}
       <DragDropContext onDragEnd={onDragEnd}>
         {/* Board — scrollable */}
-        <div className='min-h-0 flex-1 overflow-y-auto p-4'>
-          <TierBoard rowMinHeight='24' boardRef={boardRef} />
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          <TierBoard rowMinHeight="24" boardRef={boardRef} />
         </div>
 
         {/* Item bank — pinned at bottom */}
-        <div className='shrink-0'>
+        <div className="shrink-0">
           <ItemBankStrip />
         </div>
       </DragDropContext>

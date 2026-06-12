@@ -31,7 +31,12 @@ describe('PageHeader', () => {
   })
 
   it('truncates long titles visually (line-clamp class present)', () => {
-    const { container } = render(<PageHeader backHref="/dashboard" title="A very long title that might overflow the header area" />)
+    const { container } = render(
+      <PageHeader
+        backHref="/dashboard"
+        title="A very long title that might overflow the header area"
+      />
+    )
     const heading = container.querySelector('h1')
     expect(heading?.className).toMatch(/line-clamp/)
   })

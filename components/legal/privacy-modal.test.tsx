@@ -7,7 +7,9 @@ import { PrivacyModal } from './privacy-modal'
 describe('PrivacyModal', () => {
   it('renders a trigger labelled "Privacy Policy"', () => {
     render(<PrivacyModal />)
-    expect(screen.getByRole('button', { name: /privacy policy/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /privacy policy/i })
+    ).toBeInTheDocument()
   })
 
   it('does not show the modal content until the trigger is activated', () => {
@@ -22,9 +24,13 @@ describe('PrivacyModal', () => {
 
     const dialog = await screen.findByRole('dialog')
     expect(dialog).toBeInTheDocument()
-    expect(within(dialog).getByRole('heading', { name: /privacy policy/i })).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole('heading', { name: /privacy policy/i })
+    ).toBeInTheDocument()
     expect(within(dialog).getByText(/^last updated/i)).toBeInTheDocument()
-    expect(within(dialog).getByRole('heading', { name: /information we collect/i })).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole('heading', { name: /information we collect/i })
+    ).toBeInTheDocument()
   })
 
   it('closes the dialog when the close button is activated', async () => {
