@@ -184,10 +184,9 @@ export function TierListCreator({
         <SaveBar onSave={handleSave} isSaving={isPending} />
       </PageHeader>
 
-      <MetadataPanel categoryPresets={categoryPresets} userPresets={userCategoryPresets} />
-
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className='grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]'>
+        <div className='flex flex-col gap-6 lg:grid lg:grid-cols-[260px_1fr_320px] lg:items-start'>
+          <MetadataPanel categoryPresets={categoryPresets} userPresets={userCategoryPresets} />
           <TierBoard />
           <ItemBank onPickFiles={openModal} />
         </div>

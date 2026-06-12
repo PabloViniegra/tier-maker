@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
-import { Check, ChevronsUpDown, ImagePlus, Loader2, X } from 'lucide-react'
+import { Check, ChevronDown, ChevronsUpDown, ImagePlus, Loader2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { cn } from '@/lib/utils'
 import {
@@ -143,7 +144,7 @@ export function MetadataPanel({
         />
       </div>
 
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-[1fr_220px] md:items-start'>
+      <div className='grid grid-cols-1 gap-4'>
         <div className='flex flex-col gap-2'>
           <Label htmlFor='category' className='text-xs font-medium text-muted-foreground'>
             Category
@@ -314,25 +315,40 @@ export function MetadataPanel({
         </div>
       </div>
 
-      <div className='flex flex-col gap-2'>
-        <div className='flex items-baseline justify-between'>
-          <Label htmlFor='description' className='text-xs font-medium text-muted-foreground'>
-            Description
-          </Label>
-          <span className='text-[11px] text-muted-foreground tabular-nums'>
-            {metadata.description.length}/500
-          </span>
-        </div>
-        <Textarea
-          id='description'
-          value={metadata.description}
-          onChange={(e) => setMetadata({ description: e.target.value })}
-          placeholder='A short description of your tier list'
-          maxLength={500}
-          className='min-h-8 resize-none'
-          rows={1}
-        />
-      </div>
+      <Collapsible>
+        <CollapsibleTrigger
+          render={
+            <button
+              type='button'
+              className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors'
+            />
+          }
+        >
+          <ChevronDown size={12} className='[[data-open]_&]:rotate-180' />
+          More details
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className='flex flex-col gap-2 pt-3'>
+            <div className='flex items-baseline justify-between'>
+              <Label htmlFor='description' className='text-xs font-medium text-muted-foreground'>
+                Description
+              </Label>
+              <span className='text-[11px] text-muted-foreground tabular-nums'>
+                {metadata.description.length}/500
+              </span>
+            </div>
+            <Textarea
+              id='description'
+              value={metadata.description}
+              onChange={(e) => setMetadata({ description: e.target.value })}
+              placeholder='A short description of your tier list'
+              maxLength={500}
+              className='min-h-8 resize-none'
+              rows={1}
+            />
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </section>
   )
 }
