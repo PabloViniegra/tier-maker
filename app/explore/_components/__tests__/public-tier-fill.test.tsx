@@ -7,12 +7,12 @@ vi.mock('@hello-pangea/dnd', () => ({
   DragDropContext: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="dnd-context">{children}</div>
   ),
-  Droppable: ({ children }: any) =>
+  Droppable: ({ children }: { children: (provided: { innerRef: null; droppableProps: Record<string, unknown>; placeholder: null }, snapshot: { isDraggingOver: boolean }) => React.ReactNode }) =>
     children(
       { innerRef: null, droppableProps: {}, placeholder: null },
       { isDraggingOver: false }
     ),
-  Draggable: ({ children }: any) =>
+  Draggable: ({ children }: { children: (provided: { innerRef: null; draggableProps: Record<string, unknown>; dragHandleProps: Record<string, unknown> }, snapshot: { isDragging: boolean }) => React.ReactNode }) =>
     children(
       { innerRef: null, draggableProps: {}, dragHandleProps: {} },
       { isDragging: false }
@@ -36,7 +36,7 @@ vi.mock('@/lib/stores/tier-editor', async () => {
   return {
     ...(actual as object),
     useTierEditor: Object.assign(
-      (selector: (s: any) => any) => {
+      (selector: (s: ReturnType<typeof mockEditorState>) => unknown) => {
         const state = mockEditorState()
         return selector(state)
       },
