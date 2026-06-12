@@ -15,7 +15,7 @@ import {
   gte,
 } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { tierRows, tierTemplates, tierLikes } from '@/lib/db/schema'
+import { tierRows, tierTemplates } from '@/lib/db/schema'
 import { user } from '@/lib/db/schema/auth'
 import { CACHE_TAGS } from '@/lib/cache-tags'
 import { likeCountExpr } from '@/lib/queries/tier-likes'

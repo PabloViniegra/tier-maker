@@ -58,8 +58,6 @@ export function generateSlug(
   // Try -2, -3, ... until we find an available slug
   let counter = 2
   let candidate: string
-  const suffixMax = SUFFIX_SEPARATOR.length + String(counter).length
-
   do {
     const suffix = `${SUFFIX_SEPARATOR}${counter}`
     // Truncate base if needed to fit suffix within maxLength

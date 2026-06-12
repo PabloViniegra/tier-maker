@@ -58,8 +58,6 @@ describe('slugify', () => {
 })
 
 describe('generateSlug', () => {
-  const existing = new Set<string>()
-
   it('generates a slug from title when no collision', () => {
     const slug = generateSlug('Best Anime', new Set())
     expect(slug).toBe('best-anime')

@@ -46,14 +46,6 @@ function mockOwned(templateId = 'tpl-1') {
   })
 }
 
-function mockNotOwned() {
-  mockSelect.mockReturnValue({
-    from: vi.fn().mockReturnValue({
-      where: vi.fn().mockResolvedValue([]),
-    }),
-  })
-}
-
 function setupTransaction(ownedId = 'tpl-1') {
   mockTransaction.mockImplementation(
     async (cb: (tx: unknown) => Promise<unknown>) => {

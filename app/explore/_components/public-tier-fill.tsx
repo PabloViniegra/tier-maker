@@ -1,6 +1,7 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef } from 'react'
+import { useHydrated } from '@/lib/hooks/use-hydrated'
 import { DragDropContext } from '@hello-pangea/dnd'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -41,18 +42,10 @@ export function PublicTierFill({ tierId, data, backHref = '/explore' }: Props) {
   const boardRef = useRef<HTMLElement>(null)
   const { data: session } = useSession()
   const userId = session?.user?.id ?? null
-  const [hydrated, setHydrated] = useState(false)
+  const hydrated = useHydrated()
 
   // Initialize Zustand store + IndexedDB persistence in the background.
   useTierFillPersistence(tierId, userId, data)
-
-  // After the initial client render, swap to the interactive board.
-  // Using useEffect (post-paint) instead of useLayoutEffect (pre-paint) so
-  // crawlers/bots see the static HTML in the initial response, but real users
-  // get a fast hydration without blocking the first paint.
-  useEffect(() => {
-    setHydrated(true)
-  }, [])
 
   const { onDragEnd } = useTierDnd()
 
