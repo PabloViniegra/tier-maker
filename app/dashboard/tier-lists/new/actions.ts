@@ -9,35 +9,28 @@ import { getSession } from '@/lib/session'
 import {
   createTierListSchema,
   imageUploadSchema,
+  IMAGE_EXT_BY_MIME,
   MAX_CATEGORY_LENGTH,
+  type AllowedImageType,
   type CreateTierListInput,
 } from '@/lib/validators/tier-list'
 import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
-import { generateSlug } from '@/lib/utils/slug'
+import { slugify } from '@/lib/utils/slug'
 
-const ALLOWED_MIME = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-])
-const EXT_BY_MIME: Record<string, string> = {
-  'image/jpeg': 'jpg',
-  'image/png': 'png',
-  'image/webp': 'webp',
-  'image/gif': 'gif',
+const MAX_SLUG_RETRIES = 50
+
+function isUniqueViolation(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false
+  const code = (err as { code?: string }).code
+  return code === '23505'
 }
 
-function extFromMime(type: string): string {
-  return EXT_BY_MIME[type] ?? 'bin'
-}
-
-function uniquePath(userId: string, type: string): string {
+function uniquePath(userId: string, type: AllowedImageType): string {
   const uuid =
     typeof crypto !== 'undefined' && 'randomUUID' in crypto
       ? crypto.randomUUID()
       : Math.random().toString(36).slice(2, 12)
-  return `tier-items/${userId}/${uuid}.${extFromMime(type)}`
+  return `tier-items/${userId}/${uuid}.${IMAGE_EXT_BY_MIME[type]}`
 }
 
 export type UploadImagesResult = { url: string }
@@ -63,12 +56,8 @@ export async function uploadImagesAction(
     throw new Error(parsed.error.issues[0]?.message ?? 'Invalid image')
   }
 
-  if (!ALLOWED_MIME.has(file.type)) {
-    throw new Error('Image must be JPG, PNG, WEBP or GIF')
-  }
-
   try {
-    const blob = await put(uniquePath(session.user.id, file.type), file, {
+    const blob = await put(uniquePath(session.user.id, parsed.data.type), file, {
       access: 'public',
     })
     return { url: blob.url }
@@ -96,46 +85,55 @@ export async function createTierListAction(
   const data = parsed.data
   const sidebarItems = [...data.bankItems, ...data.rows.flatMap((r) => r.items)]
 
-  // Generate a unique slug from the title
-  const existingRows = await db
-    .select({ slug: tierTemplates.slug })
-    .from(tierTemplates)
-  const existingSlugs = new Set(existingRows.map((r) => r.slug))
-  const slug = generateSlug(data.title, existingSlugs)
+  // Slug uniqueness is enforced by the DB (unique constraint on tierTemplates.slug).
+  // Try the base slug first, then append -2, -3, ... on conflict (PG 23505).
+  const baseSlug = slugify(data.title) || slugify('untitled')
 
-  const { id } = await db.transaction(async (tx) => {
-    const [tpl] = await tx
-      .insert(tierTemplates)
-      .values({
-        title: data.title,
-        slug,
-        description: data.description ?? null,
-        category: data.category,
-        creatorId: session.user.id,
-        coverImageUrl: data.coverImageUrl ?? null,
-        sidebarItems,
+  for (let attempt = 0; attempt < MAX_SLUG_RETRIES; attempt++) {
+    const slug =
+      attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`
+
+    try {
+      const { id } = await db.transaction(async (tx) => {
+        const [tpl] = await tx
+          .insert(tierTemplates)
+          .values({
+            title: data.title,
+            slug,
+            description: data.description ?? null,
+            category: data.category,
+            creatorId: session.user.id,
+            coverImageUrl: data.coverImageUrl ?? null,
+            sidebarItems,
+          })
+          .returning({ id: tierTemplates.id })
+
+        if (data.rows.length > 0) {
+          await tx.insert(tierRows).values(
+            data.rows.map((row, index) => ({
+              templateId: tpl.id,
+              label: row.label,
+              color: row.color,
+              order: index,
+              items: row.items,
+            }))
+          )
+        }
+
+        return tpl
       })
-      .returning({ id: tierTemplates.id })
 
-    if (data.rows.length > 0) {
-      await tx.insert(tierRows).values(
-        data.rows.map((row, index) => ({
-          templateId: tpl.id,
-          label: row.label,
-          color: row.color,
-          order: index,
-          items: row.items,
-        }))
-      )
+      revalidatePath('/dashboard')
+      revalidatePath('/explore')
+      revalidateTag('public-categories', {})
+      return { id }
+    } catch (err) {
+      if (isUniqueViolation(err) && attempt < MAX_SLUG_RETRIES - 1) continue
+      throw err
     }
+  }
 
-    return tpl
-  })
-
-  revalidatePath('/dashboard')
-  revalidatePath('/explore')
-  revalidateTag('public-categories', {})
-  return { id }
+  throw new Error('Could not generate a unique slug')
 }
 
 export async function saveUserCategoryPresetAction(

@@ -10,6 +10,22 @@ export const MAX_CATEGORY_LENGTH = 40
 export const MAX_LABEL_LENGTH = 20
 export const MAX_IMAGE_LABEL_LENGTH = 50
 
+export const MAX_FILE_SIZE = 5 * 1024 * 1024
+export const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+] as const
+export type AllowedImageType = (typeof ALLOWED_IMAGE_TYPES)[number]
+
+export const IMAGE_EXT_BY_MIME: Record<AllowedImageType, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+}
+
 export const TIER_COLORS = {
   S: 'oklch(0.65 0.22 250)',
   A: 'oklch(0.65 0.20 145)',
@@ -85,8 +101,8 @@ export const imageUploadSchema = z.object({
     .number()
     .int()
     .nonnegative()
-    .max(5 * 1024 * 1024, 'Image must be 5 MB or smaller'),
-  type: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif'], {
+    .max(MAX_FILE_SIZE, 'Image must be 5 MB or smaller'),
+  type: z.enum(ALLOWED_IMAGE_TYPES, {
     message: 'Image must be JPG, PNG, WEBP or GIF',
   }),
 })
