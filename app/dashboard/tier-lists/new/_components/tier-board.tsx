@@ -8,6 +8,11 @@ import { useTierEditor } from '@/lib/stores/tier-editor'
 import { droppableIdForRow } from './constants'
 import { cn } from '@/lib/utils'
 import { dragActiveVariants } from '@/lib/motion-variants'
+import {
+  fadeUpVariants,
+  staggerIndex,
+  STAGGER_DELAY,
+} from '@/lib/motion-variants'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -182,9 +187,13 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
       ref={boardRef as React.RefObject<HTMLElement>}
       className="flex flex-col gap-1.5"
     >
-      {rows.map((row) => (
-        <div
+      {rows.map((row, index) => (
+        <motion.div
           key={row.id}
+          variants={fadeUpVariants}
+          initial="hidden"
+          animate="visible"
+          custom={staggerIndex(index) * STAGGER_DELAY}
           className="flex items-stretch gap-1.5"
           data-testid="tier-row"
         >
@@ -298,7 +307,7 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
               </div>
             )}
           </Droppable>
-        </div>
+        </motion.div>
       ))}
 
       {rows.length < 10 && (

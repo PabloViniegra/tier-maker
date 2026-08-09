@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import {
   Check,
   ChevronDown,
@@ -35,6 +36,7 @@ import {
 } from '@/components/ui/collapsible'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { cn } from '@/lib/utils'
+import { fadeSwapVariants } from '@/lib/motion-variants'
 import {
   ALLOWED_IMAGE_TYPES,
   MAX_FILE_SIZE,
@@ -317,40 +319,57 @@ export function MetadataPanel({
             onChange={handleCoverFileChange}
             data-testid="cover-file-input"
           />
-          {metadata.coverImageUrl ? (
-            <div className="group/cover relative aspect-video w-full overflow-hidden rounded-md border border-border">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={metadata.coverImageUrl}
-                alt="Cover image preview"
-                className="h-full w-full object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => setMetadata({ coverImageUrl: undefined })}
-                className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/cover:opacity-100 hover:text-foreground focus-visible:opacity-100"
-                aria-label="Remove cover"
+          <AnimatePresence initial={false}>
+            {metadata.coverImageUrl ? (
+              <motion.div
+                key="cover-preview"
+                variants={fadeSwapVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="group/cover relative aspect-video w-full overflow-hidden rounded-md border border-border"
               >
-                <X size={14} />
-              </button>
-            </div>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 w-full justify-start gap-2 px-2.5"
-              onClick={() => coverInputRef.current?.click()}
-              disabled={isUploadingCover}
-            >
-              {isUploadingCover ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <ImagePlus size={14} />
-              )}
-              {isUploadingCover ? 'Uploading…' : 'Upload cover'}
-            </Button>
-          )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={metadata.coverImageUrl}
+                  alt="Cover image preview"
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMetadata({ coverImageUrl: undefined })}
+                  className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/cover:opacity-100 hover:text-foreground focus-visible:opacity-100"
+                  aria-label="Remove cover"
+                >
+                  <X size={14} />
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="cover-button"
+                variants={fadeSwapVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-full justify-start gap-2 px-2.5"
+                  onClick={() => coverInputRef.current?.click()}
+                  disabled={isUploadingCover}
+                >
+                  {isUploadingCover ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <ImagePlus size={14} />
+                  )}
+                  {isUploadingCover ? 'Uploading…' : 'Upload cover'}
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 

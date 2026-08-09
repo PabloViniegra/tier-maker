@@ -165,3 +165,23 @@ export const slideUpVariants: Variants = {
     transition: { duration: 0.3, ease: EASE_SMOOTH },
   },
 }
+
+export const likeHeartVariants: Variants = {
+  idle: { scale: 1 },
+  liked: {
+    scale: [1, 1.2, 1],
+    transition: { duration: 0.18, ease: EASE_SMOOTH, times: [0, 0.4, 1] },
+  },
+}
+
+export const fadeSwapVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.2, ease: EASE_SMOOTH },
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.15, ease: EASE_SMOOTH },
+  },
+}

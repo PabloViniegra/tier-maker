@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useOptimistic, useTransition } from 'react'
+import { motion } from 'motion/react'
 import { Heart } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { likeHeartVariants } from '@/lib/motion-variants'
 import { toggleLike } from '@/app/explore/_actions/toggle-like'
 
 type Props = {
@@ -68,11 +70,17 @@ export function LikeButton({
           : 'text-muted-foreground hover:text-rose-400'
       )}
     >
-      <Heart
-        size={14}
-        className={cn(optimistic.isLiked && 'fill-current')}
-        aria-hidden="true"
-      />
+      <motion.span
+        variants={likeHeartVariants}
+        animate={optimistic.isLiked ? 'liked' : 'idle'}
+        className="inline-flex"
+      >
+        <Heart
+          size={14}
+          className={cn(optimistic.isLiked && 'fill-current')}
+          aria-hidden="true"
+        />
+      </motion.span>
       <span>{optimistic.count}</span>
     </button>
   )

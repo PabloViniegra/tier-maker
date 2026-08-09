@@ -9,6 +9,12 @@ vi.mock('motion/react', () => ({
     }: React.HTMLAttributes<HTMLDivElement> & {
       children?: React.ReactNode
     }) => <div {...props}>{children}</div>,
+    span: ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement> & {
+      children?: React.ReactNode
+    }) => <span {...props}>{children}</span>,
   },
 }))
 
