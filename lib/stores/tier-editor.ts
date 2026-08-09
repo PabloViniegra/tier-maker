@@ -290,3 +290,24 @@ export function buildSavePayload(state: State): {
       .map((i) => ({ url: i.url as string, label: i.label })),
   }
 }
+
+export function buildUpdatePayload(state: State): {
+  coverImageUrl?: string
+  bankItems: ImageItem[]
+  rows: { id: string; label: string; color: string; items: ImageItem[] }[]
+} {
+  return {
+    coverImageUrl: state.metadata.coverImageUrl || undefined,
+    bankItems: state.bankItems
+      .filter((i) => i.status === 'uploaded' && i.url)
+      .map((i) => ({ url: i.url as string, label: i.label })),
+    rows: state.rows.map((r) => ({
+      id: r.id,
+      label: r.label,
+      color: r.color,
+      items: r.items
+        .filter((i) => i.status === 'uploaded' && i.url)
+        .map((i) => ({ url: i.url as string, label: i.label })),
+    })),
+  }
+}

@@ -13,6 +13,11 @@ import {
 } from '@/components/ui/tooltip'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { BANK_DROPPABLE } from './constants'
+import {
+  ALLOWED_IMAGE_TYPES,
+  MAX_ITEM_COUNT,
+} from '@/lib/validators/tier-list'
+import { deleteImagesAction } from '../../_actions/delete-images'
 import { cn } from '@/lib/utils'
 import { dragActiveVariants } from '@/lib/motion-variants'
 
@@ -30,14 +35,14 @@ export function ItemBank({
       <div className="flex items-center justify-between">
         <h2 className="font-heading text-sm">Item bank</h2>
         <span className="text-xs text-muted-foreground tabular-nums">
-          {bankItems.length}/30
+          {bankItems.length}/{MAX_ITEM_COUNT}
         </span>
       </div>
 
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
+        accept={ALLOWED_IMAGE_TYPES.join(',')}
         multiple
         className="sr-only"
         onChange={(e) => {
@@ -138,7 +143,12 @@ export function ItemBank({
                             )}
                             <button
                               type="button"
-                              onClick={() => removeItemEverywhere(item.id)}
+                              onClick={() => {
+                                if (item.status === 'uploaded' && item.url) {
+                                  deleteImagesAction([item.url]).catch(() => {})
+                                }
+                                removeItemEverywhere(item.id)
+                              }}
                               className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-foreground focus-visible:opacity-100"
                               aria-label={`Remove ${item.label}`}
                             >

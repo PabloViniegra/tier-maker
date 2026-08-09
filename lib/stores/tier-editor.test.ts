@@ -3,6 +3,7 @@ import {
   useTierEditor,
   hasPendingUploads,
   buildSavePayload,
+  buildUpdatePayload,
   type TierListDetailSeed,
 } from './tier-editor'
 
@@ -388,6 +389,38 @@ describe('useTierEditor — selectors', () => {
     })
     const payload = buildSavePayload(useTierEditor.getState())
     expect(payload.coverImageUrl).toBe('https://blob/cover.png')
+  })
+
+  it('buildUpdatePayload omits title/description/category and maps bank + rows', () => {
+    useTierEditor.getState().setMetadata({
+      title: 'Should not appear',
+      description: 'Should not appear',
+      category: 'Should not appear',
+      coverImageUrl: 'https://blob/cover.png',
+    })
+    const a = useTierEditor.getState().addUploadingItem('A')
+    const b = useTierEditor.getState().addUploadingItem('B')
+    useTierEditor.getState().markItemUploaded(a, 'https://blob/a.png')
+    useTierEditor.getState().markItemError(b)
+    const rowId = useTierEditor.getState().rows[0].id
+    useTierEditor.getState().moveItem({
+      source: 'bank',
+      sourceIndex: 0,
+      target: 'row',
+      targetId: rowId,
+      targetIndex: 0,
+    })
+
+    const payload = buildUpdatePayload(useTierEditor.getState())
+
+    expect(payload).not.toHaveProperty('title')
+    expect(payload).not.toHaveProperty('description')
+    expect(payload).not.toHaveProperty('category')
+    expect(payload.coverImageUrl).toBe('https://blob/cover.png')
+    expect(payload.bankItems).toEqual([])
+    expect(payload.rows[0].items).toEqual([
+      { url: 'https://blob/a.png', label: 'A' },
+    ])
   })
 })
 
