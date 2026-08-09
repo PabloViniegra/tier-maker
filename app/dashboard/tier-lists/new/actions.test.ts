@@ -8,14 +8,12 @@ const {
   mockRevalidateTag,
   mockGetSession,
   mockTransaction,
-  mockSelect,
 } = vi.hoisted(() => ({
   mockPut: vi.fn(),
   mockRevalidatePath: vi.fn(),
   mockRevalidateTag: vi.fn(),
   mockGetSession: vi.fn(),
   mockTransaction: vi.fn(),
-  mockSelect: vi.fn(),
 }))
 
 vi.mock('@vercel/blob', () => ({
@@ -34,7 +32,6 @@ vi.mock('@/lib/session', () => ({
 vi.mock('@/lib/db', () => ({
   db: {
     transaction: mockTransaction,
-    select: mockSelect,
   },
 }))
 
@@ -67,12 +64,6 @@ function setupTransaction(templateId = 'tpl-1') {
       return cb(tx)
     }
   )
-}
-
-function setupSelectSlugs(slugs: string[] = []) {
-  mockSelect.mockReturnValue({
-    from: vi.fn().mockResolvedValue(slugs.map((s) => ({ slug: s }))),
-  })
 }
 
 describe('uploadImagesAction', () => {
@@ -162,7 +153,6 @@ describe('createTierListAction', () => {
 
   it('wraps inserts in a transaction and revalidates the dashboard', async () => {
     authedSession()
-    setupSelectSlugs()
     setupTransaction('tpl-1')
 
     const result = await createTierListAction({
@@ -182,12 +172,48 @@ describe('createTierListAction', () => {
 
   it('propagates transaction errors without orphaned data', async () => {
     authedSession()
-    setupSelectSlugs()
     mockTransaction.mockRejectedValue(new Error('db failure'))
 
     await expect(createTierListAction(validInput)).rejects.toThrow(
       /db failure/i
     )
+  })
+
+  it('retries with a -2 suffix on PG 23505 unique_violation', async () => {
+    authedSession()
+    let call = 0
+    mockTransaction.mockImplementation(
+      async (cb: (tx: unknown) => Promise<unknown>) => {
+        call++
+        if (call === 1) {
+          throw Object.assign(new Error('duplicate key'), { code: '23505' })
+        }
+        const tx = {
+          insert: vi.fn().mockReturnValue({
+            values: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'tpl-2' }]),
+            }),
+          }),
+        }
+        return cb(tx)
+      }
+    )
+
+    const result = await createTierListAction(validInput)
+    expect(result.id).toBe('tpl-2')
+    expect(mockTransaction).toHaveBeenCalledTimes(2)
+  })
+
+  it('propagates non-unique-violation errors without retrying', async () => {
+    authedSession()
+    mockTransaction.mockRejectedValue(
+      Object.assign(new Error('connection lost'), { code: '08006' })
+    )
+
+    await expect(createTierListAction(validInput)).rejects.toThrow(
+      /connection lost/i
+    )
+    expect(mockTransaction).toHaveBeenCalledTimes(1)
   })
 
   it('rejects payloads with too many items', async () => {
