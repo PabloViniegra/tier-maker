@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTierEditor, initialState } from '@/lib/stores/tier-editor'
 import { getTierFill, setTierFill } from '@/lib/idb/tier-fill-store'
 import { buildTierFillKey } from '@/lib/idb/tier-fill-key'
@@ -14,8 +14,12 @@ export function useTierFillPersistence(
   userId: string | null,
   seed: TierListDetailSeed
 ): void {
+  const seedRef = useRef(seed)
+  const key = buildTierFillKey(userId, tierId)
+
   useEffect(() => {
-    const key = buildTierFillKey(userId, tierId)
+    seedRef.current = seed
+
     let debounceTimer: ReturnType<typeof setTimeout> | null = null
     let seeded = false
     let cancelled = false
@@ -24,21 +28,22 @@ export function useTierFillPersistence(
       try {
         const draft = await getTierFill(key)
         if (cancelled) return
-        const merged = mergeTierFill(seed, draft)
+        const current = seedRef.current
+        const merged = mergeTierFill(current, draft)
         useTierEditor.setState((s) => ({
           ...s,
           metadata: {
-            title: seed.title,
-            description: seed.description ?? '',
-            category: seed.category,
-            coverImageUrl: seed.coverImageUrl ?? undefined,
+            title: current.title,
+            description: current.description ?? '',
+            category: current.category,
+            coverImageUrl: current.coverImageUrl ?? undefined,
           },
           rows: merged.rows,
           bankItems: merged.bankItems,
         }))
       } catch {
         if (cancelled) return
-        useTierEditor.getState().initFromDb(seed)
+        useTierEditor.getState().initFromDb(seedRef.current)
       } finally {
         seeded = true
       }
@@ -67,5 +72,6 @@ export function useTierFillPersistence(
       unsubscribe()
       useTierEditor.setState(initialState)
     }
-  }, [userId, tierId, seed])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key])
 }
