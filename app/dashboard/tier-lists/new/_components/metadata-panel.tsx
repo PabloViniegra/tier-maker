@@ -36,11 +36,17 @@ import {
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { cn } from '@/lib/utils'
 import {
+  ALLOWED_IMAGE_TYPES,
+  MAX_FILE_SIZE,
+} from '@/lib/validators/tier-list'
+import {
   saveUserCategoryPresetAction,
   deleteUserCategoryPresetAction,
   uploadImagesAction,
 } from '../actions'
 import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
+
+const ACCEPT = ALLOWED_IMAGE_TYPES.join(',')
 
 export function MetadataPanel({
   categoryPresets,
@@ -84,11 +90,11 @@ export function MetadataPanel({
         const saved = await saveUserCategoryPresetAction(inputTrimmed)
         if (saved) {
           setUserPresets((prev) => [saved, ...prev])
-          toast.success(`"${inputTrimmed}" guardado como preset`)
+          toast.success(`"${inputTrimmed}" saved as preset`)
         }
         selectCategory(inputTrimmed)
       } catch {
-        toast.error('No se pudo guardar el preset')
+        toast.error("Couldn't save preset")
       }
     })
   }
@@ -100,7 +106,7 @@ export function MetadataPanel({
         await deleteUserCategoryPresetAction(preset.id)
       } catch {
         setUserPresets((prev) => [preset, ...prev])
-        toast.error('No se pudo eliminar el preset')
+        toast.error("Couldn't delete preset")
       }
     })
   }
@@ -113,7 +119,7 @@ export function MetadataPanel({
       toast.error('Cover must be an image')
       return
     }
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > MAX_FILE_SIZE) {
       toast.error('Cover image must be 5 MB or smaller')
       return
     }
@@ -209,7 +215,7 @@ export function MetadataPanel({
                 <CommandInput
                   value={categoryInput}
                   onValueChange={setCategoryInput}
-                  placeholder="Buscar o escribir una categoría..."
+                  placeholder="Search or type a category..."
                 />
                 <CommandList>
                   <CommandEmpty>
@@ -219,7 +225,7 @@ export function MetadataPanel({
                         onClick={() => selectCategory(inputTrimmed)}
                         className="rounded px-2 py-1.5 text-left text-sm text-primary hover:bg-accent hover:text-accent-foreground"
                       >
-                        Usar &quot;{inputTrimmed}&quot;
+                        Use &quot;{inputTrimmed}&quot;
                       </button>
                       {inputTrimmed && !isAlreadyPreset && (
                         <button
@@ -228,7 +234,7 @@ export function MetadataPanel({
                           onClick={handleSaveAndUse}
                           className="rounded px-2 py-1.5 text-left text-sm font-medium text-primary hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
                         >
-                          Guardar y usar &quot;{inputTrimmed}&quot;
+                          Save and use &quot;{inputTrimmed}&quot;
                         </button>
                       )}
                     </div>
@@ -257,7 +263,7 @@ export function MetadataPanel({
                   {filteredUser.length > 0 && (
                     <>
                       {filteredDefaults.length > 0 && <CommandSeparator />}
-                      <CommandGroup heading="Mis categorías">
+                      <CommandGroup heading="My categories">
                         {filteredUser.map((preset) => (
                           <CommandItem
                             key={preset.id}
@@ -275,7 +281,7 @@ export function MetadataPanel({
                             />
                             <button
                               type="button"
-                              aria-label={`Eliminar preset ${preset.name}`}
+                              aria-label={`Delete preset ${preset.name}`}
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleDeletePreset(preset)
@@ -306,7 +312,7 @@ export function MetadataPanel({
             ref={coverInputRef}
             id="cover-image-input"
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept={ACCEPT}
             className="sr-only"
             onChange={handleCoverFileChange}
             data-testid="cover-file-input"

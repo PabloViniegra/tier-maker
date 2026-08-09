@@ -12,6 +12,10 @@ import {
   type TierListDetailSeed,
 } from '@/lib/stores/tier-editor'
 import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
+import {
+  MAX_FILE_SIZE,
+  MAX_ITEM_COUNT,
+} from '@/lib/validators/tier-list'
 import { MetadataPanel } from './metadata-panel'
 import { ItemBank } from './item-bank'
 import { TierBoard } from './tier-board'
@@ -58,7 +62,7 @@ export function TierListCreator({
           toast.error(`${file.name} is not an image`)
           continue
         }
-        if (file.size > 5 * 1024 * 1024) {
+        if (file.size > MAX_FILE_SIZE) {
           toast.error(`${file.name} is larger than 5 MB`)
           continue
         }
@@ -66,8 +70,10 @@ export function TierListCreator({
       }
       const totalItems =
         bankItems.length + rows.reduce((n, r) => n + r.items.length, 0)
-      if (totalItems + filtered.length > 30) {
-        toast.error('You can upload at most 30 images per tier list')
+      if (totalItems + filtered.length > MAX_ITEM_COUNT) {
+        toast.error(
+          `You can upload at most ${MAX_ITEM_COUNT} images per tier list`
+        )
         return
       }
       if (filtered.length > 0) setPendingFiles(filtered)
