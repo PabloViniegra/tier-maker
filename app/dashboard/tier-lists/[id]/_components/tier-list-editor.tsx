@@ -3,10 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { DragDropContext } from '@hello-pangea/dnd'
 import { toast } from 'sonner'
-import { useTierEditor } from '@/lib/stores/tier-editor'
+import {
+  useTierEditor,
+  buildUpdatePayload,
+  hasPendingUploads,
+} from '@/lib/stores/tier-editor'
 import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
 import { TierBoard } from '@/app/dashboard/tier-lists/new/_components/tier-board'
-import { updateTierListAction, type UpdateTierListPayload } from '../actions'
+import { updateTierListAction } from '../actions'
 import { ItemBankStrip } from './item-bank-strip'
 import { SaveIndicator, type SaveState } from './save-indicator'
 import { ExportButton } from './export-button'
@@ -16,25 +20,6 @@ import type { TierListDetailSeed } from '@/lib/stores/tier-editor'
 type Props = {
   id: string
   data: TierListDetailSeed
-}
-
-function buildUpdatePayload(
-  state: ReturnType<typeof useTierEditor.getState>
-): UpdateTierListPayload {
-  return {
-    coverImageUrl: state.metadata.coverImageUrl,
-    bankItems: state.bankItems
-      .filter((i) => i.status === 'uploaded' && i.url)
-      .map((i) => ({ url: i.url as string, label: i.label })),
-    rows: state.rows.map((r) => ({
-      id: r.id,
-      label: r.label,
-      color: r.color,
-      items: r.items
-        .filter((i) => i.status === 'uploaded' && i.url)
-        .map((i) => ({ url: i.url as string, label: i.label })),
-    })),
-  }
 }
 
 export function TierListEditor({ id, data }: Props) {
@@ -58,8 +43,10 @@ export function TierListEditor({ id, data }: Props) {
       if (debounceTimer) clearTimeout(debounceTimer)
       setSaveState('saving')
       debounceTimer = setTimeout(async () => {
+        const state = useTierEditor.getState()
+        if (hasPendingUploads(state)) return
         try {
-          const payload = buildUpdatePayload(useTierEditor.getState())
+          const payload = buildUpdatePayload(state)
           await updateTierListAction(id, payload)
           setSaveState('saved')
           if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
