@@ -1,18 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-const { mockPush, mockToastError, mockSignInEmail, mockSignUpEmail } =
+const { mockAssign, mockToastError, mockSignInEmail, mockSignUpEmail } =
   vi.hoisted(() => ({
-    mockPush: vi.fn(),
+    mockAssign: vi.fn(),
     mockToastError: vi.fn(),
     mockSignInEmail: vi.fn(),
     mockSignUpEmail: vi.fn(),
   }))
-
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
-}))
 
 vi.mock('sonner', () => ({
   toast: { error: mockToastError, success: vi.fn() },
@@ -29,13 +25,27 @@ import { AuthForm } from '@/components/auth-form'
 
 describe('AuthForm — login mode', () => {
   const user = userEvent.setup()
+  const originalLocation = window.location
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockPush.mockClear()
+    mockAssign.mockClear()
     mockToastError.mockClear()
     mockSignInEmail.mockClear()
     mockSignUpEmail.mockClear()
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: { ...originalLocation, assign: mockAssign },
+    })
+  })
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: originalLocation,
+    })
   })
 
   it('renders email and password fields in login mode', () => {
@@ -90,7 +100,7 @@ describe('AuthForm — login mode', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/dashboard')
+      expect(mockAssign).toHaveBeenCalledWith('/dashboard')
     })
   })
 
@@ -113,13 +123,19 @@ describe('AuthForm — login mode', () => {
 
 describe('AuthForm — register mode', () => {
   const user = userEvent.setup()
+  const originalLocation = window.location
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockPush.mockClear()
+    mockAssign.mockClear()
     mockToastError.mockClear()
     mockSignInEmail.mockClear()
     mockSignUpEmail.mockClear()
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: { ...originalLocation, assign: mockAssign },
+    })
   })
 
   it('renders all fields in register mode', () => {

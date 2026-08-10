@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Eye, EyeOff, Info } from 'lucide-react'
 import Link from 'next/link'
@@ -77,7 +76,6 @@ function PasswordInput({
 }
 
 export function LoginForm() {
-  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -99,7 +97,7 @@ export function LoginForm() {
         return
       }
 
-      router.push('/dashboard')
+      window.location.assign('/dashboard')
     } catch {
       toast.error('Something went wrong. Please try again.')
     }
@@ -151,7 +149,6 @@ export function LoginForm() {
 }
 
 export function RegisterForm() {
-  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -174,7 +171,7 @@ export function RegisterForm() {
         return
       }
 
-      router.push('/dashboard')
+      window.location.assign('/dashboard')
     } catch {
       toast.error('Something went wrong. Please try again.')
     }

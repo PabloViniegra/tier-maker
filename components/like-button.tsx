@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useOptimistic, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { motion } from 'motion/react'
 import { Heart } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -24,35 +24,30 @@ export function LikeButton({
 }: Props) {
   const router = useRouter()
   const [, startTransition] = useTransition()
-  const [committed, setCommitted] = useState({
+  const [state, setState] = useState({
     count: initialCount,
     isLiked: initialIsLiked,
   })
-  const [optimistic, setOptimistic] = useOptimistic(
-    committed,
-    (state, liked: boolean) => ({
-      count: liked ? state.count + 1 : state.count - 1,
-      isLiked: liked,
-    })
-  )
 
   function handleClick() {
     if (!isAuthenticated) {
-      router.push('/auth/sign-in')
+      router.push('/login')
       return
     }
 
-    const nextLiked = !optimistic.isLiked
+    const previous = state
+    const nextLiked = !state.isLiked
+    setState({
+      count: state.count + (nextLiked ? 1 : -1),
+      isLiked: nextLiked,
+    })
+
     startTransition(async () => {
-      setOptimistic(nextLiked)
       try {
         await toggleLike(templateId)
-        setCommitted((prev) => ({
-          count: nextLiked ? prev.count + 1 : prev.count - 1,
-          isLiked: nextLiked,
-        }))
         router.refresh()
       } catch {
+        setState(previous)
         toast.error('Failed to update like')
       }
     })
@@ -62,26 +57,26 @@ export function LikeButton({
     <button
       type="button"
       onClick={handleClick}
-      aria-label={optimistic.isLiked ? 'Unlike' : 'Like'}
+      aria-label={state.isLiked ? 'Unlike' : 'Like'}
       className={cn(
         'flex items-center gap-1 text-xs transition-colors',
-        optimistic.isLiked
+        state.isLiked
           ? 'text-rose-500'
           : 'text-muted-foreground hover:text-rose-400'
       )}
     >
       <motion.span
         variants={likeHeartVariants}
-        animate={optimistic.isLiked ? 'liked' : 'idle'}
+        animate={state.isLiked ? 'liked' : 'idle'}
         className="inline-flex"
       >
         <Heart
           size={14}
-          className={cn(optimistic.isLiked && 'fill-current')}
+          className={cn(state.isLiked && 'fill-current')}
           aria-hidden="true"
         />
       </motion.span>
-      <span>{optimistic.count}</span>
+      <span>{state.count}</span>
     </button>
   )
 }

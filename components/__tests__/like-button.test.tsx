@@ -58,7 +58,7 @@ describe('LikeButton', () => {
 
     fireEvent.click(screen.getByRole('button'))
 
-    expect(mockRouterPush).toHaveBeenCalledWith('/auth/sign-in')
+    expect(mockRouterPush).toHaveBeenCalledWith('/login')
     expect(mockToggleLike).not.toHaveBeenCalled()
   })
 
