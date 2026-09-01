@@ -15,6 +15,7 @@ const baseData = {
   firstItemUrl: null,
   creatorId: 'creator-1',
   likeCount: 7,
+  isPublic: true,
 }
 
 const baseProps = {

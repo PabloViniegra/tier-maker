@@ -11,7 +11,7 @@ export function formatRelativeDate(date: Date | string | null): string {
   if (!date) return 'Never'
   const d = date instanceof Date ? date : new Date(date)
   const days = Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24))
-  const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
+  const rtf = new Intl.RelativeTimeFormat('en-US', { numeric: 'auto' })
   if (days === 0) return rtf.format(0, 'day')
   if (days < 30) return rtf.format(-days, 'day')
   const months = Math.floor(days / 30)

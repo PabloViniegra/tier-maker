@@ -33,6 +33,7 @@ export type TierListSummary = {
   createdAt: Date
   coverImageUrl: string | null
   firstItemUrl: string | null
+  isPublic: boolean
 }
 
 const STATS_WINDOW_DAYS = 14
@@ -153,6 +154,7 @@ export async function getRecentTierLists(
       coverImageUrl: tierTemplates.coverImageUrl,
       createdAt: tierTemplates.createdAt,
       firstItemUrl: firstItemUrlExpr,
+      isPublic: tierTemplates.isPublic,
     })
     .from(tierTemplates)
     .where(eq(tierTemplates.creatorId, userId))
@@ -168,6 +170,7 @@ export async function getRecentTierLists(
     createdAt: r.createdAt,
     coverImageUrl: r.coverImageUrl ?? null,
     firstItemUrl: r.firstItemUrl ?? null,
+    isPublic: r.isPublic,
   }))
 }
 
@@ -185,6 +188,7 @@ export async function getAllUserTierLists(
       createdAt: tierTemplates.createdAt,
       firstItemUrl: firstItemUrlExpr,
       likeCount: likeCountExpr,
+      isPublic: tierTemplates.isPublic,
     })
     .from(tierTemplates)
     .where(eq(tierTemplates.creatorId, userId))
@@ -201,6 +205,7 @@ export async function getAllUserTierLists(
     coverImageUrl: r.coverImageUrl ?? null,
     firstItemUrl: r.firstItemUrl ?? null,
     likeCount: r.likeCount ?? 0,
+    isPublic: r.isPublic,
   }))
 }
 
@@ -413,6 +418,7 @@ export const getPublicTierLists = unstable_cache(
         createdAt: r.createdAt,
         coverImageUrl: r.coverImageUrl ?? null,
         firstItemUrl: r.firstItemUrl ?? null,
+        isPublic: true,
         creatorName: r.creatorName ?? null,
         creatorId: r.creatorId ?? null,
         likeCount: r.likeCount ?? 0,

@@ -15,6 +15,7 @@ const baseItem = {
   firstItemUrl: null,
   creatorId: 'creator-1',
   likeCount: 0,
+  isPublic: true,
 }
 
 const gridDefaults = {
@@ -100,6 +101,21 @@ describe('ExploreGrid', () => {
       )
       expect(screen.getByText('Test List')).toBeInTheDocument()
       expect(screen.getByText('Another List')).toBeInTheDocument()
+    })
+
+    it('builds dashboard fill links from a serializable prefix', () => {
+      render(
+        <ExploreGrid
+          items={[baseItem]}
+          {...gridDefaults}
+          fillHrefPrefix="/dashboard/explore"
+        />
+      )
+
+      expect(screen.getByRole('link', { name: /fill test list/i })).toHaveAttribute(
+        'href',
+        '/dashboard/explore/1'
+      )
     })
   })
 })

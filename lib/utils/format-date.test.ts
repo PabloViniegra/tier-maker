@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   formatLongDate,
   formatRelativeDate,
@@ -12,18 +12,53 @@ describe('formatLongDate', () => {
 })
 
 describe('formatRelativeDate', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('returns Never for null', () => {
     expect(formatRelativeDate(null)).toBe('Never')
   })
 
-  it('uses Intl.RelativeTimeFormat for today', () => {
-    const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
-    expect(formatRelativeDate(new Date())).toBe(rtf.format(0, 'day'))
+  it('formats today in English regardless of the runtime locale', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-09-01T12:00:00Z'))
+    expect(formatRelativeDate(new Date('2026-09-01T08:00:00Z'))).toBe('today')
   })
 
-  it('uses Intl.RelativeTimeFormat for days ago', () => {
-    const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
-    const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
-    expect(formatRelativeDate(fiveDaysAgo)).toBe(rtf.format(-5, 'day'))
+  it('formats relative days in English regardless of the runtime locale', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-09-01T12:00:00Z'))
+    expect(formatRelativeDate(new Date('2026-08-27T12:00:00Z'))).toBe(
+      '5 days ago'
+    )
+  })
+
+  it('uses an explicit locale so server and client render the same text', () => {
+    const OriginalFormatter = Intl.RelativeTimeFormat
+    const locales: Intl.LocalesArgument[] = []
+    class TrackingFormatter extends OriginalFormatter {
+      constructor(
+        locale?: Intl.LocalesArgument,
+        options?: Intl.RelativeTimeFormatOptions
+      ) {
+        locales.push(locale ?? [])
+        super(locale, options)
+      }
+    }
+    Object.defineProperty(Intl, 'RelativeTimeFormat', {
+      value: TrackingFormatter,
+      configurable: true,
+    })
+
+    try {
+      formatRelativeDate(new Date())
+      expect(locales).toEqual(['en-US'])
+    } finally {
+      Object.defineProperty(Intl, 'RelativeTimeFormat', {
+        value: OriginalFormatter,
+        configurable: true,
+      })
+    }
   })
 })

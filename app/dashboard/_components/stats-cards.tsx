@@ -27,8 +27,8 @@ const statDefs: StatsCardDef[] = [
     icon: LayoutList,
   },
   {
-    label: 'Categories',
-    sublabel: 'distinct',
+    label: 'Topics',
+    sublabel: 'categories ranked',
     key: 'categories',
     icon: Tag,
   },
@@ -124,9 +124,11 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
                       ? 'text-foreground'
                       : 'text-muted-foreground',
                   ].join(' ')}
-                  title="vs previous 14 days"
                 >
                   {delta.formatted}
+                  <span className="ml-1 font-normal text-muted-foreground">
+                    vs prev 14 days
+                  </span>
                 </p>
               )}
             </div>

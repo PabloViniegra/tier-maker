@@ -13,6 +13,7 @@ const baseProps = {
   category: 'anime',
   itemCount: 23,
   createdAt: new Date('2026-06-01T10:00:00Z'),
+  isPublic: true,
 }
 
 async function openMenu(user: ReturnType<typeof userEvent.setup>) {
@@ -73,29 +74,101 @@ describe('TierListCard', () => {
   })
 
   it('renders the cover image when coverImageUrl is provided', () => {
-    render(
+    const { container } = render(
       <TierListCard {...baseProps} coverImageUrl="https://blob/cover.png" />
     )
-    const img = screen.getByRole('img', { name: /my anime rankings/i })
+    const img = container.querySelector('img')
     expect(img).toHaveAttribute('src', 'https://blob/cover.png')
   })
 
   it('renders the first item image as fallback when no cover but firstItemUrl exists', () => {
-    render(<TierListCard {...baseProps} firstItemUrl="https://blob/item.png" />)
-    const img = screen.getByRole('img')
+    const { container } = render(
+      <TierListCard {...baseProps} firstItemUrl="https://blob/item.png" />
+    )
+    const img = container.querySelector('img')
     expect(img).toHaveAttribute('src', 'https://blob/item.png')
   })
 
   it('cover image takes precedence over firstItemUrl', () => {
-    render(
+    const { container } = render(
       <TierListCard
         {...baseProps}
         coverImageUrl="https://blob/cover.png"
         firstItemUrl="https://blob/item.png"
       />
     )
-    const img = screen.getByRole('img')
+    const img = container.querySelector('img')
     expect(img).toHaveAttribute('src', 'https://blob/cover.png')
+  })
+
+  it('marks the cover image decorative so screen readers do not repeat the title', () => {
+    const { container } = render(
+      <TierListCard {...baseProps} coverImageUrl="https://blob/cover.png" />
+    )
+    expect(container.querySelector('img')).toHaveAttribute('alt', '')
+  })
+
+  it('shows a Private badge when the tier list is not public', () => {
+    render(<TierListCard {...baseProps} isPublic={false} />)
+    expect(screen.getByText('Private')).toBeInTheDocument()
+  })
+
+  it('does not show a Private badge when the tier list is public', () => {
+    render(<TierListCard {...baseProps} isPublic={true} />)
+    expect(screen.queryByText('Private')).not.toBeInTheDocument()
+  })
+
+  it('Copy link copies the public explore URL for public tier lists', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn()
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    })
+    render(<TierListCard {...baseProps} isPublic={true} />)
+    await openMenu(user)
+    await user.click(screen.getByText('Copy link'))
+    expect(writeText).toHaveBeenCalledWith(
+      `${window.location.origin}/explore/my-anime-rankings`
+    )
+    expect(toast.success).toHaveBeenCalledWith('Link copied')
+  })
+
+  it('Copy link copies the editor URL for private tier lists', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn()
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    })
+    render(<TierListCard {...baseProps} isPublic={false} />)
+    await openMenu(user)
+    await user.click(screen.getByText('Copy link'))
+    expect(writeText).toHaveBeenCalledWith(
+      `${window.location.origin}/dashboard/tier-lists/abc-123/edit`
+    )
+    expect(toast.info).toHaveBeenCalledWith(
+      'Private tier list — editor link copied'
+    )
+  })
+
+  it('shows an error when copying the link fails', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockRejectedValue(new Error('Not allowed'))
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    })
+    render(<TierListCard {...baseProps} isPublic={true} />)
+    await openMenu(user)
+    await user.click(screen.getByText('Copy link'))
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        'Could not copy link. Try again.'
+      )
+    })
+    expect(toast.success).not.toHaveBeenCalled()
   })
 
   it('shows a placeholder with title initials when neither cover nor firstItemUrl is set', () => {

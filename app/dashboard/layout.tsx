@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/session'
 import { DashboardSidebar } from './_components/dashboard-sidebar'
 import { MobileTopBar } from './_components/mobile-top-bar'
+import { CreateTierListHotkey } from './_components/create-tier-list-hotkey'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -23,6 +24,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-[100dvh] bg-background">
+      <CreateTierListHotkey />
       <DashboardSidebar user={user} />
       <div className="flex min-w-0 flex-1 flex-col">
         <MobileTopBar user={user} />

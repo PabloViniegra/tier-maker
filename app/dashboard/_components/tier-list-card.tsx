@@ -45,6 +45,7 @@ export type TierListCardProps = {
   coverImageUrl?: string | null
   firstItemUrl?: string | null
   likeCount?: number
+  isPublic: boolean
 }
 
 function truncateCategory(cat: string, max = 20): string {
@@ -61,6 +62,7 @@ export function TierListCard({
   coverImageUrl,
   firstItemUrl,
   likeCount,
+  isPublic,
   className,
   style,
 }: TierListCardProps & { className?: string; style?: React.CSSProperties }) {
@@ -86,7 +88,7 @@ export function TierListCard({
         {imageUrl ? (
           <Image
             src={imageUrl}
-            alt={title}
+            alt=""
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -106,12 +108,22 @@ export function TierListCard({
 
       <div className="flex flex-col gap-3 px-4 pb-4">
         <div className="flex items-center justify-between gap-2">
-          <Badge
-            variant="secondary"
-            className="h-5 max-w-[120px] truncate text-[10px]"
-          >
-            {truncateCategory(category)}
-          </Badge>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <Badge
+              variant="secondary"
+              className="h-5 max-w-[120px] truncate text-xs"
+            >
+              {truncateCategory(category)}
+            </Badge>
+            {!isPublic && (
+              <Badge
+                variant="secondary"
+                className="h-5 shrink-0 text-xs text-muted-foreground"
+              >
+                Private
+              </Badge>
+            )}
+          </div>
           <div className="flex shrink-0 items-center gap-1">
             <span className="text-xs text-muted-foreground">
               {formatRelativeDate(createdAt)}
@@ -134,11 +146,22 @@ export function TierListCard({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      `${window.location.origin}/explore/${slug}`
-                    )
-                    toast.success('Link copied')
+                  onClick={async () => {
+                    const origin = window.location.origin
+                    try {
+                      await navigator.clipboard.writeText(
+                        isPublic
+                          ? `${origin}/explore/${slug}`
+                          : `${origin}${editHref}`
+                      )
+                      if (isPublic) {
+                        toast.success('Link copied')
+                      } else {
+                        toast.info('Private tier list — editor link copied')
+                      }
+                    } catch {
+                      toast.error('Could not copy link. Try again.')
+                    }
                   }}
                 >
                   <LinkIcon size={13} />

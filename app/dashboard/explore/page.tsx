@@ -104,7 +104,7 @@ export default async function DashboardExplorePage({ searchParams }: Props) {
         likedIds={likedIds}
         currentUserId={userId}
         isAuthenticated={!!session}
-        fillHref={(item) => `/dashboard/explore/${item.id}`}
+        fillHrefPrefix="/dashboard/explore"
         clearFiltersHref="/dashboard/explore"
       />
 

@@ -139,7 +139,7 @@ export function SidebarNav({
                 prefetch={true}
                 aria-label="Create Tier List"
                 className={cn(
-                  buttonVariants({ variant: 'outline', size: 'sm' }),
+                  buttonVariants({ variant: 'default', size: 'sm' }),
                   'w-full justify-center'
                 )}
               >
@@ -154,7 +154,7 @@ export function SidebarNav({
           href="/dashboard/tier-lists/new"
           prefetch={true}
           className={cn(
-            buttonVariants({ variant: 'outline', size: 'sm' }),
+            buttonVariants({ variant: 'default', size: 'sm' }),
             'w-full justify-start gap-2'
           )}
         >

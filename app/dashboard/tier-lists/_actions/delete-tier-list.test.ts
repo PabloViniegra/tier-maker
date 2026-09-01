@@ -91,6 +91,7 @@ describe('deleteTierList', () => {
 
     await deleteTierList('tpl-1')
 
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard')
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
     expect(revalidatePath).toHaveBeenCalledWith('/explore', 'layout')
     expect(revalidateTag).toHaveBeenCalledWith('public-tier-lists', {})

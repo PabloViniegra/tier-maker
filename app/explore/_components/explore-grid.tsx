@@ -21,7 +21,7 @@ type Props = ExploreFilters & {
   likedIds: string[]
   currentUserId: string | null
   isAuthenticated: boolean
-  fillHref?: (item: PublicTierListSummary) => string
+  fillHrefPrefix?: string
   clearFiltersHref?: string
 }
 
@@ -33,7 +33,7 @@ export function ExploreGrid({
   likedIds,
   currentUserId,
   isAuthenticated,
-  fillHref,
+  fillHrefPrefix,
   clearFiltersHref = '/explore',
 }: Props) {
   if (items.length === 0) {
@@ -74,7 +74,7 @@ export function ExploreGrid({
             isLiked={likedSet.has(item.id)}
             isOwner={currentUserId !== null && item.creatorId === currentUserId}
             isAuthenticated={isAuthenticated}
-            href={fillHref?.(item)}
+            href={fillHrefPrefix ? `${fillHrefPrefix}/${item.id}` : undefined}
             priority={i === 0}
           />
         </motion.div>

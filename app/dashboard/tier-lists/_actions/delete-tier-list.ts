@@ -62,6 +62,7 @@ export async function deleteTierList(id: string): Promise<{ ok: true }> {
 
   await purgeBlobs(urlsToPurge)
 
+  revalidatePath('/dashboard')
   revalidatePath('/dashboard/tier-lists')
   revalidateExplore()
 

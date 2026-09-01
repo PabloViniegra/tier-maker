@@ -10,9 +10,9 @@ import { cn } from '@/lib/utils'
 import { getSession } from '@/lib/session'
 import { getAllUserTierLists } from '@/lib/queries/tier-templates'
 import {
-  TierListGrid,
-  TierListGridSkeleton,
-} from '../_components/tier-list-grid'
+  TierListsBrowser,
+} from './_components/tier-lists-browser'
+import { TierListGridSkeleton } from '../_components/tier-list-grid'
 
 export const metadata: Metadata = { title: 'My Tier Lists' }
 
@@ -20,7 +20,7 @@ export default function TierListsIndexPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-heading text-xl">My Tier Lists</h1>
+        <h1 className="font-heading text-[2rem] leading-tight">My Tier Lists</h1>
         <Link
           href="/dashboard/tier-lists/new"
           className={cn(buttonVariants({ size: 'sm' }), 'gap-1.5')}
@@ -48,12 +48,12 @@ async function TierListsIndexContent() {
       {tierLists.length > 0 && (
         <div className="flex items-center gap-2">
           <h2 className="font-heading text-base">All</h2>
-          <Badge variant="secondary" className="h-5 text-[10px] tabular-nums">
+          <Badge variant="secondary" className="h-5 text-xs tabular-nums">
             {tierLists.length}
           </Badge>
         </div>
       )}
-      <TierListGrid tierLists={tierLists} />
+      <TierListsBrowser tierLists={tierLists} />
     </div>
   )
 }
