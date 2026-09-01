@@ -36,6 +36,8 @@ pnpm-debug.log*
 next-env.d.ts
 
 # AI
+.agents/
+AGENTS.md
 .mcp.json
 opencode.json
 .playwright-mcp/*
