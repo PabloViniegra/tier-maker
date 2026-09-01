@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/collapsible'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { cn } from '@/lib/utils'
-import { fadeSwapVariants } from '@/lib/motion-variants'
+import { fadeSwapVariants, hoverRevealVariants } from '@/lib/motion-variants'
 import {
   ALLOWED_IMAGE_TYPES,
   MAX_FILE_SIZE,
@@ -329,20 +329,28 @@ export function MetadataPanel({
                 exit="exit"
                 className="group/cover relative aspect-video w-full overflow-hidden rounded-md border border-border"
               >
+                <motion.div
+                  className="relative h-full w-full"
+                  initial="rest"
+                  whileHover="hover"
+                >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={metadata.coverImageUrl}
                   alt="Cover image preview"
                   className="h-full w-full object-cover"
                 />
-                <button
+                <motion.button
                   type="button"
+                  variants={hoverRevealVariants}
+                  whileFocus="hover"
                   onClick={() => setMetadata({ coverImageUrl: undefined })}
-                  className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/cover:opacity-100 hover:text-foreground focus-visible:opacity-100"
+                  className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground hover:text-foreground"
                   aria-label="Remove cover"
                 >
                   <X size={14} />
-                </button>
+                </motion.button>
+                </motion.div>
               </motion.div>
             ) : (
               <motion.div

@@ -1,12 +1,15 @@
 'use server'
 
 import { put } from '@vercel/blob'
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { tierRows, tierTemplates, userCategoryPresets } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
+import { blobObjectPath } from '@/lib/blob-url'
+import { revalidateExplore } from '@/lib/revalidate-explore'
 import {
+  buildCatalogue,
   createTierListSchema,
   imageUploadSchema,
   IMAGE_EXT_BY_MIME,
@@ -26,11 +29,7 @@ function isUniqueViolation(err: unknown): boolean {
 }
 
 function uniquePath(userId: string, type: AllowedImageType): string {
-  const uuid =
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID()
-      : Math.random().toString(36).slice(2, 12)
-  return `tier-items/${userId}/${uuid}.${IMAGE_EXT_BY_MIME[type]}`
+  return blobObjectPath(userId, `${crypto.randomUUID()}.${IMAGE_EXT_BY_MIME[type]}`)
 }
 
 export type UploadImagesResult = { url: string }
@@ -83,7 +82,7 @@ export async function createTierListAction(
   }
 
   const data = parsed.data
-  const sidebarItems = [...data.bankItems, ...data.rows.flatMap((r) => r.items)]
+  const sidebarItems = buildCatalogue(data.bankItems, data.rows)
 
   // Slug uniqueness is enforced by the DB (unique constraint on tierTemplates.slug).
   // Try the base slug first, then append -2, -3, ... on conflict (PG 23505).
@@ -124,8 +123,7 @@ export async function createTierListAction(
       })
 
       revalidatePath('/dashboard')
-      revalidatePath('/explore')
-      revalidateTag('public-categories', {})
+      revalidateExplore()
       return { id }
     } catch (err) {
       if (isUniqueViolation(err) && attempt < MAX_SLUG_RETRIES - 1) continue

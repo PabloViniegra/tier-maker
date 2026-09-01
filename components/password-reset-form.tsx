@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -24,8 +24,7 @@ export function RequestPasswordResetForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RequestPasswordResetInput>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(requestPasswordResetSchema as any),
+    resolver: standardSchemaResolver(requestPasswordResetSchema),
   })
 
   const onSubmit = async (data: RequestPasswordResetInput) => {
@@ -107,8 +106,7 @@ export function ResetPasswordForm({
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<ResetPasswordInput>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(resetPasswordSchema as any),
+    resolver: standardSchemaResolver(resetPasswordSchema),
   })
 
   const onSubmit = async (data: ResetPasswordInput) => {

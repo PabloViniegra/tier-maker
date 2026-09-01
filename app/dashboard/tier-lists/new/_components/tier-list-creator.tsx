@@ -50,6 +50,11 @@ export function TierListCreator({
   useEffect(() => {
     if (initialData) {
       useTierEditor.getState().initFromDb(initialData)
+    } else {
+      useTierEditor.getState().reset()
+    }
+    return () => {
+      useTierEditor.getState().reset()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

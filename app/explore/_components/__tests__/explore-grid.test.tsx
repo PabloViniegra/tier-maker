@@ -116,6 +116,19 @@ describe('ExploreGrid', () => {
       const link = screen.getByRole('link', { name: /clear filters/i })
       expect(link).toHaveAttribute('href', '/explore')
     })
+
+    it('"Clear filters" link uses clearFiltersHref when provided', () => {
+      render(
+        <ExploreGrid
+          items={[]}
+          {...gridDefaults}
+          q="x"
+          clearFiltersHref="/dashboard/explore"
+        />
+      )
+      const link = screen.getByRole('link', { name: /clear filters/i })
+      expect(link).toHaveAttribute('href', '/dashboard/explore')
+    })
   })
 
   describe('with items', () => {

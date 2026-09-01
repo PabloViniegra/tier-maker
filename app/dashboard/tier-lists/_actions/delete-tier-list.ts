@@ -1,12 +1,13 @@
 'use server'
 
 import { and, asc, eq } from 'drizzle-orm'
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { tierRows, tierTemplates } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
 import { purgeBlobs } from '@/lib/blob'
-import { CACHE_TAGS } from '@/lib/cache-tags'
+import { isOwnedBlobUrl } from '@/lib/blob-url'
+import { revalidateExplore } from '@/lib/revalidate-explore'
 
 function collectItemUrls(items: { url?: string }[] | null | undefined): string[] {
   if (!items) return []
@@ -23,6 +24,7 @@ export async function deleteTierList(id: string): Promise<{ ok: true }> {
     db
       .select({
         sidebarItems: tierTemplates.sidebarItems,
+        coverImageUrl: tierTemplates.coverImageUrl,
       })
       .from(tierTemplates)
       .where(
@@ -41,9 +43,10 @@ export async function deleteTierList(id: string): Promise<{ ok: true }> {
   if (!tpl) throw new Error('Not found')
 
   const urlsToPurge = [
+    ...(tpl.coverImageUrl ? [tpl.coverImageUrl] : []),
     ...collectItemUrls(tpl.sidebarItems),
     ...rows.flatMap((r) => collectItemUrls(r.items)),
-  ]
+  ].filter((url) => isOwnedBlobUrl(url, session.user.id))
 
   const [deleted] = await db
     .delete(tierTemplates)
@@ -60,8 +63,7 @@ export async function deleteTierList(id: string): Promise<{ ok: true }> {
   await purgeBlobs(urlsToPurge)
 
   revalidatePath('/dashboard/tier-lists')
-  revalidatePath('/explore')
-  revalidateTag(CACHE_TAGS.publicTierLists, {})
+  revalidateExplore()
 
   return { ok: true }
 }

@@ -157,10 +157,23 @@ describe('createTierListAction', () => {
 
     const result = await createTierListAction({
       ...validInput,
-      bankItems: [{ url: 'https://blob/a.png', label: 'A cake' }],
+      bankItems: [
+        {
+          url: 'https://store.public.blob.vercel-storage.com/a.png',
+          label: 'A cake',
+        },
+      ],
       rows: validInput.rows.map((r, i) =>
         i === 0
-          ? { ...r, items: [{ url: 'https://blob/b.png', label: 'B cake' }] }
+          ? {
+              ...r,
+              items: [
+                {
+                  url: 'https://store.public.blob.vercel-storage.com/b.png',
+                  label: 'B cake',
+                },
+              ],
+            }
           : r
       ),
     })
@@ -219,7 +232,7 @@ describe('createTierListAction', () => {
   it('rejects payloads with too many items', async () => {
     authedSession()
     const tooMany = Array.from({ length: 31 }, (_, i) => ({
-      url: `https://blob/${i}.png`,
+      url: `https://store.public.blob.vercel-storage.com/${i}.png`,
       label: `Item ${i}`,
     }))
     await expect(

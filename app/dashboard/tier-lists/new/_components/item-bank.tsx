@@ -19,7 +19,10 @@ import {
 } from '@/lib/validators/tier-list'
 import { deleteImagesAction } from '../../_actions/delete-images'
 import { cn } from '@/lib/utils'
-import { dragActiveVariants } from '@/lib/motion-variants'
+import {
+  dragActiveVariants,
+  hoverRevealVariants,
+} from '@/lib/motion-variants'
 
 export function ItemBank({
   onPickFiles,
@@ -107,10 +110,12 @@ export function ItemBank({
                           data-testid="bank-item"
                         >
                           <motion.div
+                            initial="rest"
                             variants={dragActiveVariants}
                             animate={
                               dragSnapshot.isDragging ? 'dragging' : 'idle'
                             }
+                            whileHover="hover"
                             className="relative h-full w-full overflow-hidden rounded-md border border-border bg-background"
                           >
                             {item.status === 'uploaded' && item.url ? (
@@ -141,19 +146,21 @@ export function ItemBank({
                                 <span>Failed</span>
                               </div>
                             )}
-                            <button
+                            <motion.button
                               type="button"
+                              variants={hoverRevealVariants}
+                              whileFocus="hover"
                               onClick={() => {
                                 if (item.status === 'uploaded' && item.url) {
                                   deleteImagesAction([item.url]).catch(() => {})
                                 }
                                 removeItemEverywhere(item.id)
                               }}
-                              className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-foreground focus-visible:opacity-100"
+                              className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground hover:text-foreground"
                               aria-label={`Remove ${item.label}`}
                             >
                               <X size={12} />
-                            </button>
+                            </motion.button>
                           </motion.div>
                         </li>
                       )}

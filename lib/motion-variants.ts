@@ -52,8 +52,12 @@ export const statusFadeVariants: Variants = {
   exit: { opacity: 0, y: 4, transition: { duration: 0.15, ease: 'easeInOut' } },
 }
 
+const dragIdle = { scale: 1, opacity: 1, boxShadow: 'none', zIndex: 0 }
+
 export const dragActiveVariants: Variants = {
-  idle: { scale: 1, opacity: 1, boxShadow: 'none', zIndex: 0 },
+  idle: dragIdle,
+  rest: dragIdle,
+  hover: dragIdle,
   dragging: {
     scale: 1.08,
     opacity: 1,
@@ -172,6 +176,11 @@ export const likeHeartVariants: Variants = {
     scale: [1, 1.2, 1],
     transition: { duration: 0.18, ease: EASE_SMOOTH, times: [0, 0.4, 1] },
   },
+}
+
+export const hoverRevealVariants: Variants = {
+  rest: { opacity: 0 },
+  hover: { opacity: 1, transition: { duration: 0.15, ease: EASE_SMOOTH } },
 }
 
 export const fadeSwapVariants: Variants = {

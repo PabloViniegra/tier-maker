@@ -9,6 +9,7 @@ import {
   hasPendingUploads,
 } from '@/lib/stores/tier-editor'
 import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
+import { createSerializedSaver } from '@/lib/utils/serialized-save'
 import { TierBoard } from '@/app/dashboard/tier-lists/new/_components/tier-board'
 import { updateTierListAction } from '../actions'
 import { ItemBankStrip } from './item-bank-strip'
@@ -32,8 +33,12 @@ export function TierListEditor({ id, data }: Props) {
 
     let seeded = false
     let debounceTimer: ReturnType<typeof setTimeout> | null = null
+    const saver = createSerializedSaver(async (payload: ReturnType<
+      typeof buildUpdatePayload
+    >) => {
+      await updateTierListAction(id, payload)
+    })
 
-    // Defer seeded flag so initFromDb state change is skipped
     const raf = requestAnimationFrame(() => {
       seeded = true
     })
@@ -46,8 +51,7 @@ export function TierListEditor({ id, data }: Props) {
         const state = useTierEditor.getState()
         if (hasPendingUploads(state)) return
         try {
-          const payload = buildUpdatePayload(state)
-          await updateTierListAction(id, payload)
+          await saver(buildUpdatePayload(state))
           setSaveState('saved')
           if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
           savedTimerRef.current = setTimeout(() => setSaveState('idle'), 2000)
@@ -64,6 +68,7 @@ export function TierListEditor({ id, data }: Props) {
       if (debounceTimer) clearTimeout(debounceTimer)
       if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
       unsubscribe()
+      useTierEditor.getState().reset()
     }
   }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -80,7 +85,7 @@ export function TierListEditor({ id, data }: Props) {
       <DragDropContext onDragEnd={onDragEnd}>
         {/* Board — scrollable */}
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <TierBoard rowMinHeight="24" boardRef={boardRef} />
+          <TierBoard rowMinHeight="24" boardRef={boardRef} mode="fill" />
         </div>
 
         {/* Item bank — pinned at bottom */}

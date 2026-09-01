@@ -21,6 +21,8 @@ type Props = ExploreFilters & {
   likedIds: string[]
   currentUserId: string | null
   isAuthenticated: boolean
+  fillHref?: (item: PublicTierListSummary) => string
+  clearFiltersHref?: string
 }
 
 export function ExploreGrid({
@@ -31,6 +33,8 @@ export function ExploreGrid({
   likedIds,
   currentUserId,
   isAuthenticated,
+  fillHref,
+  clearFiltersHref = '/explore',
 }: Props) {
   if (items.length === 0) {
     const filtersActive = hasActiveFilters({ q, category, sort })
@@ -40,7 +44,7 @@ export function ExploreGrid({
         icon={Search}
         title="No tier lists match your filters"
         description="Try adjusting or clearing your search and filters."
-        cta={{ label: 'Clear filters', href: '/explore' }}
+        cta={{ label: 'Clear filters', href: clearFiltersHref }}
       />
     ) : (
       <EmptyState
@@ -70,6 +74,7 @@ export function ExploreGrid({
             isLiked={likedSet.has(item.id)}
             isOwner={currentUserId !== null && item.creatorId === currentUserId}
             isAuthenticated={isAuthenticated}
+            href={fillHref?.(item)}
           />
         </motion.div>
       ))}

@@ -13,6 +13,7 @@ import {
   EASE_SMOOTH,
   bentoIconFloat,
   cardLiftVariants,
+  hoverRevealVariants,
 } from './motion-variants'
 
 describe('constants', () => {
@@ -121,6 +122,15 @@ describe('dragActiveVariants', () => {
     const idle = dragActiveVariants.idle as TargetAndTransition
     expect(idle.scale).toBe(1)
     expect(idle.opacity).toBe(1)
+  })
+})
+
+describe('hoverRevealVariants', () => {
+  it('rest is hidden and hover is visible', () => {
+    const rest = hoverRevealVariants.rest as TargetAndTransition
+    const hover = hoverRevealVariants.hover as TargetAndTransition
+    expect(rest.opacity).toBe(0)
+    expect(hover.opacity).toBe(1)
   })
 })
 

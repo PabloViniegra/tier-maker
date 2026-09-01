@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
 import { toast } from 'sonner'
 import { Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
@@ -84,8 +84,7 @@ export function LoginForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(loginSchema as any),
+    resolver: standardSchemaResolver(loginSchema),
   })
 
   const onSubmit = async (data: LoginInput) => {
@@ -164,8 +163,7 @@ export function RegisterForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(registerSchema as any),
+    resolver: standardSchemaResolver(registerSchema),
   })
 
   const onSubmit = async (data: RegisterInput) => {

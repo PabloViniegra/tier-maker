@@ -6,7 +6,9 @@ import { db } from '@/lib/db'
 import { tierTemplates } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
 import { assertOwned, replaceTierRows } from '@/lib/db/tier-list-mutations'
+import { revalidateExplore } from '@/lib/revalidate-explore'
 import {
+  buildCatalogue,
   createTierListSchema,
   type CreateTierListInput,
 } from '@/lib/validators/tier-list'
@@ -34,7 +36,7 @@ export async function updateTierListStructureAction(
         description: description ?? null,
         category,
         coverImageUrl: coverImageUrl ?? null,
-        sidebarItems: bankItems,
+        sidebarItems: buildCatalogue(bankItems, rows),
       })
       .where(eq(tierTemplates.id, id))
 
@@ -43,8 +45,7 @@ export async function updateTierListStructureAction(
 
   revalidatePath(`/dashboard/tier-lists/${id}`)
   revalidatePath('/dashboard/tier-lists')
-  revalidatePath('/explore')
-  revalidatePath(`/explore/${id}`)
+  revalidateExplore()
 
   return { ok: true }
 }

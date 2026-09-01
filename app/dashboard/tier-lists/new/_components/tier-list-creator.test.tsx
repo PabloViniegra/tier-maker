@@ -85,6 +85,12 @@ describe('TierListCreator — create mode (no initialData)', () => {
     const back = screen.getByRole('link', { name: /back/i })
     expect(back).toHaveAttribute('href', '/dashboard')
   })
+
+  it('clears leftover editor state on mount', () => {
+    useTierEditor.getState().setMetadata({ title: 'Stale' })
+    render(<TierListCreator {...baseProps} />)
+    expect(useTierEditor.getState().metadata.title).toBe('')
+  })
 })
 
 describe('TierListCreator — edit mode (with initialData)', () => {
@@ -118,5 +124,14 @@ describe('TierListCreator — edit mode (with initialData)', () => {
     expect(state.metadata.category).toBe('Anime')
     expect(state.bankItems).toHaveLength(1)
     expect(state.rows).toHaveLength(1)
+  })
+
+  it('resets the store on unmount', () => {
+    const { unmount } = render(
+      <TierListCreator {...baseProps} initialData={seedData} editId="tpl-1" />
+    )
+    expect(useTierEditor.getState().metadata.title).toBe('My Anime Rankings')
+    unmount()
+    expect(useTierEditor.getState().metadata.title).toBe('')
   })
 })

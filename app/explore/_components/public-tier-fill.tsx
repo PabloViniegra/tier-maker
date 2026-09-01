@@ -86,7 +86,7 @@ export function PublicTierFill({ tierId, data, backHref = '/explore' }: Props) {
             id="dnd-announcements"
           />
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
-            <TierBoard rowMinHeight="24" boardRef={boardRef} />
+            <TierBoard rowMinHeight="24" boardRef={boardRef} mode="fill" />
           </div>
           <div className="shrink-0">
             <ItemBankStrip />

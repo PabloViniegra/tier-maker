@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
+  buildCatalogue,
   createTierListSchema,
   defaultTierRows,
   imageItemSchema,
@@ -7,12 +8,12 @@ import {
   MAX_ITEM_COUNT,
   MAX_ROW_COUNT,
   MIN_ROW_COUNT,
+  tierColorSchema,
 } from './tier-list'
 
-const item = (
-  url = 'https://blob.vercel-storage.com/a.png',
-  label = 'A cake'
-) => ({
+const BLOB = 'https://store.public.blob.vercel-storage.com/a.png'
+
+const item = (url = BLOB, label = 'A cake') => ({
   url,
   label,
 })
@@ -24,6 +25,26 @@ describe('imageItemSchema', () => {
 
   it('rejects a non-url string for url', () => {
     expect(imageItemSchema.safeParse(item('not-a-url')).success).toBe(false)
+  })
+
+  it('rejects non-blob https URLs', () => {
+    expect(
+      imageItemSchema.safeParse(item('https://169.254.169.254/latest')).success
+    ).toBe(false)
+    expect(
+      imageItemSchema.safeParse(item('https://evil.example/x.png')).success
+    ).toBe(false)
+  })
+
+  it('rejects javascript and http URLs', () => {
+    expect(imageItemSchema.safeParse(item('javascript:alert(1)')).success).toBe(
+      false
+    )
+    expect(
+      imageItemSchema.safeParse(
+        item('http://store.public.blob.vercel-storage.com/a.png')
+      ).success
+    ).toBe(false)
   })
 
   it('rejects an empty label', () => {
@@ -78,14 +99,17 @@ describe('createTierListSchema', () => {
     const input = {
       ...validInput,
       bankItems: [
-        item('https://blob.vercel-storage.com/a.png', 'Strawberry cake'),
+        item(BLOB, 'Strawberry cake'),
       ],
       rows: validInput.rows.map((r, i) =>
         i === 0
           ? {
               ...r,
               items: [
-                item('https://blob.vercel-storage.com/b.png', 'Chocolate tart'),
+                item(
+                  'https://store.public.blob.vercel-storage.com/b.png',
+                  'Chocolate tart'
+                ),
               ],
             }
           : r
@@ -97,7 +121,7 @@ describe('createTierListSchema', () => {
   it('rejects a bank item without a label', () => {
     const input = {
       ...validInput,
-      bankItems: [{ url: 'https://blob.vercel-storage.com/a.png' }],
+      bankItems: [{ url: BLOB }],
     }
     expect(createTierListSchema.safeParse(input).success).toBe(false)
   })
@@ -105,7 +129,7 @@ describe('createTierListSchema', () => {
   it('rejects a bank item with an empty label', () => {
     const input = {
       ...validInput,
-      bankItems: [item('https://blob.vercel-storage.com/a.png', '')],
+      bankItems: [item(BLOB, '')],
     }
     expect(createTierListSchema.safeParse(input).success).toBe(false)
   })
@@ -188,7 +212,11 @@ describe('createTierListSchema', () => {
       ...r,
       items: Array.from(
         { length: Math.ceil(MAX_ITEM_COUNT / validInput.rows.length) + 1 },
-        (_, i) => item(`https://blob.vercel-storage.com/${i}.png`, `Item ${i}`)
+        (_, i) =>
+          item(
+            `https://store.public.blob.vercel-storage.com/${i}.png`,
+            `Item ${i}`
+          )
       ),
     }))
     expect(
@@ -199,7 +227,7 @@ describe('createTierListSchema', () => {
   it('accepts an optional coverImageUrl', () => {
     const input = {
       ...validInput,
-      coverImageUrl: 'https://blob.vercel-storage.com/cover.png',
+      coverImageUrl: 'https://store.public.blob.vercel-storage.com/cover.png',
     }
     expect(createTierListSchema.safeParse(input).success).toBe(true)
   })
@@ -207,5 +235,47 @@ describe('createTierListSchema', () => {
   it('rejects a non-url coverImageUrl', () => {
     const input = { ...validInput, coverImageUrl: 'not-a-url' }
     expect(createTierListSchema.safeParse(input).success).toBe(false)
+  })
+
+  it('rejects a non-blob coverImageUrl', () => {
+    const input = { ...validInput, coverImageUrl: 'https://evil.example/x.png' }
+    expect(createTierListSchema.safeParse(input).success).toBe(false)
+  })
+})
+
+describe('tierColorSchema', () => {
+  it('accepts hex and oklch', () => {
+    expect(tierColorSchema.safeParse('#ff0').success).toBe(true)
+    expect(tierColorSchema.safeParse('oklch(0.65 0.22 250)').success).toBe(true)
+  })
+
+  it('rejects css url() and javascript', () => {
+    expect(
+      tierColorSchema.safeParse('url(https://evil.example/track)').success
+    ).toBe(false)
+    expect(tierColorSchema.safeParse('javascript:alert(1)').success).toBe(false)
+  })
+})
+
+describe('buildCatalogue', () => {
+  it('unions bank and row items without duplicate urls', () => {
+    const bank = [item(BLOB, 'Bank')]
+    const rows = [
+      {
+        items: [
+          item(BLOB, 'Placed same'),
+          item('https://store.public.blob.vercel-storage.com/b.png', 'B'),
+        ],
+      },
+    ]
+    expect(buildCatalogue(bank, rows)).toEqual([
+      item(BLOB, 'Bank'),
+      item('https://store.public.blob.vercel-storage.com/b.png', 'B'),
+    ])
+  })
+
+  it('keeps row items when the bank is empty', () => {
+    const rows = [{ items: [item(BLOB, 'Placed')] }]
+    expect(buildCatalogue([], rows)).toEqual([item(BLOB, 'Placed')])
   })
 })

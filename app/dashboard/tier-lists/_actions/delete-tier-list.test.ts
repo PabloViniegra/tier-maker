@@ -43,12 +43,13 @@ function anonSession() {
 
 function mockTemplateFetch(
   sidebarItems: { url?: string }[] = [],
-  rows: { items: { url?: string }[] }[] = []
+  rows: { items: { url?: string }[] }[] = [],
+  coverImageUrl: string | null = null
 ) {
   mockSelect
     .mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ sidebarItems }]),
+        where: vi.fn().mockResolvedValue([{ sidebarItems, coverImageUrl }]),
       }),
     })
     .mockReturnValueOnce({
@@ -118,25 +119,41 @@ describe('deleteTierList', () => {
     await deleteTierList('tpl-1')
 
     expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
-    expect(mockRevalidatePath).toHaveBeenCalledWith('/explore')
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/explore', 'layout')
     expect(mockRevalidateTag).toHaveBeenCalledWith('public-tier-lists', {})
+    expect(mockRevalidateTag).toHaveBeenCalledWith('public-categories', {})
   })
 
-  it('purges all image URLs from sidebarItems and row items', async () => {
+  it('purges owned cover, sidebar, and row image URLs', async () => {
     authedSession()
-    mockTemplateFetch(
-      [{ url: 'https://blob/a.png' }, { url: 'https://blob/b.png' }],
-      [{ items: [{ url: 'https://blob/c.png' }] }]
-    )
+    const cover =
+      'https://store.public.blob.vercel-storage.com/tier-items/user-1/cover.png'
+    const a =
+      'https://store.public.blob.vercel-storage.com/tier-items/user-1/a.png'
+    const b =
+      'https://store.public.blob.vercel-storage.com/tier-items/user-1/b.png'
+    const c =
+      'https://store.public.blob.vercel-storage.com/tier-items/user-1/c.png'
+    mockTemplateFetch([{ url: a }, { url: b }], [{ items: [{ url: c }] }], cover)
     mockOwnedDeletion()
 
     await deleteTierList('tpl-1')
 
-    expect(mockDel).toHaveBeenCalledWith([
-      'https://blob/a.png',
-      'https://blob/b.png',
-      'https://blob/c.png',
-    ])
+    expect(mockDel).toHaveBeenCalledWith([cover, a, b, c])
+  })
+
+  it('does not purge blob URLs owned by another user', async () => {
+    authedSession()
+    const own =
+      'https://store.public.blob.vercel-storage.com/tier-items/user-1/a.png'
+    const planted =
+      'https://store.public.blob.vercel-storage.com/tier-items/user-2/x.png'
+    mockTemplateFetch([{ url: own }, { url: planted }])
+    mockOwnedDeletion()
+
+    await deleteTierList('tpl-1')
+
+    expect(mockDel).toHaveBeenCalledWith([own])
   })
 
   it('skips blob purge when no images are referenced', async () => {

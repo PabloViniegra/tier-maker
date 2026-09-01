@@ -2,16 +2,25 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('server-only', () => ({}))
 
-const { mockGetSession, mockRevalidatePath, mockSelect, mockTransaction } =
-  vi.hoisted(() => ({
-    mockGetSession: vi.fn(),
-    mockRevalidatePath: vi.fn(),
-    mockSelect: vi.fn(),
-    mockTransaction: vi.fn(),
-  }))
+const {
+  mockGetSession,
+  mockRevalidatePath,
+  mockRevalidateTag,
+  mockSelect,
+  mockTransaction,
+} = vi.hoisted(() => ({
+  mockGetSession: vi.fn(),
+  mockRevalidatePath: vi.fn(),
+  mockRevalidateTag: vi.fn(),
+  mockSelect: vi.fn(),
+  mockTransaction: vi.fn(),
+}))
 
 vi.mock('@/lib/session', () => ({ getSession: mockGetSession }))
-vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }))
+vi.mock('next/cache', () => ({
+  revalidatePath: mockRevalidatePath,
+  revalidateTag: mockRevalidateTag,
+}))
 vi.mock('@/lib/db', () => ({
   db: {
     select: mockSelect,
@@ -70,13 +79,23 @@ const validInput = {
   title: 'Anime Rankings',
   description: 'My picks',
   category: 'Anime',
-  bankItems: [{ url: 'https://blob/bank.png', label: 'Naruto' }],
+  bankItems: [
+    {
+      url: 'https://store.public.blob.vercel-storage.com/bank.png',
+      label: 'Naruto',
+    },
+  ],
   rows: [
     {
       id: 'row-1',
       label: 'S',
       color: '#ff0',
-      items: [{ url: 'https://blob/a.png', label: 'Luffy' }],
+      items: [
+        {
+          url: 'https://store.public.blob.vercel-storage.com/a.png',
+          label: 'Luffy',
+        },
+      ],
     },
     { id: 'row-2', label: 'A', color: '#0ff', items: [] },
   ],

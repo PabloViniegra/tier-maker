@@ -7,9 +7,10 @@ import { X, Loader2, Plus, Palette } from 'lucide-react'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { droppableIdForRow } from './constants'
 import { cn } from '@/lib/utils'
-import { dragActiveVariants } from '@/lib/motion-variants'
 import {
+  dragActiveVariants,
   fadeUpVariants,
+  hoverRevealVariants,
   staggerIndex,
   STAGGER_DELAY,
 } from '@/lib/motion-variants'
@@ -39,6 +40,7 @@ type TierRowChipProps = {
   label: string
   color: string
   canRemove: boolean
+  readOnly?: boolean
   height?: '16' | '24'
   onLabelChange: (label: string) => void
   onColorChange: (color: string) => void
@@ -49,6 +51,7 @@ function TierRowChip({
   label,
   color,
   canRemove,
+  readOnly = false,
   height = '16',
   onLabelChange,
   onColorChange,
@@ -76,15 +79,32 @@ function TierRowChip({
   }
 
   const chipCls = height === '24' ? 'h-24 w-24' : 'h-16 w-20'
+  const chipClassName = cn(
+    'group/chip relative flex shrink-0 items-center justify-center rounded font-heading text-sm font-bold text-white',
+    chipCls
+  )
+
+  if (readOnly) {
+    return (
+      <div
+        className={chipClassName}
+        style={{ background: color }}
+        aria-label={`Tier ${label}`}
+      >
+        <span className="line-clamp-2 px-1 text-center text-xs leading-tight break-words select-none">
+          {label}
+        </span>
+      </div>
+    )
+  }
 
   return (
-    <div
-      className={cn(
-        'group/chip relative flex shrink-0 items-center justify-center rounded font-heading text-sm font-bold text-white',
-        chipCls
-      )}
+    <motion.div
+      className={chipClassName}
       style={{ background: color }}
       aria-label={`Tier ${label}`}
+      initial="rest"
+      whileHover="hover"
     >
       {editing ? (
         <input
@@ -119,12 +139,17 @@ function TierRowChip({
       )}
 
       <Popover>
+        <motion.div
+          variants={hoverRevealVariants}
+          className="absolute right-0.5 bottom-0.5"
+        >
         <PopoverTrigger
           aria-label="Change tier color"
-          className="absolute right-0.5 bottom-0.5 flex h-4 w-4 items-center justify-center rounded-sm border border-white/30 bg-black/20 text-white opacity-0 transition-opacity group-hover/chip:opacity-100 hover:bg-black/40 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+          className="flex h-4 w-4 items-center justify-center rounded-sm border border-white/30 bg-black/20 text-white hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
         >
           <Palette size={9} aria-hidden />
         </PopoverTrigger>
+        </motion.div>
         <PopoverContent
           side="right"
           sideOffset={8}
@@ -149,34 +174,40 @@ function TierRowChip({
         </PopoverContent>
       </Popover>
 
-      <button
-        type="button"
-        onClick={onRemove}
-        disabled={!canRemove}
-        className={cn(
-          'absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-border bg-background text-muted-foreground opacity-0 transition-opacity group-hover/chip:opacity-100 focus-visible:opacity-100',
-          !canRemove && 'cursor-not-allowed opacity-0'
-        )}
-        aria-label="Remove row"
-      >
-        <X size={9} />
-      </button>
-    </div>
+      {canRemove && (
+        <motion.button
+          type="button"
+          variants={hoverRevealVariants}
+          whileFocus="hover"
+          onClick={onRemove}
+          className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-border bg-background text-muted-foreground"
+          aria-label="Remove row"
+        >
+          <X size={9} />
+        </motion.button>
+      )}
+    </motion.div>
   )
 }
 
 type TierBoardProps = {
   rowMinHeight?: '16' | '24'
   boardRef?: React.RefObject<HTMLElement | null>
+  mode?: 'structure' | 'fill'
 }
 
-export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
+export function TierBoard({
+  rowMinHeight = '16',
+  boardRef,
+  mode = 'structure',
+}: TierBoardProps) {
   const rows = useTierEditor((s) => s.rows)
   const removeItem = useTierEditor((s) => s.removeItem)
   const addRow = useTierEditor((s) => s.addRow)
   const updateRow = useTierEditor((s) => s.updateRow)
   const removeRow = useTierEditor((s) => s.removeRow)
 
+  const isStructure = mode === 'structure'
   const lg = rowMinHeight === '24'
   const itemCls = lg ? 'h-20 w-20' : 'h-12 w-12'
   const rowHeightCls = lg ? 'min-h-24' : 'min-h-16'
@@ -201,7 +232,8 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
             label={row.label}
             color={row.color}
             height={rowMinHeight}
-            canRemove={rows.length > 1}
+            readOnly={!isStructure}
+            canRemove={isStructure && rows.length > 1}
             onLabelChange={(label) => updateRow(row.id, { label })}
             onColorChange={(color) => updateRow(row.id, { color })}
             onRemove={() => removeRow(row.id)}
@@ -248,11 +280,12 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
                           data-testid="row-item"
                         >
                           <motion.div
-                            initial={false}
+                            initial="rest"
                             variants={dragActiveVariants}
                             animate={
                               dragSnapshot.isDragging ? 'dragging' : 'idle'
                             }
+                            whileHover="hover"
                             className="relative h-full w-full overflow-hidden rounded border border-border bg-background"
                           >
                             {item.status === 'uploaded' && item.url ? (
@@ -283,20 +316,24 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
                                 <X size={12} />
                               </div>
                             )}
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeItem({
-                                  source: 'row',
-                                  id: item.id,
-                                  rowId: row.id,
-                                })
-                              }
-                              className="absolute top-0 right-0 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-foreground focus-visible:opacity-100"
-                              aria-label={`Remove ${item.label}`}
-                            >
-                              <X size={10} />
-                            </button>
+                            {isStructure && (
+                              <motion.button
+                                type="button"
+                                variants={hoverRevealVariants}
+                                whileFocus="hover"
+                                onClick={() =>
+                                  removeItem({
+                                    source: 'row',
+                                    id: item.id,
+                                    rowId: row.id,
+                                  })
+                                }
+                                className="absolute top-0 right-0 rounded bg-background/80 p-0.5 text-muted-foreground hover:text-foreground"
+                                aria-label={`Remove ${item.label}`}
+                              >
+                                <X size={10} />
+                              </motion.button>
+                            )}
                           </motion.div>
                         </div>
                       )}
@@ -310,7 +347,7 @@ export function TierBoard({ rowMinHeight = '16', boardRef }: TierBoardProps) {
         </motion.div>
       ))}
 
-      {rows.length < 10 && (
+      {isStructure && rows.length < 10 && (
         <Button
           type="button"
           variant="ghost"

@@ -5,7 +5,10 @@ import { motion } from 'motion/react'
 import { X, Loader2 } from 'lucide-react'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { BANK_DROPPABLE } from '@/app/dashboard/tier-lists/new/_components/constants'
-import { dragActiveVariants } from '@/lib/motion-variants'
+import {
+  dragActiveVariants,
+  hoverRevealVariants,
+} from '@/lib/motion-variants'
 import { cn } from '@/lib/utils'
 import {
   Tooltip,
@@ -14,9 +17,14 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-export function ItemBankStrip() {
+export function ItemBankStrip({
+  mode = 'fill',
+}: {
+  mode?: 'structure' | 'fill'
+}) {
   const bankItems = useTierEditor((s) => s.bankItems)
   const removeItem = useTierEditor((s) => s.removeItem)
+  const canRemove = mode === 'structure'
 
   return (
     <div
@@ -59,9 +67,10 @@ export function ItemBankStrip() {
                       className="group/item relative h-20 w-20 shrink-0 rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none"
                     >
                       <motion.div
-                        initial={false}
+                        initial="rest"
                         variants={dragActiveVariants}
                         animate={dragSnapshot.isDragging ? 'dragging' : 'idle'}
+                        whileHover="hover"
                         className="relative h-full w-full overflow-hidden rounded border border-border bg-background"
                       >
                         {item.status === 'uploaded' && item.url ? (
@@ -92,16 +101,20 @@ export function ItemBankStrip() {
                             <X size={14} />
                           </div>
                         )}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            removeItem({ source: 'bank', id: item.id })
-                          }
-                          className="absolute top-0 right-0 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-foreground focus-visible:opacity-100"
-                          aria-label={`Remove ${item.label}`}
-                        >
-                          <X size={10} />
-                        </button>
+                        {canRemove && (
+                          <motion.button
+                            type="button"
+                            variants={hoverRevealVariants}
+                            whileFocus="hover"
+                            onClick={() =>
+                              removeItem({ source: 'bank', id: item.id })
+                            }
+                            className="absolute top-0 right-0 rounded bg-background/80 p-0.5 text-muted-foreground hover:text-foreground"
+                            aria-label={`Remove ${item.label}`}
+                          >
+                            <X size={10} />
+                          </motion.button>
+                        )}
                       </motion.div>
                     </div>
                   )}

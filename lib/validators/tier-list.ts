@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isAllowedImageUrl } from '@/lib/blob-url'
 
 export const MIN_ROW_COUNT = 1
 export const MAX_ROW_COUNT = 10
@@ -47,15 +48,32 @@ export type ImageItem = {
   label: string
 }
 
+const imageUrlSchema = z.url({
+  protocol: /^https$/,
+  hostname: /^(.+\.)?public\.blob\.vercel-storage\.com$/,
+})
+
+const UNSAFE_COLOR = /url\s*\(|expression\s*\(|javascript:/i
+const SAFE_COLOR =
+  /^(#([0-9a-fA-F]{3,8})|oklch\(|oklab\(|lab\(|lch\(|rgb\(|rgba\(|hsl\(|hsla\(|color\()/
+
+export const tierColorSchema = z
+  .string()
+  .min(1)
+  .refine((value) => {
+    const trimmed = value.trim()
+    return SAFE_COLOR.test(trimmed) && !UNSAFE_COLOR.test(trimmed)
+  }, 'Invalid color')
+
 export const imageItemSchema = z.object({
-  url: z.string().url(),
+  url: imageUrlSchema.refine(isAllowedImageUrl),
   label: z.string().min(1).max(MAX_IMAGE_LABEL_LENGTH),
 })
 
 export const tierRowSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1).max(MAX_LABEL_LENGTH),
-  color: z.string().min(1),
+  color: tierColorSchema,
   items: z.array(imageItemSchema).max(MAX_ITEM_COUNT),
 })
 
@@ -64,7 +82,7 @@ export const createTierListSchema = z
     title: z.string().min(1).max(MAX_TITLE_LENGTH),
     description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
     category: z.string().min(1).max(MAX_CATEGORY_LENGTH),
-    coverImageUrl: z.string().url().optional(),
+    coverImageUrl: imageUrlSchema.optional(),
     rows: z.array(tierRowSchema).min(MIN_ROW_COUNT).max(MAX_ROW_COUNT),
     bankItems: z.array(imageItemSchema).max(MAX_ITEM_COUNT),
   })
@@ -82,7 +100,7 @@ export type CreateTierListInput = z.infer<typeof createTierListSchema>
 
 export const updateTierListPayloadSchema = z
   .object({
-    coverImageUrl: z.string().url().optional(),
+    coverImageUrl: imageUrlSchema.optional(),
     bankItems: z.array(imageItemSchema).max(MAX_ITEM_COUNT),
     rows: z.array(tierRowSchema).max(MAX_ROW_COUNT),
   })
@@ -108,6 +126,20 @@ export const imageUploadSchema = z.object({
 })
 
 export type ImageUploadInput = z.infer<typeof imageUploadSchema>
+
+export function buildCatalogue(
+  bankItems: ImageItem[],
+  rows: { items: ImageItem[] }[]
+): ImageItem[] {
+  const seen = new Set<string>()
+  const catalogue: ImageItem[] = []
+  for (const item of [...bankItems, ...rows.flatMap((r) => r.items)]) {
+    if (seen.has(item.url)) continue
+    seen.add(item.url)
+    catalogue.push(item)
+  }
+  return catalogue
+}
 
 export function defaultTierRows(): TierRow[] {
   return (

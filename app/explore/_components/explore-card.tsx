@@ -16,6 +16,7 @@ type Props = {
   isLiked: boolean
   isOwner: boolean
   isAuthenticated: boolean
+  href?: string
   style?: React.CSSProperties
 }
 
@@ -24,6 +25,7 @@ export function ExploreCard({
   isLiked,
   isOwner,
   isAuthenticated,
+  href,
   style,
 }: Props) {
   const {
@@ -38,14 +40,14 @@ export function ExploreCard({
     likeCount,
   } = data
   const imageUrl = coverImageUrl ?? firstItemUrl ?? null
-  const href = `/explore/${data.slug}`
+  const fillHref = href ?? `/explore/${data.slug}`
 
   return (
     <div
       className="flex flex-col gap-3 overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-200 hover:border-primary/20 hover:bg-overlay"
       style={style}
     >
-      <Link href={href} className="block">
+      <Link href={fillHref} className="block">
         <ViewTransition name={`tier-cover-${id}`}>
           <div className="relative aspect-video w-full overflow-hidden bg-muted">
             {imageUrl ? (
@@ -84,7 +86,7 @@ export function ExploreCard({
           </span>
         </div>
 
-        <Link href={href}>
+        <Link href={fillHref}>
           <p className="text-sm leading-snug font-medium text-foreground hover:underline">
             {title}
           </p>
@@ -113,7 +115,7 @@ export function ExploreCard({
               />
             )}
             <Link
-              href={href}
+              href={fillHref}
               aria-label={`Fill ${title}`}
               className={cn(
                 buttonVariants({ variant: 'ghost', size: 'sm' }),

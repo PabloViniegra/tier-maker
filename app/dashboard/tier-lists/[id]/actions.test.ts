@@ -93,13 +93,23 @@ function setupTransactionNotOwned() {
 }
 
 const validPayload = {
-  bankItems: [{ url: 'https://blob/bank.png', label: 'Bank item' }],
+  bankItems: [
+    {
+      url: 'https://store.public.blob.vercel-storage.com/bank.png',
+      label: 'Bank item',
+    },
+  ],
   rows: [
     {
       id: 'row-1',
       label: 'S',
       color: '#ff0',
-      items: [{ url: 'https://blob/a.png', label: 'A item' }],
+      items: [
+        {
+          url: 'https://store.public.blob.vercel-storage.com/a.png',
+          label: 'A item',
+        },
+      ],
     },
     { id: 'row-2', label: 'A', color: '#0ff', items: [] },
   ],

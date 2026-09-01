@@ -110,4 +110,20 @@ describe('ExploreCard', () => {
       screen.queryByRole('button', { name: /like/i })
     ).not.toBeInTheDocument()
   })
+
+  it('links to the public slug by default', () => {
+    render(<ExploreCard {...baseProps} />)
+    expect(screen.getByRole('link', { name: /fill best anime ever/i })).toHaveAttribute(
+      'href',
+      '/explore/best-anime-ever'
+    )
+  })
+
+  it('uses the provided href', () => {
+    render(<ExploreCard {...baseProps} href="/dashboard/explore/xyz-456" />)
+    expect(screen.getByRole('link', { name: /fill best anime ever/i })).toHaveAttribute(
+      'href',
+      '/dashboard/explore/xyz-456'
+    )
+  })
 })
