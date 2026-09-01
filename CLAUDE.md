@@ -103,3 +103,22 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - `<MotionConfig reducedMotion="user">` is set at the root — do not override it per component.
 - CSS `transition-*` Tailwind utilities are allowed only for color/border changes on hover. Never use them for `transform` or `opacity` — those belong to Motion.
 - `tw-animate-css` is retained exclusively for Shadcn UI component internals (`data-open:animate-in` etc.). Do not use its classes in custom components.
+
+<!-- graphify:start -->
+## Graphify Knowledge Graph
+
+This project keeps a queryable knowledge graph of the source in `graphify-out/`
+(git-ignored, rebuilt after each commit). Use it to navigate the code instead of
+broad file searches.
+
+Before grepping or reading many files, query the graph:
+
+    python -m graphify query "where is the project store defined?"
+    python -m graphify path "ModuleA" "ModuleB"
+    python -m graphify explain "concept-name"
+
+Read `graphify-out/GRAPH_REPORT.md` for a high-level map.
+Missing graph? Build once: pip install graphifyy && python -m graphify .
+
+> Windows: always use `python -m graphify`, never `graphify` (may not be on PATH).
+<!-- graphify:end -->

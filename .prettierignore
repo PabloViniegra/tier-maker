@@ -8,3 +8,4 @@ pnpm-lock.yaml
 .agents/
 .claude/
 tools/eslint/anti-slop/
+graphify-out/

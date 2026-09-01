@@ -173,3 +173,22 @@ See [docs/agents.md](docs/agents.md) for the decision matrix and [references/orc
 Skills in this repo are markdown-first: each lives at `skills/<kebab-case-name>/SKILL.md` with YAML frontmatter (`name`, `description`) and follows the section anatomy (Overview, When to Use, Process, Common Rationalizations, Red Flags, Verification). Add a `scripts/` directory only when the skill ships runnable helpers; most skills are markdown only, and there are no per-skill zip packages.
 
 For the full format, naming conventions, frontmatter rules, supporting-file thresholds, and writing principles, see [docs/skill-anatomy.md](docs/skill-anatomy.md), the single source of truth for skill structure. Do not restate that guidance here, link to it.
+
+<!-- graphify:start -->
+## Graphify Knowledge Graph
+
+This project keeps a queryable knowledge graph of the source in `graphify-out/`
+(git-ignored, rebuilt after each commit). Use it to navigate the code instead of
+broad file searches.
+
+Before grepping or reading many files, query the graph:
+
+    python -m graphify query "where is the project store defined?"
+    python -m graphify path "ModuleA" "ModuleB"
+    python -m graphify explain "concept-name"
+
+Read `graphify-out/GRAPH_REPORT.md` for a high-level map.
+Missing graph? Build once: pip install graphifyy && python -m graphify .
+
+> Windows: always use `python -m graphify`, never `graphify` (may not be on PATH).
+<!-- graphify:end -->
