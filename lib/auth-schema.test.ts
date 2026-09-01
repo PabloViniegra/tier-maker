@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { loginSchema, registerSchema } from './auth-schema'
+import {
+  loginSchema,
+  registerSchema,
+  requestPasswordResetSchema,
+  resetPasswordSchema,
+} from './auth-schema'
 
 describe('loginSchema', () => {
   it('accepts a valid email and password', () => {
@@ -94,5 +99,32 @@ describe('registerSchema', () => {
       confirmPassword: '',
     })
     expect(result.success).toBe(false)
+  })
+})
+
+describe('password reset schemas', () => {
+  it('validates a password reset request email', () => {
+    expect(
+      requestPasswordResetSchema.safeParse({ email: 'user@example.com' })
+        .success
+    ).toBe(true)
+    expect(
+      requestPasswordResetSchema.safeParse({ email: 'invalid' }).success
+    ).toBe(false)
+  })
+
+  it('requires matching reset passwords of at least eight characters', () => {
+    expect(
+      resetPasswordSchema.safeParse({
+        password: 'password123',
+        confirmPassword: 'password123',
+      }).success
+    ).toBe(true)
+    expect(
+      resetPasswordSchema.safeParse({
+        password: 'password123',
+        confirmPassword: 'different123',
+      }).success
+    ).toBe(false)
   })
 })

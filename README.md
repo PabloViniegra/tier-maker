@@ -130,6 +130,9 @@ BLOB_READ_WRITE_TOKEN=your-vercel-blob-token
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 
+# Resend (transactional email)
+RESEND_API_KEY=your-resend-api-key
+
 # App URL
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```

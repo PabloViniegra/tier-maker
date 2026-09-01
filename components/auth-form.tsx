@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Eye, EyeOff, Info } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
@@ -29,12 +29,14 @@ function PasswordInput({
   registration,
   error,
   disabled,
+  autoComplete,
 }: {
   id: string
   placeholder: string
   registration: UseFormRegisterReturn
   error?: string
   disabled?: boolean
+  autoComplete: 'current-password' | 'new-password'
 }) {
   const [show, setShow] = useState(false)
   return (
@@ -45,6 +47,7 @@ function PasswordInput({
           placeholder={placeholder}
           className="pr-8"
           disabled={disabled}
+          autoComplete={autoComplete}
           {...registration}
           type={show ? 'text' : 'password'}
           aria-invalid={error ? 'true' : 'false'}
@@ -90,9 +93,14 @@ export function LoginForm() {
       const result = await authClient.signIn.email({
         email: data.email,
         password: data.password,
+        callbackURL: '/dashboard',
       })
 
       if (result.error) {
+        if (result.error.code === 'EMAIL_NOT_VERIFIED') {
+          toast.error('Check your email to verify your account.')
+          return
+        }
         toast.error(result.error.message || 'Login failed')
         return
       }
@@ -112,6 +120,7 @@ export function LoginForm() {
           id="email"
           type="email"
           placeholder="you@example.com"
+          autoComplete="username"
           {...register('email')}
           aria-invalid={errors.email ? 'true' : 'false'}
           aria-describedby={errors.email ? 'email-error' : undefined}
@@ -125,7 +134,7 @@ export function LoginForm() {
 
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="current-password">Password</Label>
           <Link
             href="/forgot-password"
             className="text-xs text-muted-foreground transition-colors hover:text-foreground"
@@ -134,10 +143,11 @@ export function LoginForm() {
           </Link>
         </div>
         <PasswordInput
-          id="password"
+          id="current-password"
           placeholder="••••••••"
           registration={register('password')}
           error={errors.password?.message}
+          autoComplete="current-password"
         />
       </div>
 
@@ -152,7 +162,7 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(registerSchema as any),
@@ -164,6 +174,7 @@ export function RegisterForm() {
         name: data.name,
         email: data.email,
         password: data.password,
+        callbackURL: '/dashboard',
       })
 
       if (result.error) {
@@ -171,7 +182,7 @@ export function RegisterForm() {
         return
       }
 
-      window.location.assign('/dashboard')
+      toast.success('Check your email to verify your account.')
     } catch {
       toast.error('Something went wrong. Please try again.')
     }
@@ -180,20 +191,13 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <GoogleButton />
-      <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/50 dark:bg-amber-950/30">
-        <Info className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-        <p className="text-sm text-amber-800 dark:text-amber-200">
-          Email registration is temporarily disabled. Please sign up with
-          Google.
-        </p>
-      </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"
           type="text"
           placeholder="Your name"
-          disabled
+          autoComplete="name"
           {...register('name')}
           aria-invalid={errors.name ? 'true' : 'false'}
           aria-describedby={errors.name ? 'name-error' : undefined}
@@ -211,7 +215,7 @@ export function RegisterForm() {
           id="email"
           type="email"
           placeholder="you@example.com"
-          disabled
+          autoComplete="username"
           {...register('email')}
           aria-invalid={errors.email ? 'true' : 'false'}
           aria-describedby={errors.email ? 'email-error' : undefined}
@@ -224,28 +228,28 @@ export function RegisterForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="new-password">Password</Label>
         <PasswordInput
-          id="password"
+          id="new-password"
           placeholder="••••••••"
-          disabled
           registration={register('password')}
           error={errors.password?.message}
+          autoComplete="new-password"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="confirmPassword">Confirm password</Label>
+        <Label htmlFor="new-password-confirmation">Confirm password</Label>
         <PasswordInput
-          id="confirmPassword"
+          id="new-password-confirmation"
           placeholder="••••••••"
-          disabled
           registration={register('confirmPassword')}
           error={errors.confirmPassword?.message}
+          autoComplete="new-password"
         />
       </div>
 
-      <Button type="submit" disabled className="mt-2 w-full">
+      <Button type="submit" disabled={isSubmitting} className="mt-2 w-full">
         Sign up
       </Button>
     </form>

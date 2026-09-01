@@ -64,6 +64,13 @@
       "when": 1781281531542,
       "tag": "0008_nice_yellow_claw",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788263958035,
+      "tag": "0009_shiny_the_executioner",
+      "breakpoints": true
     }
   ]
 }

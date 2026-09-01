@@ -2,16 +2,22 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-const { mockAssign, mockToastError, mockSignInEmail, mockSignUpEmail } =
-  vi.hoisted(() => ({
-    mockAssign: vi.fn(),
-    mockToastError: vi.fn(),
-    mockSignInEmail: vi.fn(),
-    mockSignUpEmail: vi.fn(),
-  }))
+const {
+  mockAssign,
+  mockToastError,
+  mockToastSuccess,
+  mockSignInEmail,
+  mockSignUpEmail,
+} = vi.hoisted(() => ({
+  mockAssign: vi.fn(),
+  mockToastError: vi.fn(),
+  mockToastSuccess: vi.fn(),
+  mockSignInEmail: vi.fn(),
+  mockSignUpEmail: vi.fn(),
+}))
 
 vi.mock('sonner', () => ({
-  toast: { error: mockToastError, success: vi.fn() },
+  toast: { error: mockToastError, success: mockToastSuccess },
 }))
 
 vi.mock('@/lib/auth-client', () => ({
@@ -146,26 +152,30 @@ describe('AuthForm — register mode', () => {
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument()
   })
 
-  it('disables all email registration fields and shows info alert', () => {
+  it('enables email registration', () => {
     render(<AuthForm mode="register" />)
 
-    expect(screen.getByLabelText(/name/i)).toBeDisabled()
-    expect(screen.getByLabelText(/email/i)).toBeDisabled()
-    expect(screen.getByLabelText(/^password$/i)).toBeDisabled()
-    expect(screen.getByLabelText(/confirm password/i)).toBeDisabled()
-    expect(screen.getByRole('button', { name: /sign up/i })).toBeDisabled()
-
-    expect(
-      screen.getByText(/email registration is temporarily disabled/i)
-    ).toBeInTheDocument()
-    expect(screen.getByText(/please sign up with google/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/name/i)).toBeEnabled()
+    expect(screen.getByLabelText(/email/i)).toBeEnabled()
+    expect(screen.getByLabelText(/^password$/i)).toBeEnabled()
+    expect(screen.getByLabelText(/confirm password/i)).toBeEnabled()
+    expect(screen.getByRole('button', { name: /sign up/i })).toBeEnabled()
   })
 
-  it('does not call signUp when submit is disabled', async () => {
+  it('asks the user to verify their email after registration', async () => {
+    mockSignUpEmail.mockResolvedValue({ data: { user: {} }, error: null })
     render(<AuthForm mode="register" />)
-    const submitButton = screen.getByRole('button', { name: /sign up/i })
-    await user.click(submitButton)
+    await user.type(screen.getByLabelText(/name/i), 'Jane Doe')
+    await user.type(screen.getByLabelText(/email/i), 'jane@example.com')
+    await user.type(screen.getByLabelText(/^password$/i), 'password123')
+    await user.type(screen.getByLabelText(/confirm password/i), 'password123')
+    await user.click(screen.getByRole('button', { name: /sign up/i }))
 
-    expect(mockSignUpEmail).not.toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockToastSuccess).toHaveBeenCalledWith(
+        'Check your email to verify your account.'
+      )
+    })
+    expect(mockAssign).not.toHaveBeenCalled()
   })
 })

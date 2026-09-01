@@ -17,6 +17,10 @@ describe('schema — Better Auth core tables', () => {
   it('exports verification table', () => {
     expect(schema.verification).toBeDefined()
   })
+
+  it('exports rate limit table for serverless authentication', () => {
+    expect(schema.rateLimit).toBeDefined()
+  })
 })
 
 describe('schema — business tables', () => {
