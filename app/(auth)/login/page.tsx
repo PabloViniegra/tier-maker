@@ -13,9 +13,9 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-center font-heading text-lg font-semibold tracking-tight text-card-foreground">
+        <h1 className="text-center font-heading text-lg font-semibold tracking-tight text-card-foreground">
           Welcome back
-        </h2>
+        </h1>
         <p className="text-center text-sm text-muted-foreground">
           Enter your credentials to access your account
         </p>

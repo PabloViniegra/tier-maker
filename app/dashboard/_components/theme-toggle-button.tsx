@@ -17,9 +17,19 @@ export function ThemeToggleButton() {
       suppressHydrationWarning
     >
       {isDark ? (
-        <Sun size={14} strokeWidth={1.5} data-testid="icon-sun" />
+        <Sun
+          size={14}
+          strokeWidth={1.5}
+          data-testid="icon-sun"
+          aria-hidden="true"
+        />
       ) : (
-        <Moon size={14} strokeWidth={1.5} data-testid="icon-moon" />
+        <Moon
+          size={14}
+          strokeWidth={1.5}
+          data-testid="icon-moon"
+          aria-hidden="true"
+        />
       )}
     </Button>
   )

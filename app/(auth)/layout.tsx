@@ -20,7 +20,10 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           delay={0.1}
           className="relative z-10 flex h-full w-full flex-col justify-end p-10"
         >
-          <p className="font-heading text-2xl font-semibold text-foreground">
+          <p
+            className="font-heading text-2xl font-semibold text-foreground"
+            translate="no"
+          >
             Tier Maker
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -37,9 +40,12 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div className="w-full max-w-sm">
           {/* Wordmark — mobile only (desktop shows it in left panel) */}
           <div className="mb-6 text-center lg:hidden">
-            <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
+            <p
+              className="font-heading text-2xl font-semibold tracking-tight text-foreground"
+              translate="no"
+            >
               Tier Maker
-            </h1>
+            </p>
             <p className="mt-1 text-sm text-muted-foreground">
               Create and share tier lists with the community
             </p>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   HERO_DEMO_STEP_INTERVAL,
@@ -37,13 +37,32 @@ interface PlacedChip {
   label: string
 }
 
+const ALL_PLACED: PlacedChip[] = SEQUENCE.map((entry, i) => ({
+  id: `chip-${i}`,
+  tierIndex: entry.tierIndex,
+  label: entry.label,
+}))
+
+function subscribeReducedMotion(onStoreChange: () => void) {
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+  mq.addEventListener('change', onStoreChange)
+  return () => mq.removeEventListener('change', onStoreChange)
+}
+
 export function HeroDemo() {
+  const reducedMotion = useSyncExternalStore(
+    subscribeReducedMotion,
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    () => false
+  )
   const [placed, setPlaced] = useState<PlacedChip[]>([])
   const [placing, setPlacing] = useState<number | null>(null)
   const cancelledRef = useRef(false)
   const frameRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
+    if (reducedMotion) return
+
     cancelledRef.current = false
 
     function scheduleNext(currentStep: number, currentPlaced: PlacedChip[]) {
@@ -93,7 +112,10 @@ export function HeroDemo() {
       cancelledRef.current = true
       if (frameRef.current !== null) clearTimeout(frameRef.current)
     }
-  }, [])
+  }, [reducedMotion])
+
+  const chipsPlaced = reducedMotion ? ALL_PLACED : placed
+  const placingIndex = reducedMotion ? null : placing
 
   return (
     <div
@@ -103,7 +125,7 @@ export function HeroDemo() {
     >
       {/* Tier rows */}
       {TIERS.map((tier, tierIndex) => {
-        const chips = placed.filter((c) => c.tierIndex === tierIndex)
+        const chips = chipsPlaced.filter((c) => c.tierIndex === tierIndex)
         return (
           <motion.div
             key={tier.label}
@@ -145,8 +167,8 @@ export function HeroDemo() {
       {/* Staging bank */}
       <div className="mt-1 flex flex-wrap gap-1">
         {BANK_LABELS.map((label, i) => {
-          const alreadyPlaced = placed.some((c) => c.label === label)
-          const isBeingPlaced = placing === i
+          const alreadyPlaced = chipsPlaced.some((c) => c.label === label)
+          const isBeingPlaced = placingIndex === i
 
           if (alreadyPlaced) return null
 

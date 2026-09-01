@@ -65,9 +65,10 @@ export function ImageLabelModal({ files, onConfirm, onCancel }: Props) {
                     return next
                   })
                 }
+                name={`image-label-${i}`}
+                autoComplete="off"
                 placeholder={file.name}
                 maxLength={MAX_IMAGE_LABEL_LENGTH}
-                autoFocus={i === 0}
               />
             </div>
           ))}

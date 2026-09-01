@@ -40,7 +40,7 @@ export function PageHeader({
             'shrink-0 gap-1.5 text-muted-foreground hover:text-foreground'
           )}
         >
-          <ArrowLeft size={14} />
+          <ArrowLeft size={14} aria-hidden="true" />
           Back
         </Link>
         <h1 className="line-clamp-1 font-heading text-lg">{title}</h1>

@@ -15,11 +15,14 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
-      <h2 className="font-heading text-xl">Something went wrong</h2>
+    <main
+      id="main-content"
+      className="flex min-h-[400px] flex-col items-center justify-center gap-4"
+    >
+      <h1 className="font-heading text-xl">Something went wrong</h1>
       <Button onClick={reset} variant="outline">
         Try again
       </Button>
-    </div>
+    </main>
   )
 }

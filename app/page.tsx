@@ -48,7 +48,10 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
           <div className="flex items-center gap-2">
             <TierMakerIcon size={18} aria-hidden="true" />
-            <span className="font-heading text-base font-semibold text-foreground">
+            <span
+              className="font-heading text-base font-semibold text-foreground"
+              translate="no"
+            >
               Tier Maker
             </span>
           </div>

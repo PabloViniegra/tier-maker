@@ -37,8 +37,9 @@ export function ExplorePagination({
   const isLast = page === totalPages
 
   const linkClass = cn(
-    'flex h-8 min-w-8 items-center justify-center rounded-md border border-border px-2 text-xs font-medium text-foreground',
-    'transition-colors hover:border-primary/30 hover:bg-overlay'
+    'flex h-8 min-w-8 items-center justify-center rounded-md border border-border px-2 text-xs font-medium text-foreground tabular-nums',
+    'transition-colors hover:border-primary/30 hover:bg-overlay',
+    'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
   )
   const activeLinkClass = 'border-primary bg-primary/10 text-primary'
 

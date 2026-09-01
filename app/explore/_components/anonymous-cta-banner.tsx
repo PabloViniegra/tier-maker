@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 export function AnonymousCTABanner() {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-primary/20 bg-primary/5 px-4 py-2.5">
-      <p className="text-xs text-muted-foreground">
+      <p className="min-w-0 text-xs text-pretty text-muted-foreground">
         Your changes are not saved.{' '}
         <span className="text-foreground">Sign in to save your result.</span>
       </p>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
 import { useForm } from 'react-hook-form'
@@ -22,6 +23,7 @@ export function RequestPasswordResetForm() {
   const {
     register,
     handleSubmit,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<RequestPasswordResetInput>({
     resolver: standardSchemaResolver(requestPasswordResetSchema),
@@ -35,7 +37,10 @@ export function RequestPasswordResetForm() {
       })
 
       if (result.error) {
-        toast.error(result.error.message || 'Password reset request failed')
+        toast.error(
+          result.error.message ||
+            'Could not send the reset link. Try again in a moment.'
+        )
         return
       }
 
@@ -64,14 +69,20 @@ export function RequestPasswordResetForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form
+      onSubmit={handleSubmit(onSubmit, (errs) => {
+        if (errs.email) setFocus('email')
+      })}
+      className="flex flex-col gap-4"
+    >
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="reset-email">Email</Label>
         <Input
           id="reset-email"
           type="email"
-          placeholder="you@example.com"
+          placeholder="you@example.com…"
           autoComplete="email"
+          spellCheck={false}
           {...register('email')}
           aria-invalid={errors.email ? 'true' : 'false'}
           aria-describedby={errors.email ? 'reset-email-error' : undefined}
@@ -87,6 +98,9 @@ export function RequestPasswordResetForm() {
         )}
       </div>
       <Button type="submit" disabled={isSubmitting} className="w-full">
+        {isSubmitting && (
+          <Loader2 className="animate-spin" aria-hidden="true" />
+        )}
         Send reset link
       </Button>
     </form>
@@ -104,6 +118,7 @@ export function ResetPasswordForm({
   const {
     register,
     handleSubmit,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<ResetPasswordInput>({
     resolver: standardSchemaResolver(resetPasswordSchema),
@@ -119,7 +134,10 @@ export function ResetPasswordForm({
       })
 
       if (result.error) {
-        toast.error(result.error.message || 'Password reset failed')
+        toast.error(
+          result.error.message ||
+            'Could not reset your password. Request a new link and try again.'
+        )
         return
       }
 
@@ -160,7 +178,15 @@ export function ResetPasswordForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form
+      onSubmit={handleSubmit(onSubmit, (errs) => {
+        const first = (['password', 'confirmPassword'] as const).find(
+          (k) => errs[k]
+        )
+        if (first) setFocus(first)
+      })}
+      className="flex flex-col gap-4"
+    >
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="reset-password">New password</Label>
         <Input
@@ -208,6 +234,9 @@ export function ResetPasswordForm({
         )}
       </div>
       <Button type="submit" disabled={isSubmitting} className="w-full">
+        {isSubmitting && (
+          <Loader2 className="animate-spin" aria-hidden="true" />
+        )}
         Reset password
       </Button>
     </form>

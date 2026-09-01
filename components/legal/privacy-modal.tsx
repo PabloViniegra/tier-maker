@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { LegalSections } from './legal-sections'
 import { privacySections } from '@/lib/legal/content'
+import { formatLongDate, LEGAL_UPDATED_AT } from '@/lib/utils/format-date'
 
 export function PrivacyModal() {
   return (
@@ -17,10 +18,12 @@ export function PrivacyModal() {
       <DialogTrigger className="text-foreground/80 transition-colors hover:text-foreground">
         Privacy Policy
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto overscroll-contain sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Privacy Policy</DialogTitle>
-          <DialogDescription>Last updated June 7, 2026.</DialogDescription>
+          <DialogDescription>
+            Last updated {formatLongDate(LEGAL_UPDATED_AT)}.
+          </DialogDescription>
         </DialogHeader>
         <LegalSections sections={privacySections} />
       </DialogContent>

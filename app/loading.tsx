@@ -2,7 +2,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function Loading() {
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div
+      className="flex flex-col gap-6 p-6"
+      aria-busy="true"
+      aria-label="Loading"
+    >
       <Skeleton className="h-7 w-48" />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (

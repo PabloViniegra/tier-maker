@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import localFont from 'next/font/local'
 
@@ -10,6 +10,10 @@ import { CookieBanner } from '@/components/cookie-banner'
 import { cn } from '@/lib/utils'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tier-maker.app'
+
+export const viewport: Viewport = {
+  themeColor: '#1a1a1a',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),

@@ -59,7 +59,7 @@ export function PublicTierFill({ tierId, data, backHref = '/explore' }: Props) {
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col">
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-background/90 px-4 py-2 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <Link
             href={backHref}
             className={cn(
@@ -67,10 +67,12 @@ export function PublicTierFill({ tierId, data, backHref = '/explore' }: Props) {
               'gap-1.5 text-muted-foreground hover:text-foreground'
             )}
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={14} aria-hidden="true" />
             Explore
           </Link>
-          <h1 className="line-clamp-1 font-heading text-lg">{data.title}</h1>
+          <h1 className="line-clamp-1 min-w-0 font-heading text-lg">
+            {data.title}
+          </h1>
         </div>
         <ExportButton boardRef={boardRef} title={data.title} />
       </header>

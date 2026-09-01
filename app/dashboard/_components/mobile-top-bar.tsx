@@ -31,7 +31,7 @@ export function MobileTopBar({ user }: { user: SidebarUser }) {
           )}
           aria-label="Open navigation"
         >
-          <Menu size={16} strokeWidth={1.5} />
+          <Menu size={16} strokeWidth={1.5} aria-hidden="true" />
         </SheetTrigger>
         <SheetContent
           side="left"

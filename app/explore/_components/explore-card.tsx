@@ -18,6 +18,7 @@ type Props = {
   isAuthenticated: boolean
   href?: string
   style?: React.CSSProperties
+  priority?: boolean
 }
 
 export function ExploreCard({
@@ -27,6 +28,7 @@ export function ExploreCard({
   isAuthenticated,
   href,
   style,
+  priority = false,
 }: Props) {
   const {
     id,
@@ -55,6 +57,7 @@ export function ExploreCard({
                 src={imageUrl}
                 alt={title}
                 fill
+                priority={priority || undefined}
                 className="object-cover"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
               />
@@ -87,7 +90,7 @@ export function ExploreCard({
         </div>
 
         <Link href={fillHref}>
-          <p className="text-sm leading-snug font-medium text-foreground hover:underline">
+          <p className="line-clamp-2 text-sm leading-snug font-medium break-words text-foreground hover:underline">
             {title}
           </p>
         </Link>
@@ -100,7 +103,7 @@ export function ExploreCard({
               {itemCount} {itemCount === 1 ? 'item' : 'items'}
             </span>
             {creatorName && (
-              <span className="text-[10px] text-muted-foreground/70">
+              <span className="max-w-[10rem] truncate text-[10px] text-muted-foreground/70">
                 by {creatorName}
               </span>
             )}
@@ -123,7 +126,7 @@ export function ExploreCard({
               )}
             >
               Fill
-              <ArrowRight size={12} />
+              <ArrowRight size={12} aria-hidden="true" />
             </Link>
           </div>
         </div>

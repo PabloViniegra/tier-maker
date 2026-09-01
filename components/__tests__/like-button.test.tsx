@@ -53,12 +53,11 @@ describe('LikeButton', () => {
     await waitFor(() => expect(screen.getByText('6')).toBeInTheDocument())
   })
 
-  it('redirects to sign-in when unauthenticated user clicks', () => {
+  it('links to sign-in when unauthenticated', () => {
     render(<LikeButton {...baseProps} isAuthenticated={false} />)
 
-    fireEvent.click(screen.getByRole('button'))
-
-    expect(mockRouterPush).toHaveBeenCalledWith('/login')
+    const link = screen.getByRole('link', { name: 'Like' })
+    expect(link).toHaveAttribute('href', '/login')
     expect(mockToggleLike).not.toHaveBeenCalled()
   })
 

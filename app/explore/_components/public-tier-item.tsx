@@ -17,6 +17,7 @@ export function PublicTierItem({ url, label }: PublicTierItemProps) {
           height={80}
           className="h-full w-full object-cover"
           draggable={false}
+          loading="lazy"
         />
       </div>
     </div>

@@ -16,7 +16,7 @@ export function ExploreHeader({ isLoggedIn }: Props) {
           className="flex items-center gap-2 font-heading text-base font-semibold text-foreground"
         >
           <TierMakerIcon size={18} aria-hidden="true" />
-          Tier Maker
+          <span translate="no">Tier Maker</span>
         </Link>
 
         {isLoggedIn ? (

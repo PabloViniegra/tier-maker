@@ -5,10 +5,7 @@ import { motion } from 'motion/react'
 import { X, Loader2 } from 'lucide-react'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { BANK_DROPPABLE } from '@/app/dashboard/tier-lists/new/_components/constants'
-import {
-  dragActiveVariants,
-  hoverRevealVariants,
-} from '@/lib/motion-variants'
+import { dragActiveVariants, hoverRevealVariants } from '@/lib/motion-variants'
 import { cn } from '@/lib/utils'
 import {
   Tooltip,
@@ -88,6 +85,7 @@ export function ItemBankStrip({
                                 height={80}
                                 className="h-full w-full object-cover"
                                 draggable={false}
+                                loading="lazy"
                               />
                             </TooltipTrigger>
                             <TooltipContent>{item.label}</TooltipContent>

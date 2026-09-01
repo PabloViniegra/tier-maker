@@ -13,16 +13,10 @@ import {
 } from '@/components/ui/tooltip'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { BANK_DROPPABLE } from './constants'
-import {
-  ALLOWED_IMAGE_TYPES,
-  MAX_ITEM_COUNT,
-} from '@/lib/validators/tier-list'
+import { ALLOWED_IMAGE_TYPES, MAX_ITEM_COUNT } from '@/lib/validators/tier-list'
 import { deleteImagesAction } from '../../_actions/delete-images'
 import { cn } from '@/lib/utils'
-import {
-  dragActiveVariants,
-  hoverRevealVariants,
-} from '@/lib/motion-variants'
+import { dragActiveVariants, hoverRevealVariants } from '@/lib/motion-variants'
 
 export function ItemBank({
   onPickFiles,
@@ -54,6 +48,7 @@ export function ItemBank({
           onPickFiles(Array.from(files))
           e.target.value = ''
         }}
+        aria-label="Upload images"
         data-testid="bank-file-input"
       />
 
@@ -65,7 +60,7 @@ export function ItemBank({
         onClick={() => inputRef.current?.click()}
         data-testid="bank-upload-button"
       >
-        <ImagePlus size={14} />
+        <ImagePlus size={14} aria-hidden="true" />
         Upload images
       </Button>
 
@@ -88,7 +83,7 @@ export function ItemBank({
           >
             {bankItems.length === 0 ? (
               <div className="flex h-32 flex-col items-center justify-center gap-1 text-center text-xs text-muted-foreground">
-                <ImagePlus size={20} strokeWidth={1.25} />
+                <ImagePlus size={20} strokeWidth={1.25} aria-hidden="true" />
                 <p>Drop or upload images to start</p>
               </div>
             ) : (
@@ -133,6 +128,7 @@ export function ItemBank({
                                     height={80}
                                     className="h-full w-full object-cover"
                                     draggable={false}
+                                    loading="lazy"
                                   />
                                 </TooltipTrigger>
                                 <TooltipContent>{item.label}</TooltipContent>

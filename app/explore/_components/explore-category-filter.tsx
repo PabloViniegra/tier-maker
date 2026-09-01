@@ -19,7 +19,7 @@ export function ExploreCategoryFilter({ categories, value }: Props) {
 
   return (
     <Select value={value || 'all'} onValueChange={setCategory}>
-      <SelectTrigger className="w-[160px]">
+      <SelectTrigger className="w-[160px]" aria-label="Filter by category">
         <SelectValue placeholder="Category" />
       </SelectTrigger>
       <SelectContent>

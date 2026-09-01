@@ -143,12 +143,12 @@ function TierRowChip({
           variants={hoverRevealVariants}
           className="absolute right-0.5 bottom-0.5"
         >
-        <PopoverTrigger
-          aria-label="Change tier color"
-          className="flex h-4 w-4 items-center justify-center rounded-sm border border-white/30 bg-black/20 text-white hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
-        >
-          <Palette size={9} aria-hidden />
-        </PopoverTrigger>
+          <PopoverTrigger
+            aria-label="Change tier color"
+            className="flex h-4 w-4 items-center justify-center rounded-sm border border-white/30 bg-black/20 text-white hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+          >
+            <Palette size={9} aria-hidden="true" />
+          </PopoverTrigger>
         </motion.div>
         <PopoverContent
           side="right"
@@ -183,7 +183,7 @@ function TierRowChip({
           className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-border bg-background text-muted-foreground"
           aria-label="Remove row"
         >
-          <X size={9} />
+          <X size={9} aria-hidden="true" />
         </motion.button>
       )}
     </motion.div>

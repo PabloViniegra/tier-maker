@@ -135,10 +135,19 @@
   html {
     @apply font-sans;
     line-height: 1.4;
+    scroll-padding-bottom: 6rem;
   }
   body {
     @apply bg-background text-foreground;
     font-size: 0.8125rem;
+  }
+  a,
+  button,
+  [role='button'],
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
   h1,
   h2,
@@ -147,6 +156,7 @@
   h5,
   h6 {
     @apply font-heading font-semibold;
+    scroll-margin-top: 4rem;
   }
 }
 

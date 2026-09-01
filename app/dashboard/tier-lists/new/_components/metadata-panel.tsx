@@ -37,10 +37,7 @@ import {
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { cn } from '@/lib/utils'
 import { fadeSwapVariants, hoverRevealVariants } from '@/lib/motion-variants'
-import {
-  ALLOWED_IMAGE_TYPES,
-  MAX_FILE_SIZE,
-} from '@/lib/validators/tier-list'
+import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE } from '@/lib/validators/tier-list'
 import {
   saveUserCategoryPresetAction,
   deleteUserCategoryPresetAction,
@@ -96,7 +93,7 @@ export function MetadataPanel({
         }
         selectCategory(inputTrimmed)
       } catch {
-        toast.error("Couldn't save preset")
+        toast.error('Could not save preset. Try again.')
       }
     })
   }
@@ -108,7 +105,7 @@ export function MetadataPanel({
         await deleteUserCategoryPresetAction(preset.id)
       } catch {
         setUserPresets((prev) => [preset, ...prev])
-        toast.error("Couldn't delete preset")
+        toast.error('Could not delete preset. Try again.')
       }
     })
   }
@@ -166,7 +163,9 @@ export function MetadataPanel({
           id="title"
           value={metadata.title}
           onChange={(e) => setMetadata({ title: e.target.value })}
-          placeholder="Best movies of all time"
+          name="title"
+          autoComplete="off"
+          placeholder="Best movies of all time…"
           maxLength={80}
           required
         />
@@ -201,7 +200,11 @@ export function MetadataPanel({
               >
                 {metadata.category || 'Pick a category'}
               </span>
-              <ChevronsUpDown size={14} className="opacity-50" />
+              <ChevronsUpDown
+                size={14}
+                className="opacity-50"
+                aria-hidden="true"
+              />
             </PopoverTrigger>
             <PopoverContent
               className="w-[var(--anchor-width)] p-0"
@@ -217,7 +220,8 @@ export function MetadataPanel({
                 <CommandInput
                   value={categoryInput}
                   onValueChange={setCategoryInput}
-                  placeholder="Search or type a category..."
+                  aria-label="Search or type a category"
+                  placeholder="Search or type a category…"
                 />
                 <CommandList>
                   <CommandEmpty>
@@ -227,7 +231,7 @@ export function MetadataPanel({
                         onClick={() => selectCategory(inputTrimmed)}
                         className="rounded px-2 py-1.5 text-left text-sm text-primary hover:bg-accent hover:text-accent-foreground"
                       >
-                        Use &quot;{inputTrimmed}&quot;
+                        Use “{inputTrimmed}”
                       </button>
                       {inputTrimmed && !isAlreadyPreset && (
                         <button
@@ -236,7 +240,7 @@ export function MetadataPanel({
                           onClick={handleSaveAndUse}
                           className="rounded px-2 py-1.5 text-left text-sm font-medium text-primary hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
                         >
-                          Save and use &quot;{inputTrimmed}&quot;
+                          Save and use “{inputTrimmed}”
                         </button>
                       )}
                     </div>
@@ -288,7 +292,7 @@ export function MetadataPanel({
                                 e.stopPropagation()
                                 handleDeletePreset(preset)
                               }}
-                              className="ml-1 shrink-0 rounded opacity-0 group-hover:opacity-100 hover:text-destructive"
+                              className="ml-1 shrink-0 rounded opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100"
                             >
                               <X size={12} />
                             </button>
@@ -334,22 +338,24 @@ export function MetadataPanel({
                   initial="rest"
                   whileHover="hover"
                 >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={metadata.coverImageUrl}
-                  alt="Cover image preview"
-                  className="h-full w-full object-cover"
-                />
-                <motion.button
-                  type="button"
-                  variants={hoverRevealVariants}
-                  whileFocus="hover"
-                  onClick={() => setMetadata({ coverImageUrl: undefined })}
-                  className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground hover:text-foreground"
-                  aria-label="Remove cover"
-                >
-                  <X size={14} />
-                </motion.button>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={metadata.coverImageUrl}
+                    alt="Cover image preview"
+                    width={640}
+                    height={360}
+                    className="h-full w-full object-cover"
+                  />
+                  <motion.button
+                    type="button"
+                    variants={hoverRevealVariants}
+                    whileFocus="hover"
+                    onClick={() => setMetadata({ coverImageUrl: undefined })}
+                    className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground hover:text-foreground"
+                    aria-label="Remove cover"
+                  >
+                    <X size={14} />
+                  </motion.button>
                 </motion.div>
               </motion.div>
             ) : (
@@ -369,9 +375,13 @@ export function MetadataPanel({
                   disabled={isUploadingCover}
                 >
                   {isUploadingCover ? (
-                    <Loader2 size={14} className="animate-spin" />
+                    <Loader2
+                      size={14}
+                      className="animate-spin"
+                      aria-hidden="true"
+                    />
                   ) : (
-                    <ImagePlus size={14} />
+                    <ImagePlus size={14} aria-hidden="true" />
                   )}
                   {isUploadingCover ? 'Uploading…' : 'Upload cover'}
                 </Button>
@@ -390,7 +400,11 @@ export function MetadataPanel({
             />
           }
         >
-          <ChevronDown size={12} className="[[data-open]_&]:rotate-180" />
+          <ChevronDown
+            size={12}
+            className="[[data-open]_&]:rotate-180"
+            aria-hidden="true"
+          />
           More details
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -410,7 +424,9 @@ export function MetadataPanel({
               id="description"
               value={metadata.description}
               onChange={(e) => setMetadata({ description: e.target.value })}
-              placeholder="A short description of your tier list"
+              name="description"
+              autoComplete="off"
+              placeholder="A short description of your tier list…"
               maxLength={500}
               className="min-h-8 resize-none"
               rows={1}

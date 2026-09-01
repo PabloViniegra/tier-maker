@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form'
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
 import { toast } from 'sonner'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
@@ -62,7 +62,7 @@ function PasswordInput({
           onClick={() => setShow((v) => !v)}
           aria-label={show ? 'Hide password' : 'Show password'}
         >
-          {show ? <EyeOff /> : <Eye />}
+          {show ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
         </Button>
       </div>
       {error && (
@@ -82,6 +82,7 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: standardSchemaResolver(loginSchema),
@@ -100,7 +101,9 @@ export function LoginForm() {
           toast.error('Check your email to verify your account.')
           return
         }
-        toast.error(result.error.message || 'Login failed')
+        toast.error(
+          result.error.message || 'Login failed. Check your email and password.'
+        )
         return
       }
 
@@ -111,15 +114,22 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form
+      onSubmit={handleSubmit(onSubmit, (errs) => {
+        const first = (['email', 'password'] as const).find((k) => errs[k])
+        if (first) setFocus(first)
+      })}
+      className="flex flex-col gap-4"
+    >
       <GoogleButton />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
-          placeholder="you@example.com"
+          placeholder="you@example.com…"
           autoComplete="username"
+          spellCheck={false}
           {...register('email')}
           aria-invalid={errors.email ? 'true' : 'false'}
           aria-describedby={errors.email ? 'email-error' : undefined}
@@ -151,6 +161,9 @@ export function LoginForm() {
       </div>
 
       <Button type="submit" disabled={isSubmitting} className="mt-2 w-full">
+        {isSubmitting && (
+          <Loader2 className="animate-spin" aria-hidden="true" />
+        )}
         Sign in
       </Button>
     </form>
@@ -161,6 +174,7 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: standardSchemaResolver(registerSchema),
@@ -176,7 +190,10 @@ export function RegisterForm() {
       })
 
       if (result.error) {
-        toast.error(result.error.message || 'Registration failed')
+        toast.error(
+          result.error.message ||
+            'Registration failed. Check your details and try again.'
+        )
         return
       }
 
@@ -187,14 +204,22 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form
+      onSubmit={handleSubmit(onSubmit, (errs) => {
+        const first = (
+          ['name', 'email', 'password', 'confirmPassword'] as const
+        ).find((k) => errs[k])
+        if (first) setFocus(first)
+      })}
+      className="flex flex-col gap-4"
+    >
       <GoogleButton />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"
           type="text"
-          placeholder="Your name"
+          placeholder="Ada Lovelace…"
           autoComplete="name"
           {...register('name')}
           aria-invalid={errors.name ? 'true' : 'false'}
@@ -212,8 +237,9 @@ export function RegisterForm() {
         <Input
           id="email"
           type="email"
-          placeholder="you@example.com"
+          placeholder="you@example.com…"
           autoComplete="username"
+          spellCheck={false}
           {...register('email')}
           aria-invalid={errors.email ? 'true' : 'false'}
           aria-describedby={errors.email ? 'email-error' : undefined}
@@ -248,6 +274,9 @@ export function RegisterForm() {
       </div>
 
       <Button type="submit" disabled={isSubmitting} className="mt-2 w-full">
+        {isSubmitting && (
+          <Loader2 className="animate-spin" aria-hidden="true" />
+        )}
         Sign up
       </Button>
     </form>

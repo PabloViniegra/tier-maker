@@ -43,10 +43,7 @@ export function ExportButton({ boardRef, title }: Props) {
       link.href = dataUrl
       link.click()
     } catch (err) {
-      toast.error(
-        'Export failed: ' +
-          (err instanceof Error ? err.message : 'Unknown error')
-      )
+      toast.error('Export failed. Try again.')
     } finally {
       setExporting(false)
     }
@@ -61,11 +58,11 @@ export function ExportButton({ boardRef, title }: Props) {
       className="gap-1.5"
     >
       {exporting ? (
-        <Loader2 size={14} className="animate-spin" />
+        <Loader2 size={14} className="animate-spin" aria-hidden="true" />
       ) : (
-        <Download size={14} />
+        <Download size={14} aria-hidden="true" />
       )}
-      Export
+      {exporting ? 'Exporting…' : 'Export'}
     </Button>
   )
 }

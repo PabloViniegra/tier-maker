@@ -75,6 +75,7 @@ export function ExploreGrid({
             isOwner={currentUserId !== null && item.creatorId === currentUserId}
             isAuthenticated={isAuthenticated}
             href={fillHref?.(item)}
+            priority={i === 0}
           />
         </motion.div>
       ))}

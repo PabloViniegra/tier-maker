@@ -32,7 +32,7 @@ function Command({
 
 function CommandDialog({
   title = 'Command Palette',
-  description = 'Search for a command to run...',
+  description = 'Search for a command to run…',
   children,
   className,
   showCloseButton = false,
@@ -72,6 +72,7 @@ function CommandInput({
       <InputGroup className="h-8! rounded-lg! border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:pl-2!">
         <CommandPrimitive.Input
           data-slot="command-input"
+          aria-label={props['aria-label'] ?? 'Search'}
           className={cn(
             'w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
             className
@@ -79,7 +80,10 @@ function CommandInput({
           {...props}
         />
         <InputGroupAddon>
-          <SearchIcon className="size-4 shrink-0 opacity-50" />
+          <SearchIcon
+            className="size-4 shrink-0 opacity-50"
+            aria-hidden="true"
+          />
         </InputGroupAddon>
       </InputGroup>
     </div>

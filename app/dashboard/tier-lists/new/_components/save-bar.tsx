@@ -19,7 +19,7 @@ export function SaveBar({
       className="gap-2"
       data-testid="save-button"
     >
-      <Save size={14} />
+      <Save size={14} aria-hidden="true" />
       {isSaving ? 'Saving…' : 'Save tier list'}
     </Button>
   )

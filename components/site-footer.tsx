@@ -11,7 +11,10 @@ export function SiteFooter() {
         <div>
           <div className="flex items-center gap-2">
             <TierMakerIcon size={18} aria-hidden="true" />
-            <span className="font-heading text-sm font-semibold text-foreground">
+            <span
+              className="font-heading text-sm font-semibold text-foreground"
+              translate="no"
+            >
               Tier Maker
             </span>
           </div>

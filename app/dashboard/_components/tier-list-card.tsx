@@ -121,7 +121,7 @@ export function TierListCard({
                 className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
                 aria-label={`Options for ${title}`}
               >
-                <MoreVertical size={12} />
+                <MoreVertical size={12} aria-hidden="true" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[7rem]">
                 <DropdownMenuItem>
@@ -156,7 +156,7 @@ export function TierListCard({
           </div>
         </div>
 
-        <p className="text-sm leading-snug font-medium text-foreground">
+        <p className="line-clamp-2 text-sm leading-snug font-medium break-words text-foreground">
           {title}
         </p>
 
@@ -223,7 +223,7 @@ export function TierListCard({
                 })
               }}
             >
-              Delete
+              {isPending ? 'Deleting…' : 'Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>

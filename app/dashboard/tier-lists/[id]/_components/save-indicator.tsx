@@ -24,7 +24,7 @@ const CONFIG: Record<
     className: 'text-emerald-500',
   },
   error: {
-    label: 'Save failed',
+    label: 'Save failed. Try again.',
     icon: <AlertCircle size={12} />,
     className: 'text-destructive',
   },

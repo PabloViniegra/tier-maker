@@ -25,12 +25,12 @@ export function CookieBanner() {
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-x-0 bottom-0 z-50 border-t border-border/60 bg-background px-4 py-4 sm:px-6"
+          className="fixed inset-x-0 bottom-0 z-50 border-t border-border/60 bg-background px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6"
         >
           <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
-              We use cookies and browser storage to keep you signed in and save
-              your preferences.{' '}
+              Cookies and browser storage keep you signed in and save your
+              preferences.{' '}
               <Link
                 href="/privacy"
                 className="underline underline-offset-4 hover:text-foreground"

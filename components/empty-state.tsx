@@ -44,10 +44,15 @@ export function EmptyState({
 
       {/* Content — raised above the background motif */}
       <div className="relative z-10 flex flex-col items-center gap-4">
-        <Icon size={32} strokeWidth={1} className="text-muted-foreground" />
+        <Icon
+          size={32}
+          strokeWidth={1}
+          className="text-muted-foreground"
+          aria-hidden="true"
+        />
 
         <div className="flex flex-col gap-1">
-          <h3 className="font-heading text-base text-balance">{title}</h3>
+          <h2 className="font-heading text-base text-balance">{title}</h2>
           <p className="text-sm text-pretty text-muted-foreground">
             {description}
           </p>

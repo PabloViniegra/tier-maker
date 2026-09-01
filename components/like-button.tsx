@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { motion } from 'motion/react'
 import { Heart } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -15,6 +16,12 @@ type Props = {
   initialIsLiked: boolean
   isAuthenticated: boolean
 }
+
+const likeClassName = (isLiked: boolean) =>
+  cn(
+    'flex items-center gap-1 rounded text-xs transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+    isLiked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-400'
+  )
 
 export function LikeButton({
   templateId,
@@ -30,11 +37,6 @@ export function LikeButton({
   })
 
   function handleClick() {
-    if (!isAuthenticated) {
-      router.push('/login')
-      return
-    }
-
     const previous = state
     const nextLiked = !state.isLiked
     setState({
@@ -48,23 +50,13 @@ export function LikeButton({
         router.refresh()
       } catch {
         setState(previous)
-        toast.error('Failed to update like')
+        toast.error('Could not update like. Try again.')
       }
     })
   }
 
-  return (
-    <button
-      type="button"
-      onClick={handleClick}
-      aria-label={state.isLiked ? 'Unlike' : 'Like'}
-      className={cn(
-        'flex items-center gap-1 text-xs transition-colors',
-        state.isLiked
-          ? 'text-rose-500'
-          : 'text-muted-foreground hover:text-rose-400'
-      )}
-    >
+  const content = (
+    <>
       <motion.span
         variants={likeHeartVariants}
         animate={state.isLiked ? 'liked' : 'idle'}
@@ -76,7 +68,30 @@ export function LikeButton({
           aria-hidden="true"
         />
       </motion.span>
-      <span>{state.count}</span>
+      <span className="tabular-nums">{state.count}</span>
+    </>
+  )
+
+  if (!isAuthenticated) {
+    return (
+      <Link
+        href="/login"
+        aria-label="Like"
+        className={likeClassName(state.isLiked)}
+      >
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      aria-label={state.isLiked ? 'Unlike' : 'Like'}
+      className={likeClassName(state.isLiked)}
+    >
+      {content}
     </button>
   )
 }
