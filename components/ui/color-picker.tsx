@@ -21,6 +21,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { parseCssColor } from '@/lib/color/parse-css-color'
 
+declare global {
+  interface Window {
+    EyeDropper?: new () => { open: () => Promise<{ sRGBHex: string }> }
+  }
+}
+
 type ColorFormat = 'hex' | 'rgb' | 'css' | 'hsl'
 
 type ColorPickerContextValue = {
@@ -215,7 +221,10 @@ export const ColorPickerHue = ({
       max={360}
       step={1}
       value={hue}
-      onValueChange={(next) => setHue(next as number)}
+      onValueChange={(next) => {
+        const value = Array.isArray(next) ? next[0] : next
+        if (value !== undefined) setHue(value)
+      }}
       aria-label="Hue"
       {...props}
     >
@@ -249,7 +258,10 @@ export const ColorPickerAlpha = ({
       max={100}
       step={1}
       value={alpha}
-      onValueChange={(next) => setAlpha(next as number)}
+      onValueChange={(next) => {
+        const value = Array.isArray(next) ? next[0] : next
+        if (value !== undefined) setAlpha(value)
+      }}
       aria-label="Alpha"
       {...props}
     >
@@ -280,11 +292,7 @@ export const ColorPickerEyeDropper = ({
   const { setHue, setSaturation, setLightness, setAlpha } = useColorPicker()
 
   const handlePick = async () => {
-    const EyeDropperCtor = (
-      window as unknown as {
-        EyeDropper?: new () => { open: () => Promise<{ sRGBHex: string }> }
-      }
-    ).EyeDropper
+    const EyeDropperCtor = window.EyeDropper
     if (!EyeDropperCtor) return
     try {
       const dropper = new EyeDropperCtor()
@@ -358,10 +366,12 @@ export const ColorPickerFormat = ({
   )
 }
 
-function formatValue(
-  mode: ColorFormat,
-  color: ColorInstance
-): { primary: string; suffix?: string } {
+type FormattedColor = {
+  primary: string
+  suffix?: string
+}
+
+function formatValue(mode: ColorFormat, color: ColorInstance): FormattedColor {
   if (mode === 'hex') {
     return { primary: color.hex() }
   }

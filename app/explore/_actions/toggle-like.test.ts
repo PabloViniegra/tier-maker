@@ -1,62 +1,46 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-vi.mock('server-only', () => ({}))
-
-const {
-  mockGetSession,
-  mockRevalidateTag,
-  mockGetTemplateCreatorId,
-  mockGetIsLiked,
-  mockInsert,
-  mockDelete,
-} = vi.hoisted(() => ({
-  mockGetSession: vi.fn(),
-  mockRevalidateTag: vi.fn(),
-  mockGetTemplateCreatorId: vi.fn(),
-  mockGetIsLiked: vi.fn(),
-  mockInsert: vi.fn(),
-  mockDelete: vi.fn(),
-}))
-
-vi.mock('@/lib/session', () => ({ getSession: mockGetSession }))
-vi.mock('next/cache', () => ({ revalidateTag: mockRevalidateTag }))
-vi.mock('@/lib/queries/tier-templates', () => ({
-  getTemplateCreatorId: mockGetTemplateCreatorId,
-}))
-vi.mock('@/lib/queries/tier-likes', () => ({
-  getIsLiked: mockGetIsLiked,
-}))
-vi.mock('@/lib/db', () => ({
-  db: {
-    insert: mockInsert,
-    delete: mockDelete,
-  },
-}))
-
+import { getSession } from '@/lib/session'
+import { revalidateTag } from 'next/cache'
+import { db } from '@/lib/db'
 import { toggleLike } from './toggle-like'
+import { asMock } from '@/test/as-mock'
 
 function authed(userId = 'user-1') {
-  mockGetSession.mockResolvedValue({ user: { id: userId } })
+  asMock(getSession).mockResolvedValue({ user: { id: userId } })
 }
 
 function anon() {
-  mockGetSession.mockResolvedValue(null)
+  asMock(getSession).mockResolvedValue(null)
+}
+
+function selectLimitResult<T>(rows: T[]) {
+  return {
+    from: vi.fn().mockReturnValue({
+      where: vi.fn().mockReturnValue({
+        limit: vi.fn().mockResolvedValue(rows),
+      }),
+    }),
+  }
 }
 
 function templateOwnedBy(userId: string) {
-  mockGetTemplateCreatorId.mockResolvedValue(userId)
+  asMock(db.select).mockReturnValueOnce(
+    selectLimitResult([{ creatorId: userId }])
+  )
 }
 
 function notLiked() {
-  mockGetIsLiked.mockResolvedValue(false)
+  asMock(db.select).mockReturnValueOnce(selectLimitResult([]))
 }
 
 function alreadyLiked() {
-  mockGetIsLiked.mockResolvedValue(true)
+  asMock(db.select).mockReturnValueOnce(
+    selectLimitResult([{ templateId: 'tpl-1' }])
+  )
 }
 
 function mockInsertChain() {
-  mockInsert.mockReturnValue({
+  asMock(db.insert).mockReturnValue({
     values: vi.fn().mockReturnValue({
       onConflictDoNothing: vi.fn().mockResolvedValue(undefined),
     }),
@@ -64,7 +48,7 @@ function mockInsertChain() {
 }
 
 function mockDeleteChain() {
-  mockDelete.mockReturnValue({
+  asMock(db.delete).mockReturnValue({
     where: vi.fn().mockResolvedValue(undefined),
   })
 }
@@ -72,6 +56,9 @@ function mockDeleteChain() {
 describe('toggleLike', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    asMock(db.select).mockReset()
+    asMock(db.insert).mockReset()
+    asMock(db.delete).mockReset()
   })
 
   it('throws when unauthenticated', async () => {
@@ -81,7 +68,9 @@ describe('toggleLike', () => {
 
   it('throws when user tries to like their own tier list', async () => {
     authed('user-1')
-    templateOwnedBy('user-1')
+    asMock(db.select).mockReturnValue(
+      selectLimitResult([{ creatorId: 'user-1' }])
+    )
     await expect(toggleLike('tpl-1')).rejects.toThrow(/own/i)
   })
 
@@ -93,7 +82,7 @@ describe('toggleLike', () => {
 
     const result = await toggleLike('tpl-1')
 
-    expect(mockInsert).toHaveBeenCalled()
+    expect(db.insert).toHaveBeenCalled()
     expect(result).toEqual({ liked: true })
   })
 
@@ -105,7 +94,7 @@ describe('toggleLike', () => {
 
     const result = await toggleLike('tpl-1')
 
-    expect(mockDelete).toHaveBeenCalled()
+    expect(db.delete).toHaveBeenCalled()
     expect(result).toEqual({ liked: false })
   })
 
@@ -117,12 +106,12 @@ describe('toggleLike', () => {
 
     await toggleLike('tpl-1')
 
-    expect(mockRevalidateTag).toHaveBeenCalledWith('public-tier-lists', {})
+    expect(revalidateTag).toHaveBeenCalledWith('public-tier-lists', {})
   })
 
   it('throws when template does not exist', async () => {
     authed('user-1')
-    mockGetTemplateCreatorId.mockResolvedValue(null)
+    asMock(db.select).mockReturnValue(selectLimitResult([]))
     await expect(toggleLike('tpl-nonexistent')).rejects.toThrow(/not found/i)
   })
 })

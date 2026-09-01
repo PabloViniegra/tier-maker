@@ -23,7 +23,7 @@ describe('parseCssColor', () => {
     // jsdom has no canvas implementation by default, so fromCanvas returns null
     // and we land on the documented black fallback. In a real browser, oklch
     // would render through the CSS engine and getImageData returns sRGB.
-    vi.stubGlobal('document', undefined as unknown as Document)
+    vi.stubGlobal('document', undefined)
     expect(parseCssColor('oklch(0.65 0.22 250)').hex).toBe('#000000')
     vi.unstubAllGlobals()
   })

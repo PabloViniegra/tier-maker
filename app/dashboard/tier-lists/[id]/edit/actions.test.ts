@@ -1,45 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-vi.mock('server-only', () => ({}))
-
-const {
-  mockGetSession,
-  mockRevalidatePath,
-  mockRevalidateTag,
-  mockSelect,
-  mockTransaction,
-} = vi.hoisted(() => ({
-  mockGetSession: vi.fn(),
-  mockRevalidatePath: vi.fn(),
-  mockRevalidateTag: vi.fn(),
-  mockSelect: vi.fn(),
-  mockTransaction: vi.fn(),
-}))
-
-vi.mock('@/lib/session', () => ({ getSession: mockGetSession }))
-vi.mock('next/cache', () => ({
-  revalidatePath: mockRevalidatePath,
-  revalidateTag: mockRevalidateTag,
-}))
-vi.mock('@/lib/db', () => ({
-  db: {
-    select: mockSelect,
-    transaction: mockTransaction,
-  },
-}))
-
+import { getSession } from '@/lib/session'
+import { revalidatePath } from 'next/cache'
+import { db } from '@/lib/db'
 import { updateTierListStructureAction } from './actions'
+import { asMock } from '@/test/as-mock'
 
 function authedSession(userId = 'user-1') {
-  mockGetSession.mockResolvedValue({ user: { id: userId } })
+  asMock(getSession).mockResolvedValue({ user: { id: userId } })
 }
 
 function anonSession() {
-  mockGetSession.mockResolvedValue(null)
+  asMock(getSession).mockResolvedValue(null)
 }
 
 function mockOwned(templateId = 'tpl-1') {
-  mockSelect.mockReturnValue({
+  asMock(db.select).mockReturnValue({
     from: vi.fn().mockReturnValue({
       where: vi.fn().mockResolvedValue([{ id: templateId }]),
     }),
@@ -47,7 +22,7 @@ function mockOwned(templateId = 'tpl-1') {
 }
 
 function mockNotOwned() {
-  mockSelect.mockReturnValue({
+  asMock(db.select).mockReturnValue({
     from: vi.fn().mockReturnValue({
       where: vi.fn().mockResolvedValue([]),
     }),
@@ -55,24 +30,22 @@ function mockNotOwned() {
 }
 
 function setupTransaction() {
-  mockTransaction.mockImplementation(
-    async (cb: (tx: unknown) => Promise<unknown>) => {
-      const tx = {
-        update: vi.fn().mockReturnValue({
-          set: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue(undefined),
-          }),
-        }),
-        delete: vi.fn().mockReturnValue({
+  asMock(db.transaction).mockImplementation(async (cb) => {
+    const tx = {
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue(undefined),
         }),
-        insert: vi.fn().mockReturnValue({
-          values: vi.fn().mockResolvedValue(undefined),
-        }),
-      }
-      return cb(tx)
+      }),
+      delete: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      }),
+      insert: vi.fn().mockReturnValue({
+        values: vi.fn().mockResolvedValue(undefined),
+      }),
     }
-  )
+    return cb(tx)
+  })
 }
 
 const validInput = {
@@ -134,7 +107,7 @@ describe('updateTierListStructureAction', () => {
     mockOwned()
     setupTransaction()
     await updateTierListStructureAction('tpl-1', validInput)
-    expect(mockTransaction).toHaveBeenCalledTimes(1)
+    expect(db.transaction).toHaveBeenCalledTimes(1)
   })
 
   it('revalidates the detail page and the tier list index', async () => {
@@ -142,10 +115,10 @@ describe('updateTierListStructureAction', () => {
     mockOwned('tpl-1')
     setupTransaction()
     await updateTierListStructureAction('tpl-1', validInput)
-    expect(mockRevalidatePath).toHaveBeenCalledWith(
+    expect(revalidatePath).toHaveBeenCalledWith(
       '/dashboard/tier-lists/tpl-1'
     )
-    expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
   })
 
   it('accepts input without description (optional field)', async () => {
@@ -173,7 +146,7 @@ describe('updateTierListStructureAction', () => {
   it('propagates transaction errors', async () => {
     authedSession()
     mockOwned()
-    mockTransaction.mockRejectedValue(new Error('db failure'))
+    asMock(db.transaction).mockRejectedValue(new Error('db failure'))
     await expect(
       updateTierListStructureAction('tpl-1', validInput)
     ).rejects.toThrow(/db failure/i)

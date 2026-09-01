@@ -2,21 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-const { mockRequestPasswordReset, mockResetPassword, mockToastError } =
-  vi.hoisted(() => ({
-    mockRequestPasswordReset: vi.fn(),
-    mockResetPassword: vi.fn(),
-    mockToastError: vi.fn(),
-  }))
-
-vi.mock('sonner', () => ({ toast: { error: mockToastError } }))
-vi.mock('@/lib/auth-client', () => ({
-  authClient: {
-    requestPasswordReset: mockRequestPasswordReset,
-    resetPassword: mockResetPassword,
-  },
-}))
-
+import { authClient } from '@/lib/auth-client'
+import { asMock } from '@/test/as-mock'
 import {
   RequestPasswordResetForm,
   ResetPasswordForm,
@@ -28,7 +15,7 @@ describe('password reset forms', () => {
   })
 
   it('requests a reset link without exposing account existence', async () => {
-    mockRequestPasswordReset.mockResolvedValue({ data: {}, error: null })
+    asMock(authClient.requestPasswordReset).mockResolvedValue({ data: {}, error: null })
     const user = userEvent.setup()
     render(<RequestPasswordResetForm />)
 
@@ -36,7 +23,7 @@ describe('password reset forms', () => {
     await user.click(screen.getByRole('button', { name: /send reset link/i }))
 
     await waitFor(() => {
-      expect(mockRequestPasswordReset).toHaveBeenCalledWith({
+      expect(authClient.requestPasswordReset).toHaveBeenCalledWith({
         email: 'user@example.com',
         redirectTo: '/reset-password',
       })
@@ -45,7 +32,7 @@ describe('password reset forms', () => {
   })
 
   it('resets the password with the token from the email link', async () => {
-    mockResetPassword.mockResolvedValue({ data: {}, error: null })
+    asMock(authClient.resetPassword).mockResolvedValue({ data: {}, error: null })
     const user = userEvent.setup()
     render(<ResetPasswordForm token="reset-token" />)
 
@@ -54,7 +41,7 @@ describe('password reset forms', () => {
     await user.click(screen.getByRole('button', { name: /^reset password$/i }))
 
     await waitFor(() => {
-      expect(mockResetPassword).toHaveBeenCalledWith({
+      expect(authClient.resetPassword).toHaveBeenCalledWith({
         newPassword: 'password123',
         token: 'reset-token',
       })
@@ -68,6 +55,6 @@ describe('password reset forms', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(
       /invalid or has expired/i
     )
-    expect(mockResetPassword).not.toHaveBeenCalled()
+    expect(authClient.resetPassword).not.toHaveBeenCalled()
   })
 })

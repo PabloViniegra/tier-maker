@@ -1,20 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-
-const { mockSetTheme } = vi.hoisted(() => ({
-  mockSetTheme: vi.fn(),
-}))
-
-vi.mock('next-themes', () => ({
-  useTheme: () => ({ resolvedTheme: 'dark', setTheme: mockSetTheme }),
-}))
-
+import { useTheme } from 'next-themes'
 import { useThemeToggle } from './use-theme-toggle'
 
 describe('useThemeToggle', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    delete (document as unknown as Record<string, unknown>).startViewTransition
+    Object.defineProperty(document, 'startViewTransition', {
+      configurable: true,
+      writable: true,
+      value: undefined,
+    })
   })
 
   it('returns current theme from resolvedTheme', () => {
@@ -25,23 +21,26 @@ describe('useThemeToggle', () => {
   it('toggleTheme calls setTheme with opposite of current theme', () => {
     const { result } = renderHook(() => useThemeToggle())
     act(() => result.current.toggleTheme())
-    expect(mockSetTheme).toHaveBeenCalledWith('light')
+    expect(useTheme().setTheme).toHaveBeenCalledWith('light')
   })
 
   it('toggleTheme calls startViewTransition when available', () => {
     const mockSVT = vi.fn((cb: () => void) => cb())
-    document.startViewTransition =
-      mockSVT as unknown as Document['startViewTransition']
+    Object.defineProperty(document, 'startViewTransition', {
+      configurable: true,
+      writable: true,
+      value: mockSVT,
+    })
 
     const { result } = renderHook(() => useThemeToggle())
     act(() => result.current.toggleTheme())
     expect(mockSVT).toHaveBeenCalled()
-    expect(mockSetTheme).toHaveBeenCalledWith('light')
+    expect(useTheme().setTheme).toHaveBeenCalledWith('light')
   })
 
   it('toggleTheme falls back to direct setTheme when startViewTransition unavailable', () => {
     const { result } = renderHook(() => useThemeToggle())
     act(() => result.current.toggleTheme())
-    expect(mockSetTheme).toHaveBeenCalledWith('light')
+    expect(useTheme().setTheme).toHaveBeenCalledWith('light')
   })
 })

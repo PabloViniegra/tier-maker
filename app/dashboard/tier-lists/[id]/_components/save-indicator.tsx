@@ -9,10 +9,7 @@ export type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 type Props = { state: SaveState }
 
-const CONFIG: Record<
-  Exclude<SaveState, 'idle'>,
-  { label: string; icon: React.ReactNode; className: string }
-> = {
+const CONFIG = {
   saving: {
     label: 'Saving…',
     icon: <Loader2 size={12} className="animate-spin" />,

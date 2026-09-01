@@ -1,45 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-vi.mock('server-only', () => ({}))
-
-const {
-  mockGetSession,
-  mockRevalidatePath,
-  mockRevalidateTag,
-  mockSelect,
-  mockTransaction,
-} = vi.hoisted(() => ({
-  mockGetSession: vi.fn(),
-  mockRevalidatePath: vi.fn(),
-  mockRevalidateTag: vi.fn(),
-  mockSelect: vi.fn(),
-  mockTransaction: vi.fn(),
-}))
-
-vi.mock('@/lib/session', () => ({ getSession: mockGetSession }))
-vi.mock('next/cache', () => ({
-  revalidatePath: mockRevalidatePath,
-  revalidateTag: mockRevalidateTag,
-}))
-vi.mock('@/lib/db', () => ({
-  db: {
-    select: mockSelect,
-    transaction: mockTransaction,
-  },
-}))
-
+import { getSession } from '@/lib/session'
+import { revalidatePath } from 'next/cache'
+import { db } from '@/lib/db'
 import { updateTierListAction } from './actions'
+import { asMock } from '@/test/as-mock'
 
 function authedSession(userId = 'user-1') {
-  mockGetSession.mockResolvedValue({ user: { id: userId } })
+  asMock(getSession).mockResolvedValue({ user: { id: userId } })
 }
 
 function anonSession() {
-  mockGetSession.mockResolvedValue(null)
+  asMock(getSession).mockResolvedValue(null)
 }
 
 function mockOwned(templateId = 'tpl-1') {
-  mockSelect.mockReturnValue({
+  asMock(db.select).mockReturnValue({
     from: vi.fn().mockReturnValue({
       where: vi.fn().mockResolvedValue([{ id: templateId }]),
     }),
@@ -47,49 +22,45 @@ function mockOwned(templateId = 'tpl-1') {
 }
 
 function setupTransaction(ownedId = 'tpl-1') {
-  mockTransaction.mockImplementation(
-    async (cb: (tx: unknown) => Promise<unknown>) => {
-      const tx = {
-        update: vi.fn().mockReturnValue({
-          set: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              returning: vi.fn().mockResolvedValue([{ id: ownedId }]),
-            }),
+  asMock(db.transaction).mockImplementation(async (cb) => {
+    const tx = {
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: ownedId }]),
           }),
         }),
-        delete: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-        insert: vi.fn().mockReturnValue({
-          values: vi.fn().mockResolvedValue(undefined),
-        }),
-      }
-      return cb(tx)
+      }),
+      delete: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      }),
+      insert: vi.fn().mockReturnValue({
+        values: vi.fn().mockResolvedValue(undefined),
+      }),
     }
-  )
+    return cb(tx)
+  })
 }
 
 function setupTransactionNotOwned() {
-  mockTransaction.mockImplementation(
-    async (cb: (tx: unknown) => Promise<unknown>) => {
-      const tx = {
-        update: vi.fn().mockReturnValue({
-          set: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              returning: vi.fn().mockResolvedValue([]),
-            }),
+  asMock(db.transaction).mockImplementation(async (cb) => {
+    const tx = {
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([]),
           }),
         }),
-        delete: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-        insert: vi.fn().mockReturnValue({
-          values: vi.fn().mockResolvedValue(undefined),
-        }),
-      }
-      return cb(tx)
+      }),
+      delete: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      }),
+      insert: vi.fn().mockReturnValue({
+        values: vi.fn().mockResolvedValue(undefined),
+      }),
     }
-  )
+    return cb(tx)
+  })
 }
 
 const validPayload = {
@@ -150,7 +121,7 @@ describe('updateTierListAction', () => {
 
     await updateTierListAction('tpl-1', validPayload)
 
-    expect(mockTransaction).toHaveBeenCalledTimes(1)
+    expect(db.transaction).toHaveBeenCalledTimes(1)
   })
 
   it('revalidates the detail page after save', async () => {
@@ -159,7 +130,7 @@ describe('updateTierListAction', () => {
 
     await updateTierListAction('tpl-1', validPayload)
 
-    expect(mockRevalidatePath).toHaveBeenCalledWith(
+    expect(revalidatePath).toHaveBeenCalledWith(
       '/dashboard/tier-lists/tpl-1'
     )
   })
@@ -167,7 +138,7 @@ describe('updateTierListAction', () => {
   it('propagates transaction errors', async () => {
     authedSession()
     mockOwned()
-    mockTransaction.mockRejectedValue(new Error('db failure'))
+    asMock(db.transaction).mockRejectedValue(new Error('db failure'))
 
     await expect(updateTierListAction('tpl-1', validPayload)).rejects.toThrow(
       /db failure/i

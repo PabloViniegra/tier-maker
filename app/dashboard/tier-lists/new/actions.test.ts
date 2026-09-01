@@ -1,59 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-vi.mock('server-only', () => ({}))
-
-const {
-  mockPut,
-  mockRevalidatePath,
-  mockRevalidateTag,
-  mockGetSession,
-  mockTransaction,
-} = vi.hoisted(() => ({
-  mockPut: vi.fn(),
-  mockRevalidatePath: vi.fn(),
-  mockRevalidateTag: vi.fn(),
-  mockGetSession: vi.fn(),
-  mockTransaction: vi.fn(),
-}))
-
-vi.mock('@vercel/blob', () => ({
-  put: mockPut,
-}))
-
-vi.mock('next/cache', () => ({
-  revalidatePath: mockRevalidatePath,
-  revalidateTag: mockRevalidateTag,
-}))
-
-vi.mock('@/lib/session', () => ({
-  getSession: mockGetSession,
-}))
-
-vi.mock('@/lib/db', () => ({
-  db: {
-    transaction: mockTransaction,
-  },
-}))
-
+import { put } from '@vercel/blob'
+import { revalidatePath } from 'next/cache'
+import { getSession } from '@/lib/session'
+import { db } from '@/lib/db'
 import { uploadImagesAction, createTierListAction } from './actions'
 import { getCategoryPresets } from '@/lib/queries/category-presets'
 import { defaultTierRows } from '@/lib/validators/tier-list'
+import { asMock } from '@/test/as-mock'
 
 function makeFile(name: string, type: string, size: number): File {
   return new File([new Uint8Array(size)], name, { type })
 }
 
 function authedSession(userId = 'user-1') {
-  mockGetSession.mockResolvedValue({ user: { id: userId } })
+  asMock(getSession).mockResolvedValue({ user: { id: userId } })
 }
 
 function anonSession() {
-  mockGetSession.mockResolvedValue(null)
+  asMock(getSession).mockResolvedValue(null)
 }
 
 function setupTransaction(templateId = 'tpl-1') {
-  mockTransaction.mockImplementation(
-    async (cb: (tx: unknown) => Promise<unknown>) => {
+  asMock(db.transaction).mockImplementation(async (cb) => {
       const tx = {
         insert: vi.fn().mockReturnValue({
           values: vi.fn().mockReturnValue({
@@ -100,7 +68,7 @@ describe('uploadImagesAction', () => {
 
   it('uploads the file and returns its public url', async () => {
     authedSession()
-    mockPut.mockResolvedValue({
+    asMock(put).mockResolvedValue({
       url: 'https://blob.vercel-storage.com/items/x.png',
       pathname: 'items/x.png',
     })
@@ -110,7 +78,7 @@ describe('uploadImagesAction', () => {
     const result = await uploadImagesAction(fd)
 
     expect(result.url).toBe('https://blob.vercel-storage.com/items/x.png')
-    expect(mockPut).toHaveBeenCalledWith(
+    expect(asMock(put)).toHaveBeenCalledWith(
       expect.stringMatching(/^tier-items\/user-1\/.+\.png$/),
       expect.any(File),
       expect.objectContaining({ access: 'public' })
@@ -119,7 +87,7 @@ describe('uploadImagesAction', () => {
 
   it('propagates errors from vercel blob', async () => {
     authedSession()
-    mockPut.mockRejectedValue(new Error('blob service down'))
+    asMock(put).mockRejectedValue(new Error('blob service down'))
     const fd = new FormData()
     fd.append('file', makeFile('x.png', 'image/png', 1024))
     await expect(uploadImagesAction(fd)).rejects.toThrow(/blob/i)
@@ -179,13 +147,13 @@ describe('createTierListAction', () => {
     })
 
     expect(result.id).toBe('tpl-1')
-    expect(mockTransaction).toHaveBeenCalledTimes(1)
-    expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard')
+    expect(asMock(db.transaction)).toHaveBeenCalledTimes(1)
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard')
   })
 
   it('propagates transaction errors without orphaned data', async () => {
     authedSession()
-    mockTransaction.mockRejectedValue(new Error('db failure'))
+    asMock(db.transaction).mockRejectedValue(new Error('db failure'))
 
     await expect(createTierListAction(validInput)).rejects.toThrow(
       /db failure/i
@@ -195,8 +163,7 @@ describe('createTierListAction', () => {
   it('retries with a -2 suffix on PG 23505 unique_violation', async () => {
     authedSession()
     let call = 0
-    mockTransaction.mockImplementation(
-      async (cb: (tx: unknown) => Promise<unknown>) => {
+    asMock(db.transaction).mockImplementation(async (cb) => {
         call++
         if (call === 1) {
           throw Object.assign(new Error('duplicate key'), { code: '23505' })
@@ -214,19 +181,19 @@ describe('createTierListAction', () => {
 
     const result = await createTierListAction(validInput)
     expect(result.id).toBe('tpl-2')
-    expect(mockTransaction).toHaveBeenCalledTimes(2)
+    expect(asMock(db.transaction)).toHaveBeenCalledTimes(2)
   })
 
   it('propagates non-unique-violation errors without retrying', async () => {
     authedSession()
-    mockTransaction.mockRejectedValue(
+    asMock(db.transaction).mockRejectedValue(
       Object.assign(new Error('connection lost'), { code: '08006' })
     )
 
     await expect(createTierListAction(validInput)).rejects.toThrow(
       /connection lost/i
     )
-    expect(mockTransaction).toHaveBeenCalledTimes(1)
+    expect(asMock(db.transaction)).toHaveBeenCalledTimes(1)
   })
 
   it('rejects payloads with too many items', async () => {
@@ -249,8 +216,6 @@ describe('getCategoryPresets', () => {
 
   it('returns only non-empty strings', async () => {
     const presets = await getCategoryPresets()
-    expect(presets.every((p) => typeof p === 'string' && p.length > 0)).toBe(
-      true
-    )
+    expect(presets.every((p) => p.length > 0)).toBe(true)
   })
 })

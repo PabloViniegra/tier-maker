@@ -228,7 +228,7 @@ export const useTierEditor = create<State & Actions>()((set) => ({
         id: newId(),
         url: item.url,
         label: item.label,
-        status: 'uploaded' as TierItemStatus,
+        status: 'uploaded' as const,
       })),
       rows: data.rows.map((r) => ({
         id: r.id,
@@ -238,7 +238,7 @@ export const useTierEditor = create<State & Actions>()((set) => ({
           id: newId(),
           url: item.url,
           label: item.label,
-          status: 'uploaded' as TierItemStatus,
+          status: 'uploaded' as const,
         })),
       })),
     }),
@@ -264,14 +264,26 @@ export function hasPendingUploads(state: State): boolean {
   )
 }
 
-export function buildSavePayload(state: State): {
+function toImageItem(item: TierItem & { url: string }): ImageItem {
+  return { url: item.url, label: item.label }
+}
+
+function uploadedItems(items: TierItem[]): ImageItem[] {
+  return items.flatMap((item) =>
+    item.status === 'uploaded' && item.url ? [toImageItem({ ...item, url: item.url })] : []
+  )
+}
+
+export type SavePayload = {
   title: string
   description?: string
   category: string
   coverImageUrl?: string
   rows: { id: string; label: string; color: string; items: ImageItem[] }[]
   bankItems: ImageItem[]
-} {
+}
+
+export function buildSavePayload(state: State): SavePayload {
   return {
     title: state.metadata.title.trim(),
     description: state.metadata.description.trim() || undefined,
@@ -281,33 +293,27 @@ export function buildSavePayload(state: State): {
       id: r.id,
       label: r.label,
       color: r.color,
-      items: r.items
-        .filter((i) => i.status === 'uploaded' && i.url)
-        .map((i) => ({ url: i.url as string, label: i.label })),
+      items: uploadedItems(r.items),
     })),
-    bankItems: state.bankItems
-      .filter((i) => i.status === 'uploaded' && i.url)
-      .map((i) => ({ url: i.url as string, label: i.label })),
+    bankItems: uploadedItems(state.bankItems),
   }
 }
 
-export function buildUpdatePayload(state: State): {
+export type UpdatePayload = {
   coverImageUrl?: string
   bankItems: ImageItem[]
   rows: { id: string; label: string; color: string; items: ImageItem[] }[]
-} {
+}
+
+export function buildUpdatePayload(state: State): UpdatePayload {
   return {
     coverImageUrl: state.metadata.coverImageUrl || undefined,
-    bankItems: state.bankItems
-      .filter((i) => i.status === 'uploaded' && i.url)
-      .map((i) => ({ url: i.url as string, label: i.label })),
+    bankItems: uploadedItems(state.bankItems),
     rows: state.rows.map((r) => ({
       id: r.id,
       label: r.label,
       color: r.color,
-      items: r.items
-        .filter((i) => i.status === 'uploaded' && i.url)
-        .map((i) => ({ url: i.url as string, label: i.label })),
+      items: uploadedItems(r.items),
     })),
   }
 }

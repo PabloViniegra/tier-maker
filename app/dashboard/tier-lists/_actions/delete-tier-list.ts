@@ -13,7 +13,7 @@ function collectItemUrls(items: { url?: string }[] | null | undefined): string[]
   if (!items) return []
   return items
     .map((i) => i.url)
-    .filter((u): u is string => typeof u === 'string' && u.length > 0)
+    .filter((u): u is string => u != null && u.length > 0)
 }
 
 export async function deleteTierList(id: string): Promise<{ ok: true }> {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import {
   SidebarNav,
@@ -6,11 +6,6 @@ import {
   getInitials,
   navItems,
 } from './sidebar-content'
-
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
-  usePathname: () => '/',
-}))
 
 const mockUser = {
   name: 'Pablo García',

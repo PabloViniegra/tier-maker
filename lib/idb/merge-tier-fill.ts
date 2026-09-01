@@ -63,10 +63,15 @@ function newServerBankItems(
     }))
 }
 
+export type MergedTierFill = {
+  rows: EditorTierRow[]
+  bankItems: TierItem[]
+}
+
 export function mergeTierFill(
   seed: TierListDetailSeed,
   draft: TierFillDraft | null
-): { rows: EditorTierRow[]; bankItems: TierItem[] } {
+): MergedTierFill {
   if (!draft) {
     return {
       rows: seed.rows.map((r) => ({
@@ -91,7 +96,7 @@ export function mergeTierFill(
   const rows = applyDraftToRows(seed.rows, draftRowMap, serverCatalogue)
   const surviving = survivingDraftBankItems(draft.bankItems, serverCatalogue)
   const survivingUrls = new Set(
-    surviving.map((i) => i.url).filter(Boolean) as string[]
+    surviving.flatMap((i) => (i.url ? [i.url] : []))
   )
   const fresh = newServerBankItems(seed.sidebarItems, placedUrls, survivingUrls)
 

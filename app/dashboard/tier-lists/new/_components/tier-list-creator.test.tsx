@@ -1,56 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { useTierEditor } from '@/lib/stores/tier-editor'
-
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
-}))
-
-vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
-
-vi.mock('@hello-pangea/dnd', () => ({
-  DragDropContext: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-  Droppable: ({
-    children,
-  }: {
-    children: (provided: unknown, snapshot: unknown) => React.ReactNode
-  }) =>
-    children({ innerRef: vi.fn(), droppableProps: {}, placeholder: null }, {}),
-  Draggable: ({
-    children,
-  }: {
-    children: (provided: unknown) => React.ReactNode
-  }) =>
-    children({ innerRef: vi.fn(), draggableProps: {}, dragHandleProps: {} }),
-}))
-
-vi.mock('./metadata-panel', () => ({
-  MetadataPanel: () => <div data-testid="metadata-panel" />,
-}))
-vi.mock('./item-bank', () => ({
-  ItemBank: () => <div data-testid="item-bank" />,
-}))
-vi.mock('./tier-board', () => ({
-  TierBoard: () => <div data-testid="tier-board" />,
-}))
-vi.mock('./save-bar', () => ({
-  SaveBar: ({ isSaving }: { isSaving: boolean }) => (
-    <button data-testid="save-bar" disabled={isSaving}>
-      Save
-    </button>
-  ),
-}))
-
-vi.mock('../actions', () => ({
-  uploadImagesAction: vi.fn(),
-  createTierListAction: vi.fn(),
-}))
-
-vi.mock('../../[id]/edit/actions', () => ({
-  updateTierListStructureAction: vi.fn(),
-}))
 
 import { TierListCreator } from './tier-list-creator'
 

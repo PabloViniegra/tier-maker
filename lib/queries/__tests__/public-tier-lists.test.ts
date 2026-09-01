@@ -1,17 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { db } from '@/lib/db'
+import {
+  getPublicTierListById,
+  getDistinctPublicCategories,
+  getPublicTierLists,
+  getAllPublicTierListIds,
+} from '../tier-templates'
+import { asMock } from '@/test/as-mock'
 
-vi.mock('next/cache', () => ({
-  unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
-}))
-
-// Drizzle queries are chainable thenables. This proxy resolves with `data`
-// when the chain is awaited, and returns itself for any method call.
-function makeDbChain(data: unknown) {
+function makeDbChain<T>(data: T) {
   const handler: ProxyHandler<object> = {
     get(_, prop) {
       if (prop === 'then') {
-        return (resolve: (v: unknown) => unknown) =>
-          Promise.resolve(data).then(resolve)
+        return (resolve: (value: T) => T) => Promise.resolve(data).then(resolve)
       }
       return () => new Proxy({}, handler)
     },
@@ -19,30 +20,20 @@ function makeDbChain(data: unknown) {
   return new Proxy({}, handler)
 }
 
-const { mockSelect } = vi.hoisted(() => ({ mockSelect: vi.fn() }))
-vi.mock('@/lib/db', () => ({ db: { select: mockSelect } }))
-
-import {
-  getPublicTierListById,
-  getDistinctPublicCategories,
-  getPublicTierLists,
-  getAllPublicTierListIds,
-} from '../tier-templates'
-
 // ─── getPublicTierListById ─────────────────────────────────────────────────
 
 describe('getPublicTierListById', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('returns null when the template is not found', async () => {
-    mockSelect.mockReturnValue(makeDbChain([]))
+    asMock(db.select).mockReturnValue(makeDbChain([]))
     const result = await getPublicTierListById('non-existent-id')
     expect(result).toBeNull()
   })
 
   it('returns null when the template is private (DB returns empty due to isPublic filter)', async () => {
     // WHERE is_public = true is applied at DB level, so private templates appear as "not found"
-    mockSelect.mockReturnValueOnce(makeDbChain([]))
+    asMock(db.select).mockReturnValueOnce(makeDbChain([]))
     const result = await getPublicTierListById('tid')
     expect(result).toBeNull()
   })
@@ -76,7 +67,7 @@ describe('getPublicTierListById', () => {
         items: [],
       },
     ]
-    mockSelect
+    asMock(db.select)
       .mockReturnValueOnce(makeDbChain([template]))
       .mockReturnValueOnce(makeDbChain(rows))
 
@@ -106,13 +97,13 @@ describe('getDistinctPublicCategories', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('returns an empty array when no public templates exist', async () => {
-    mockSelect.mockReturnValue(makeDbChain([]))
+    asMock(db.select).mockReturnValue(makeDbChain([]))
     const result = await getDistinctPublicCategories()
     expect(result).toEqual([])
   })
 
   it('returns distinct category strings', async () => {
-    mockSelect.mockReturnValue(
+    asMock(db.select).mockReturnValue(
       makeDbChain([
         { category: 'Anime' },
         { category: 'Sports' },
@@ -130,7 +121,14 @@ describe('getPublicTierLists', () => {
   beforeEach(() => vi.clearAllMocks())
 
   const makeTemplateRow = (
-    overrides: Partial<Record<string, unknown>> = {}
+    overrides: Partial<{
+      id: string
+      title: string
+      category: string
+      itemCount: number
+      createdAt: Date
+      creatorName: string
+    }> = {}
   ) => ({
     id: 'tid',
     title: 'My List',
@@ -146,7 +144,7 @@ describe('getPublicTierLists', () => {
       makeTemplateRow(),
       makeTemplateRow({ id: 'tid2', title: 'Other' }),
     ]
-    mockSelect
+    asMock(db.select)
       .mockReturnValueOnce(makeDbChain(rows)) // items query
       .mockReturnValueOnce(makeDbChain([{ count: 2 }])) // count query
 
@@ -158,7 +156,7 @@ describe('getPublicTierLists', () => {
 
   it('maps sidebarItems length to itemCount', async () => {
     const rows = [makeTemplateRow({ itemCount: 4 })]
-    mockSelect
+    asMock(db.select)
       .mockReturnValueOnce(makeDbChain(rows))
       .mockReturnValueOnce(makeDbChain([{ count: 1 }]))
 
@@ -168,7 +166,7 @@ describe('getPublicTierLists', () => {
 
   it('exposes creatorName from the join', async () => {
     const rows = [makeTemplateRow({ creatorName: 'Bob' })]
-    mockSelect
+    asMock(db.select)
       .mockReturnValueOnce(makeDbChain(rows))
       .mockReturnValueOnce(makeDbChain([{ count: 1 }]))
 
@@ -177,7 +175,7 @@ describe('getPublicTierLists', () => {
   })
 
   it('returns empty items and total 0 when no public templates', async () => {
-    mockSelect
+    asMock(db.select)
       .mockReturnValueOnce(makeDbChain([]))
       .mockReturnValueOnce(makeDbChain([{ count: 0 }]))
 
@@ -193,7 +191,7 @@ describe('getAllPublicTierListIds', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('returns empty array when no public templates exist', async () => {
-    mockSelect.mockReturnValue(makeDbChain([]))
+    asMock(db.select).mockReturnValue(makeDbChain([]))
     const result = await getAllPublicTierListIds()
     expect(result).toEqual([])
   })
@@ -203,7 +201,7 @@ describe('getAllPublicTierListIds', () => {
       { id: 'tid1', createdAt: new Date('2026-01-01') },
       { id: 'tid2', createdAt: new Date('2026-03-15') },
     ]
-    mockSelect.mockReturnValue(makeDbChain(rows))
+    asMock(db.select).mockReturnValue(makeDbChain(rows))
     const result = await getAllPublicTierListIds()
     expect(result).toHaveLength(2)
     expect(result[0]).toEqual({ id: 'tid1', createdAt: new Date('2026-01-01') })
@@ -211,7 +209,7 @@ describe('getAllPublicTierListIds', () => {
   })
 
   it('returns only the id and createdAt fields (minimal projection)', async () => {
-    mockSelect.mockReturnValue(
+    asMock(db.select).mockReturnValue(
       makeDbChain([{ id: 'tid1', createdAt: new Date('2026-01-01') }])
     )
     const result = await getAllPublicTierListIds()

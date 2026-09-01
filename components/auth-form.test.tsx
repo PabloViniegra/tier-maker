@@ -2,32 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-const {
-  mockAssign,
-  mockToastError,
-  mockToastSuccess,
-  mockSignInEmail,
-  mockSignUpEmail,
-} = vi.hoisted(() => ({
-  mockAssign: vi.fn(),
-  mockToastError: vi.fn(),
-  mockToastSuccess: vi.fn(),
-  mockSignInEmail: vi.fn(),
-  mockSignUpEmail: vi.fn(),
-}))
-
-vi.mock('sonner', () => ({
-  toast: { error: mockToastError, success: mockToastSuccess },
-}))
-
-vi.mock('@/lib/auth-client', () => ({
-  authClient: {
-    signIn: { email: mockSignInEmail },
-    signUp: { email: mockSignUpEmail },
-  },
-}))
-
+import { authClient } from '@/lib/auth-client'
+import { toast } from 'sonner'
 import { AuthForm } from '@/components/auth-form'
+import { asMock } from '@/test/as-mock'
+
+const mockAssign = vi.fn()
 
 describe('AuthForm — login mode', () => {
   const user = userEvent.setup()
@@ -36,9 +16,9 @@ describe('AuthForm — login mode', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockAssign.mockClear()
-    mockToastError.mockClear()
-    mockSignInEmail.mockClear()
-    mockSignUpEmail.mockClear()
+    asMock(toast.error).mockClear()
+    asMock(authClient.signIn.email).mockClear()
+    asMock(authClient.signUp.email).mockClear()
     Object.defineProperty(window, 'location', {
       configurable: true,
       writable: true,
@@ -74,10 +54,10 @@ describe('AuthForm — login mode', () => {
   })
 
   it('calls signIn with correct data on valid submit', async () => {
-    mockSignInEmail.mockResolvedValue({
+    asMock(authClient.signIn.email).mockResolvedValue({
       data: { session: {} },
       error: null,
-    } as never)
+    })
 
     render(<AuthForm mode="login" />)
     await user.type(screen.getByLabelText(/email/i), 'user@example.com')
@@ -85,7 +65,7 @@ describe('AuthForm — login mode', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     await waitFor(() => {
-      expect(mockSignInEmail).toHaveBeenCalledWith(
+      expect(authClient.signIn.email).toHaveBeenCalledWith(
         expect.objectContaining({
           email: 'user@example.com',
           password: 'password123',
@@ -95,10 +75,10 @@ describe('AuthForm — login mode', () => {
   })
 
   it('redirects to dashboard on successful login', async () => {
-    mockSignInEmail.mockResolvedValue({
+    asMock(authClient.signIn.email).mockResolvedValue({
       data: { session: {} },
       error: null,
-    } as never)
+    })
 
     render(<AuthForm mode="login" />)
     await user.type(screen.getByLabelText(/email/i), 'user@example.com')
@@ -111,10 +91,10 @@ describe('AuthForm — login mode', () => {
   })
 
   it('shows error toast on failed login', async () => {
-    mockSignInEmail.mockResolvedValue({
+    asMock(authClient.signIn.email).mockResolvedValue({
       data: null,
       error: { message: 'Invalid credentials' },
-    } as never)
+    })
 
     render(<AuthForm mode="login" />)
     await user.type(screen.getByLabelText(/email/i), 'user@example.com')
@@ -122,7 +102,7 @@ describe('AuthForm — login mode', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     await waitFor(() => {
-      expect(mockToastError).toHaveBeenCalledWith('Invalid credentials')
+      expect(toast.error).toHaveBeenCalledWith('Invalid credentials')
     })
   })
 })
@@ -134,9 +114,9 @@ describe('AuthForm — register mode', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockAssign.mockClear()
-    mockToastError.mockClear()
-    mockSignInEmail.mockClear()
-    mockSignUpEmail.mockClear()
+    asMock(toast.error).mockClear()
+    asMock(authClient.signIn.email).mockClear()
+    asMock(authClient.signUp.email).mockClear()
     Object.defineProperty(window, 'location', {
       configurable: true,
       writable: true,
@@ -163,7 +143,7 @@ describe('AuthForm — register mode', () => {
   })
 
   it('asks the user to verify their email after registration', async () => {
-    mockSignUpEmail.mockResolvedValue({ data: { user: {} }, error: null })
+    asMock(authClient.signUp.email).mockResolvedValue({ data: { user: {} }, error: null })
     render(<AuthForm mode="register" />)
     await user.type(screen.getByLabelText(/name/i), 'Jane Doe')
     await user.type(screen.getByLabelText(/email/i), 'jane@example.com')
@@ -172,7 +152,7 @@ describe('AuthForm — register mode', () => {
     await user.click(screen.getByRole('button', { name: /sign up/i }))
 
     await waitFor(() => {
-      expect(mockToastSuccess).toHaveBeenCalledWith(
+      expect(toast.success).toHaveBeenCalledWith(
         'Check your email to verify your account.'
       )
     })

@@ -1,29 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-
-vi.mock('next/image', () => ({
-  default: ({
-    src,
-    alt,
-    ...props
-  }: {
-    src: string
-    alt: string
-    fill?: boolean
-    sizes?: string
-  } & React.ImgHTMLAttributes<HTMLImageElement>) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={alt} {...props} />
-  ),
-}))
-
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
-}))
-
-vi.mock('@/app/explore/_actions/toggle-like', () => ({
-  toggleLike: vi.fn(),
-}))
 
 import { ExploreCard } from '../explore-card'
 

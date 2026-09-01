@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "NODE_OPTIONS=--experimental-strip-types eslint",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -51,6 +51,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@oxlint/plugins": "1.80.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

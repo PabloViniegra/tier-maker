@@ -52,7 +52,6 @@ describe('getOrCreateAnonId — consent rejected', () => {
 
   it('still returns a usable string ID', () => {
     const id = getOrCreateAnonId()
-    expect(typeof id).toBe('string')
     expect(id.length).toBeGreaterThan(0)
   })
 

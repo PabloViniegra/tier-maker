@@ -1,58 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { useTierEditor } from '@/lib/stores/tier-editor'
 import { PublicTierFill } from '../public-tier-fill'
-
-// Mock child modules that pull in DnD / Zustand
-vi.mock('@hello-pangea/dnd', () => ({
-  DragDropContext: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="dnd-context">{children}</div>
-  ),
-  Droppable: ({ children }: { children: (provided: { innerRef: null; droppableProps: Record<string, unknown>; placeholder: null }, snapshot: { isDraggingOver: boolean }) => React.ReactNode }) =>
-    children(
-      { innerRef: null, droppableProps: {}, placeholder: null },
-      { isDraggingOver: false }
-    ),
-  Draggable: ({ children }: { children: (provided: { innerRef: null; draggableProps: Record<string, unknown>; dragHandleProps: Record<string, unknown> }, snapshot: { isDragging: boolean }) => React.ReactNode }) =>
-    children(
-      { innerRef: null, draggableProps: {}, dragHandleProps: {} },
-      { isDragging: false }
-    ),
-}))
-
-vi.mock('@/lib/hooks/use-tier-dnd', () => ({
-  useTierDnd: () => ({ onDragEnd: vi.fn() }),
-}))
-
-vi.mock('@/lib/auth-client', () => ({
-  useSession: () => ({ data: null }),
-}))
-
-vi.mock('@/lib/hooks/use-tier-fill-persistence', () => ({
-  useTierFillPersistence: vi.fn(),
-}))
-
-vi.mock('@/lib/stores/tier-editor', async () => {
-  const actual = await vi.importActual('@/lib/stores/tier-editor')
-  return {
-    ...(actual as object),
-    useTierEditor: Object.assign(
-      (selector: (s: ReturnType<typeof mockEditorState>) => unknown) => {
-        const state = mockEditorState()
-        return selector(state)
-      },
-      {
-        getState: () => mockEditorState(),
-        setState: vi.fn(),
-        subscribe: vi.fn(() => vi.fn()),
-      }
-    ),
-  }
-})
-
-let mockEditorState = vi.fn(() => ({
-  rows: [],
-  bankItems: [],
-}))
 
 const mockData = {
   title: 'Test Tier List',
@@ -73,10 +22,7 @@ const mockData = {
 
 describe('PublicTierFill', () => {
   beforeEach(() => {
-    mockEditorState = vi.fn(() => ({
-      rows: [],
-      bankItems: [],
-    }))
+    useTierEditor.getState().reset()
   })
 
   it('renders the tier list title from props', () => {
@@ -94,10 +40,8 @@ describe('PublicTierFill', () => {
     expect(screen.getByRole('button', { name: /export/i })).toBeInTheDocument()
   })
 
-  it('renders the DnD context after hydration', () => {
+  it('renders the board after hydration', () => {
     render(<PublicTierFill tierId="test-id" data={mockData} />)
-    // In jsdom, useEffect fires synchronously during render, so hydration
-    // completes immediately and the DnD context is rendered.
-    expect(screen.getByTestId('dnd-context')).toBeInTheDocument()
+    expect(screen.getByText('S')).toBeInTheDocument()
   })
 })

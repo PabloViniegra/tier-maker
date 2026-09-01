@@ -10,6 +10,12 @@ function reportEmailError() {
   console.error('Authentication email failed')
 }
 
+function requiredEnv(name: 'GOOGLE_CLIENT_ID' | 'GOOGLE_CLIENT_SECRET'): string {
+  const value = process.env[name]
+  if (!value) throw new Error(`Missing ${name}`)
+  return value
+}
+
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   database: drizzleAdapter(db, {
@@ -53,8 +59,8 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: requiredEnv('GOOGLE_CLIENT_ID'),
+      clientSecret: requiredEnv('GOOGLE_CLIENT_SECRET'),
     },
   },
   trustedOrigins: [

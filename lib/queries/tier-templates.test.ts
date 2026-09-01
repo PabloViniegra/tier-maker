@@ -1,11 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-vi.mock('@/lib/db', () => ({
-  db: {
-    select: vi.fn(),
-  },
-}))
-
 import {
   getUserTierListStats,
   getRecentTierLists,
@@ -14,28 +7,22 @@ import {
   getPublicTierListBySlug,
 } from './tier-templates'
 import { db } from '@/lib/db'
+import { asMock } from '@/test/as-mock'
 
-const mockDb = db as unknown as {
-  select: ReturnType<typeof vi.fn>
-}
-
-// Helper: mock both select() calls made by getUserTierListStats.
-// Call 1 — aggregate: .select().from().where().then(([r]) => r)
-// Call 2 — recent rows: .select().from().where()  (resolves to array)
-function mockStatsQueries(
-  aggregateRow: object | undefined,
+function mockStatsQueries<T>(
+  aggregateRow: T | undefined,
   recentRows: { createdAt: Date; category: string }[]
 ) {
   const aggregateRows = aggregateRow ? [aggregateRow] : []
   // First call: aggregate query — where() must be a thenable so .then() works
   const aggregatePromise = Promise.resolve(aggregateRows)
-  mockDb.select.mockReturnValueOnce({
+  asMock(db.select).mockReturnValueOnce({
     from: vi.fn().mockReturnValue({
       where: vi.fn().mockReturnValue(aggregatePromise),
     }),
   })
   // Second call: recent rows query — has .limit() before awaiting
-  mockDb.select.mockReturnValueOnce({
+  asMock(db.select).mockReturnValueOnce({
     from: vi.fn().mockReturnValue({
       where: vi.fn().mockReturnValue({
         limit: vi.fn().mockResolvedValue(recentRows),
@@ -208,7 +195,7 @@ describe('getRecentTierLists', () => {
         createdAt: new Date('2026-06-01'),
       },
     ]
-    mockDb.select.mockReturnValue({
+    asMock(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockReturnValue({
@@ -234,7 +221,7 @@ describe('getRecentTierLists', () => {
         createdAt: new Date('2026-06-01'),
       },
     ]
-    mockDb.select.mockReturnValue({
+    asMock(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockReturnValue({
@@ -250,7 +237,7 @@ describe('getRecentTierLists', () => {
   })
 
   it('returns empty array when user has no tier lists', async () => {
-    mockDb.select.mockReturnValue({
+    asMock(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockReturnValue({
@@ -267,7 +254,7 @@ describe('getRecentTierLists', () => {
 
   it('defaults to limit 12', async () => {
     const limitMock = vi.fn().mockResolvedValue([])
-    mockDb.select.mockReturnValue({
+    asMock(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockReturnValue({
@@ -284,7 +271,7 @@ describe('getRecentTierLists', () => {
 
   it('respects custom limit', async () => {
     const limitMock = vi.fn().mockResolvedValue([])
-    mockDb.select.mockReturnValue({
+    asMock(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockReturnValue({
@@ -326,7 +313,7 @@ describe('getAllUserTierLists', () => {
     const orderBy = vi.fn().mockReturnValue({ limit })
     const where = vi.fn().mockReturnValue({ orderBy })
     const from = vi.fn().mockReturnValue({ where })
-    mockDb.select.mockReturnValue({ from })
+    asMock(db.select).mockReturnValue({ from })
 
     const result = await getAllUserTierLists('user-1')
 
@@ -345,7 +332,7 @@ describe('getAllUserTierLists', () => {
         createdAt: new Date('2026-06-01'),
       },
     ]
-    mockDb.select.mockReturnValue({
+    asMock(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockReturnValue({
@@ -361,7 +348,7 @@ describe('getAllUserTierLists', () => {
   })
 
   it('returns an empty array when the user has no tier lists', async () => {
-    mockDb.select.mockReturnValue({
+    asMock(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockReturnValue({
@@ -390,7 +377,7 @@ describe('getAllUserTierLists', () => {
         likeCount: 3,
       },
     ]
-    mockDb.select.mockReturnValue({
+    asMock(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockReturnValue({
@@ -420,8 +407,8 @@ describe('getTierListById', () => {
     vi.clearAllMocks()
   })
 
-  function mockTemplate(tpl: object) {
-    mockDb.select.mockReturnValueOnce({
+  function mockTemplate<T>(tpl: T) {
+    asMock(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue([tpl]),
       }),
@@ -429,7 +416,7 @@ describe('getTierListById', () => {
   }
 
   function mockNoTemplate() {
-    mockDb.select.mockReturnValueOnce({
+    asMock(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue([]),
       }),
@@ -437,7 +424,7 @@ describe('getTierListById', () => {
   }
 
   function mockRows(rows: object[]) {
-    mockDb.select.mockReturnValueOnce({
+    asMock(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockResolvedValue(rows),
@@ -519,8 +506,8 @@ describe('getPublicTierListBySlug', () => {
     vi.clearAllMocks()
   })
 
-  function mockTemplate(tpl: object) {
-    mockDb.select.mockReturnValueOnce({
+  function mockTemplate<T>(tpl: T) {
+    asMock(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           limit: vi.fn().mockResolvedValue([tpl]),
@@ -530,7 +517,7 @@ describe('getPublicTierListBySlug', () => {
   }
 
   function mockNoTemplate() {
-    mockDb.select.mockReturnValueOnce({
+    asMock(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           limit: vi.fn().mockResolvedValue([]),
@@ -540,7 +527,7 @@ describe('getPublicTierListBySlug', () => {
   }
 
   function mockRows(rows: object[]) {
-    mockDb.select.mockReturnValueOnce({
+    asMock(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockResolvedValue(rows),

@@ -9,7 +9,7 @@ export function formatLongDate(date: Date): string {
 
 export function formatRelativeDate(date: Date | string | null): string {
   if (!date) return 'Never'
-  const d = typeof date === 'string' ? new Date(date) : date
+  const d = date instanceof Date ? date : new Date(date)
   const days = Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24))
   const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
   if (days === 0) return rtf.format(0, 'day')

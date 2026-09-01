@@ -14,7 +14,7 @@ type ConsentState = {
 }
 
 export const useConsentStore = create<ConsentState>()((set) => ({
-  status: typeof window !== 'undefined' ? getConsentStatus() : 'pending',
+  status: globalThis.window == null ? 'pending' : getConsentStatus(),
   accept: () => {
     setConsentStatus('accepted')
     set({ status: 'accepted' })

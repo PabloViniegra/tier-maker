@@ -17,7 +17,7 @@ let canvasCtx: CanvasRenderingContext2D | null = null
 let canvasFallbackTried = false
 
 function ensureCanvas(): CanvasRenderingContext2D | null {
-  if (typeof document === 'undefined') return null
+  if (globalThis.document == null) return null
   if (canvasCtx) return canvasCtx
   if (canvasFallbackTried) return null
   canvasFallbackTried = true
@@ -45,12 +45,17 @@ function fromCanvas(value: string): string | null {
   return '#' + [r, g, b].map((n) => n.toString(16).padStart(2, '0')).join('')
 }
 
-function toHex(value: string): { hex: string; alpha: number } {
+export type ParsedCssColor = {
+  hex: string
+  alpha: number
+}
+
+function toHex(value: string): ParsedCssColor {
   const parsed = Color(value)
   return { hex: parsed.hex().toLowerCase(), alpha: parsed.alpha() }
 }
 
-export function parseCssColor(value: string): { hex: string; alpha: number } {
+export function parseCssColor(value: string): ParsedCssColor {
   try {
     return toHex(value)
   } catch {

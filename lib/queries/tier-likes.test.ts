@@ -1,19 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-vi.mock('server-only', () => ({}))
-
-const { mockSelect } = vi.hoisted(() => ({
-  mockSelect: vi.fn(),
-}))
-
-vi.mock('@/lib/db', () => ({
-  db: { select: mockSelect },
-}))
-
 import { getUserLikedTemplateIds, getIsLiked } from './tier-likes'
+import { db } from '@/lib/db'
+import { asMock } from '@/test/as-mock'
 
-function mockSelectResult(rows: unknown[]) {
-  mockSelect.mockReturnValue({
+function mockSelectResult<T>(rows: T[]) {
+  asMock(db.select).mockReturnValue({
     from: vi.fn().mockReturnValue({
       where: vi.fn().mockReturnValue({
         limit: vi.fn().mockResolvedValue(rows),
@@ -22,8 +13,8 @@ function mockSelectResult(rows: unknown[]) {
   })
 }
 
-function mockSelectResultNoLimit(rows: unknown[]) {
-  mockSelect.mockReturnValue({
+function mockSelectResultNoLimit<T>(rows: T[]) {
+  asMock(db.select).mockReturnValue({
     from: vi.fn().mockReturnValue({
       where: vi.fn().mockResolvedValue(rows),
     }),

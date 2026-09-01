@@ -1,22 +1,14 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-const { mockSend } = vi.hoisted(() => ({
-  mockSend: vi.fn(),
-}))
-
-vi.mock('server-only', () => ({}))
-vi.mock('resend', () => ({
-  Resend: class {
-    emails = { send: mockSend }
-  },
-}))
-
+import { beforeEach, describe, expect, it } from 'vitest'
+import { Resend } from 'resend'
 import { sendPasswordResetEmail, sendVerificationEmail } from './email'
+import { asMock } from '@/test/as-mock'
+
+const send = new Resend('test').emails.send
 
 describe('authentication email delivery', () => {
   beforeEach(() => {
-    mockSend.mockReset()
-    mockSend.mockResolvedValue({ data: { id: 'email-id' }, error: null })
+    asMock(send).mockReset()
+    asMock(send).mockResolvedValue({ data: { id: 'email-id' }, error: null })
   })
 
   it('sends verification from the authorized domain with idempotency', async () => {
@@ -26,7 +18,7 @@ describe('authentication email delivery', () => {
       token: 'verification-token',
     })
 
-    expect(mockSend).toHaveBeenCalledWith(
+    expect(send).toHaveBeenCalledWith(
       expect.objectContaining({
         from: 'Tier Maker <auth@send.pabloviniegra.dev>',
         to: 'user@example.com',
@@ -41,7 +33,7 @@ describe('authentication email delivery', () => {
       }
     )
 
-    const payload = mockSend.mock.calls[0][0]
+    const payload = asMock(send).mock.calls[0][0]
     expect(payload.html).toContain('TIER MAKER')
     expect(payload.html).toContain('ACCOUNT VERIFICATION')
     expect(payload.html).toContain('role="presentation"')
@@ -62,7 +54,7 @@ describe('authentication email delivery', () => {
       token: 'reset-token',
     })
 
-    expect(mockSend).toHaveBeenCalledWith(
+    expect(send).toHaveBeenCalledWith(
       expect.objectContaining({
         from: 'Tier Maker <auth@send.pabloviniegra.dev>',
         subject: 'Reset your Tier Maker password',
@@ -72,7 +64,7 @@ describe('authentication email delivery', () => {
       }
     )
 
-    const payload = mockSend.mock.calls[0][0]
+    const payload = asMock(send).mock.calls[0][0]
     expect(payload.html).toContain('PASSWORD RESET')
     expect(payload.html).toContain('Reset your password')
     expect(
@@ -84,7 +76,7 @@ describe('authentication email delivery', () => {
   })
 
   it('propagates provider errors', async () => {
-    mockSend.mockResolvedValue({
+    asMock(send).mockResolvedValue({
       data: null,
       error: { message: 'Rejected sender' },
     })
@@ -107,6 +99,6 @@ describe('authentication email delivery', () => {
       })
     ).rejects.toThrow('Invalid authentication email URL')
 
-    expect(mockSend).not.toHaveBeenCalled()
+    expect(send).not.toHaveBeenCalled()
   })
 })

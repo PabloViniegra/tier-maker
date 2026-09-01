@@ -137,7 +137,7 @@ export function TierListCreator({
       }
     }
     function onDragLeave(e: DragEvent) {
-      if ((e.target as HTMLElement)?.id === 'page-dropzone-overlay') {
+      if (e.target instanceof HTMLElement && e.target.id === 'page-dropzone-overlay') {
         setIsDraggingFile(false)
       }
     }

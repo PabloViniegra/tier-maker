@@ -1,15 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-vi.mock('@/lib/db', () => ({
-  db: {
-    select: vi.fn(),
-  },
-}))
-
 import { getUserCategoryPresets } from './user-category-presets'
 import { db } from '@/lib/db'
-
-const mockDb = db as unknown as { select: ReturnType<typeof vi.fn> }
+import { asMock } from '@/test/as-mock'
 
 describe('getUserCategoryPresets', () => {
   beforeEach(() => {
@@ -21,7 +13,7 @@ describe('getUserCategoryPresets', () => {
       { id: 'p-1', name: 'Arquitectura' },
       { id: 'p-2', name: 'Filosofía' },
     ]
-    mockDb.select.mockReturnValue({
+    asMock(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockResolvedValue(rows),
@@ -35,7 +27,7 @@ describe('getUserCategoryPresets', () => {
   })
 
   it('returns empty array when user has no saved presets', async () => {
-    mockDb.select.mockReturnValue({
+    asMock(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockResolvedValue([]),

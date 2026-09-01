@@ -55,7 +55,7 @@ export function StatsCardsSkeleton() {
 }
 
 export function StatsCards({ stats }: { stats: TierListStats }) {
-  const displayValues: Record<DisplayKey, string> = {
+  const displayValues = {
     total: String(stats.total),
     categories: String(stats.categories),
     lastActivity: formatRelativeDate(stats.lastActivity),

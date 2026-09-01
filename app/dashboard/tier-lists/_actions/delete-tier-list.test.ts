@@ -1,44 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-vi.mock('server-only', () => ({}))
-
-const {
-  mockGetSession,
-  mockRevalidatePath,
-  mockRevalidateTag,
-  mockDelete,
-  mockSelect,
-  mockDel,
-} = vi.hoisted(() => ({
-  mockGetSession: vi.fn(),
-  mockRevalidatePath: vi.fn(),
-  mockRevalidateTag: vi.fn(),
-  mockDelete: vi.fn(),
-  mockSelect: vi.fn(),
-  mockDel: vi.fn(),
-}))
-
-vi.mock('@/lib/session', () => ({ getSession: mockGetSession }))
-vi.mock('next/cache', () => ({
-  revalidatePath: mockRevalidatePath,
-  revalidateTag: mockRevalidateTag,
-}))
-vi.mock('@vercel/blob', () => ({ del: mockDel }))
-vi.mock('@/lib/db', () => ({
-  db: {
-    delete: mockDelete,
-    select: mockSelect,
-  },
-}))
-
+import { getSession } from '@/lib/session'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { del } from '@vercel/blob'
+import { db } from '@/lib/db'
 import { deleteTierList } from './delete-tier-list'
+import { asMock } from '@/test/as-mock'
 
 function authedSession(userId = 'user-1') {
-  mockGetSession.mockResolvedValue({ user: { id: userId } })
+  asMock(getSession).mockResolvedValue({ user: { id: userId } })
 }
 
 function anonSession() {
-  mockGetSession.mockResolvedValue(null)
+  asMock(getSession).mockResolvedValue(null)
 }
 
 function mockTemplateFetch(
@@ -46,7 +19,7 @@ function mockTemplateFetch(
   rows: { items: { url?: string }[] }[] = [],
   coverImageUrl: string | null = null
 ) {
-  mockSelect
+  asMock(db.select)
     .mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue([{ sidebarItems, coverImageUrl }]),
@@ -62,7 +35,7 @@ function mockTemplateFetch(
 }
 
 function mockNotFoundFetch() {
-  mockSelect
+  asMock(db.select)
     .mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue([]),
@@ -78,7 +51,7 @@ function mockNotFoundFetch() {
 }
 
 function mockOwnedDeletion(templateId = 'tpl-1') {
-  mockDelete.mockReturnValue({
+  asMock(db.delete).mockReturnValue({
     where: vi.fn().mockReturnValue({
       returning: vi.fn().mockResolvedValue([{ id: templateId }]),
     }),
@@ -118,10 +91,10 @@ describe('deleteTierList', () => {
 
     await deleteTierList('tpl-1')
 
-    expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
-    expect(mockRevalidatePath).toHaveBeenCalledWith('/explore', 'layout')
-    expect(mockRevalidateTag).toHaveBeenCalledWith('public-tier-lists', {})
-    expect(mockRevalidateTag).toHaveBeenCalledWith('public-categories', {})
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
+    expect(revalidatePath).toHaveBeenCalledWith('/explore', 'layout')
+    expect(revalidateTag).toHaveBeenCalledWith('public-tier-lists', {})
+    expect(revalidateTag).toHaveBeenCalledWith('public-categories', {})
   })
 
   it('purges owned cover, sidebar, and row image URLs', async () => {
@@ -139,7 +112,7 @@ describe('deleteTierList', () => {
 
     await deleteTierList('tpl-1')
 
-    expect(mockDel).toHaveBeenCalledWith([cover, a, b, c])
+    expect(del).toHaveBeenCalledWith([cover, a, b, c])
   })
 
   it('does not purge blob URLs owned by another user', async () => {
@@ -153,7 +126,7 @@ describe('deleteTierList', () => {
 
     await deleteTierList('tpl-1')
 
-    expect(mockDel).toHaveBeenCalledWith([own])
+    expect(del).toHaveBeenCalledWith([own])
   })
 
   it('skips blob purge when no images are referenced', async () => {
@@ -163,17 +136,17 @@ describe('deleteTierList', () => {
 
     await deleteTierList('tpl-1')
 
-    expect(mockDel).not.toHaveBeenCalled()
+    expect(del).not.toHaveBeenCalled()
   })
 
   it('propagates database errors', async () => {
     authedSession()
-    mockSelect.mockReturnValueOnce({
+    asMock(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockRejectedValue(new Error('db connection lost')),
       }),
     })
-    mockSelect.mockReturnValueOnce({
+    asMock(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockResolvedValue([]),

@@ -1,48 +1,23 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-
-const { mockWaitUntil, mockSendVerificationEmail, mockSendPasswordResetEmail } =
-  vi.hoisted(() => ({
-    mockWaitUntil: vi.fn(),
-    mockSendVerificationEmail: vi.fn(() => Promise.resolve()),
-    mockSendPasswordResetEmail: vi.fn(() => Promise.resolve()),
-  }))
-
-vi.mock('./db', () => ({ db: {} }))
-
-vi.mock('better-auth', () => ({
-  betterAuth: vi.fn((config: Record<string, unknown>) => ({
-    handler: vi.fn(),
-    api: {},
-    _config: config,
-  })),
-}))
-
-vi.mock('better-auth/adapters/drizzle', () => ({
-  drizzleAdapter: vi.fn(() => ({ type: 'drizzle' })),
-}))
-
-vi.mock('@vercel/functions', () => ({ waitUntil: mockWaitUntil }))
-
-vi.mock('./email', () => ({
-  sendVerificationEmail: mockSendVerificationEmail,
-  sendPasswordResetEmail: mockSendPasswordResetEmail,
-}))
+import { betterAuth } from 'better-auth'
+import { waitUntil } from '@vercel/functions'
+import * as email from './email'
+import { asMock } from '@/test/as-mock'
 
 describe('auth — module shape', () => {
   let auth: (typeof import('./auth'))['auth']
-  let betterAuthMock: ReturnType<typeof vi.fn>
 
   beforeAll(async () => {
+    vi.spyOn(email, 'sendVerificationEmail').mockResolvedValue(undefined)
+    vi.spyOn(email, 'sendPasswordResetEmail').mockResolvedValue(undefined)
     const mod = await import('./auth')
     auth = mod.auth
-    const { betterAuth } = await import('better-auth')
-    betterAuthMock = betterAuth as ReturnType<typeof vi.fn>
   })
 
   beforeEach(() => {
-    mockWaitUntil.mockClear()
-    mockSendVerificationEmail.mockClear()
-    mockSendPasswordResetEmail.mockClear()
+    asMock(waitUntil).mockClear()
+    asMock(email.sendVerificationEmail).mockClear()
+    asMock(email.sendPasswordResetEmail).mockClear()
   })
 
   it('exports an auth instance', () => {
@@ -50,7 +25,7 @@ describe('auth — module shape', () => {
   })
 
   it('auth has a handler function', () => {
-    expect(typeof auth.handler).toBe('function')
+    expect(auth.handler).toEqual(expect.any(Function))
   })
 
   it('auth has an api object', () => {
@@ -58,75 +33,86 @@ describe('auth — module shape', () => {
   })
 
   it('betterAuth was called with emailAndPassword enabled', () => {
-    const config = betterAuthMock.mock.calls[0][0]
+    const config = asMock(betterAuth).mock.calls[0][0]
     expect(config.emailVerification?.autoSignInAfterVerification).toBe(true)
     expect(config.emailAndPassword?.enabled).toBe(true)
     expect(config.emailAndPassword?.requireEmailVerification).toBe(true)
-    expect(config.emailAndPassword?.sendResetPassword).toBeTypeOf('function')
+    expect(config.emailAndPassword?.sendResetPassword).toEqual(
+      expect.any(Function)
+    )
   })
 
   it('configures verification emails for sign-up and sign-in', () => {
-    const config = betterAuthMock.mock.calls[0][0]
+    const config = asMock(betterAuth).mock.calls[0][0]
     expect(config.emailVerification?.sendOnSignUp).toBe(true)
     expect(config.emailVerification?.sendOnSignIn).toBe(true)
-    expect(config.emailVerification?.sendVerificationEmail).toBeTypeOf(
-      'function'
+    expect(config.emailVerification?.sendVerificationEmail).toEqual(
+      expect.any(Function)
     )
   })
 
   it('schedules verification email delivery with Vercel', async () => {
-    const config = betterAuthMock.mock.calls[0][0]
+    const config = asMock(betterAuth).mock.calls[0][0]
+    const sendVerificationEmail = config.emailVerification?.sendVerificationEmail
+    expect(sendVerificationEmail).toEqual(expect.any(Function))
+    if (!sendVerificationEmail) return
 
-    await config.emailVerification.sendVerificationEmail({
+    await sendVerificationEmail({
       user: { email: 'user@example.com' },
       url: 'https://example.com/verify',
       token: 'verification-token',
     })
 
-    expect(mockSendVerificationEmail).toHaveBeenCalledWith({
+    expect(email.sendVerificationEmail).toHaveBeenCalledWith({
       to: 'user@example.com',
       url: 'https://example.com/verify',
       token: 'verification-token',
     })
-    expect(mockWaitUntil).toHaveBeenCalledOnce()
+    expect(waitUntil).toHaveBeenCalledOnce()
   })
 
   it('schedules password reset email delivery with Vercel', async () => {
-    const config = betterAuthMock.mock.calls[0][0]
+    const config = asMock(betterAuth).mock.calls[0][0]
+    const sendResetPassword = config.emailAndPassword?.sendResetPassword
+    expect(sendResetPassword).toEqual(expect.any(Function))
+    if (!sendResetPassword) return
 
-    await config.emailAndPassword.sendResetPassword({
+    await sendResetPassword({
       user: { email: 'user@example.com' },
       url: 'https://example.com/reset',
       token: 'reset-token',
     })
 
-    expect(mockSendPasswordResetEmail).toHaveBeenCalledWith({
+    expect(email.sendPasswordResetEmail).toHaveBeenCalledWith({
       to: 'user@example.com',
       url: 'https://example.com/reset',
       token: 'reset-token',
     })
-    expect(mockWaitUntil).toHaveBeenCalled()
+    expect(waitUntil).toHaveBeenCalled()
   })
 
   it('stores rate limits in the database for serverless deployments', () => {
-    const config = betterAuthMock.mock.calls[0][0]
+    const config = asMock(betterAuth).mock.calls[0][0]
 
     expect(config.rateLimit?.storage).toBe('database')
-    expect(config.rateLimit?.customRules['/request-password-reset']).toEqual({
+    expect(config.rateLimit?.customRules?.['/request-password-reset']).toEqual({
       window: 3600,
       max: 5,
     })
   })
 
   it('betterAuth was called with a database adapter', () => {
-    const config = betterAuthMock.mock.calls[0][0]
+    const config = asMock(betterAuth).mock.calls[0][0]
     expect(config.database).toBeDefined()
   })
 
   it('betterAuth was called with Google social provider configured', () => {
-    const config = betterAuthMock.mock.calls[0][0]
-    expect(config.socialProviders?.google).toBeDefined()
-    expect(config.socialProviders?.google?.clientId).toBeDefined()
-    expect(config.socialProviders?.google?.clientSecret).toBeDefined()
+    const config = asMock(betterAuth).mock.calls[0][0]
+    const google = config.socialProviders?.google
+    expect(google).toBeDefined()
+    expect(google && 'clientId' in google ? google.clientId : undefined).toBeDefined()
+    expect(
+      google && 'clientSecret' in google ? google.clientSecret : undefined
+    ).toBeDefined()
   })
 })

@@ -50,7 +50,7 @@ describe('ColorPicker', () => {
     })
 
     expect(onChange).toHaveBeenCalled()
-    const lastCall = onChange.mock.calls.at(-1)?.[0] as string
+    const lastCall = onChange.mock.calls.at(-1)?.[0]
     expect(lastCall).toMatch(/^#/)
   })
 

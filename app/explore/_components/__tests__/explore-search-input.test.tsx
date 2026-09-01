@@ -1,24 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-
-const mockPush = vi.fn()
-const { mockUseRouter, mockUseSearchParams } = vi.hoisted(() => ({
-  mockUseRouter: vi.fn(() => ({ push: mockPush })),
-  mockUseSearchParams: vi.fn(() => new URLSearchParams()),
-}))
-
-vi.mock('next/navigation', () => ({
-  useRouter: mockUseRouter,
-  useSearchParams: mockUseSearchParams,
-}))
-
+import * as navigation from 'next/navigation'
 import { ExploreSearchInput } from '../explore-search-input'
+import { asMock } from '@/test/as-mock'
 
 describe('ExploreSearchInput', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.clearAllMocks()
-    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    asMock(navigation.useSearchParams).mockReturnValue(new URLSearchParams())
   })
 
   afterEach(() => {
@@ -34,7 +24,7 @@ describe('ExploreSearchInput', () => {
     render(<ExploreSearchInput defaultValue="" />)
     const input = screen.getByRole('searchbox')
     fireEvent.change(input, { target: { value: 'a' } })
-    expect(mockPush).not.toHaveBeenCalled()
+    expect(navigation.useRouter().push).not.toHaveBeenCalled()
   })
 
   it('calls router.push with ?q= after 400ms debounce', () => {
@@ -42,31 +32,33 @@ describe('ExploreSearchInput', () => {
     const input = screen.getByRole('searchbox')
     fireEvent.change(input, { target: { value: 'anime' } })
     vi.advanceTimersByTime(400)
-    expect(mockPush).toHaveBeenCalledOnce()
-    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('q=anime'))
+    expect(navigation.useRouter().push).toHaveBeenCalledOnce()
+    expect(navigation.useRouter().push).toHaveBeenCalledWith(
+      expect.stringContaining('q=anime')
+    )
   })
 
   it('resets page to 1 when search changes', () => {
-    mockUseSearchParams.mockReturnValue(
+    asMock(navigation.useSearchParams).mockReturnValue(
       new URLSearchParams('page=3&sort=newest')
     )
     render(<ExploreSearchInput defaultValue="" />)
     const input = screen.getByRole('searchbox')
     fireEvent.change(input, { target: { value: 'x' } })
     vi.advanceTimersByTime(400)
-    const url = mockPush.mock.calls[0][0] as string
+    const url = asMock(navigation.useRouter().push).mock.calls[0][0]
     expect(url).toContain('page=1')
   })
 
   it('preserves existing sort and category params', () => {
-    mockUseSearchParams.mockReturnValue(
+    asMock(navigation.useSearchParams).mockReturnValue(
       new URLSearchParams('sort=oldest&category=Anime&page=2')
     )
     render(<ExploreSearchInput defaultValue="" />)
     const input = screen.getByRole('searchbox')
     fireEvent.change(input, { target: { value: 'dragon' } })
     vi.advanceTimersByTime(400)
-    const url = mockPush.mock.calls[0][0] as string
+    const url = asMock(navigation.useRouter().push).mock.calls[0][0]
     expect(url).toContain('sort=oldest')
     expect(url).toContain('category=Anime')
   })
@@ -78,6 +70,6 @@ describe('ExploreSearchInput', () => {
     vi.advanceTimersByTime(200)
     fireEvent.change(input, { target: { value: 'ab' } })
     vi.advanceTimersByTime(400)
-    expect(mockPush).toHaveBeenCalledOnce()
+    expect(navigation.useRouter().push).toHaveBeenCalledOnce()
   })
 })

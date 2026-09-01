@@ -1,12 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { useTierEditor } from '@/lib/stores/tier-editor'
-
-vi.mock('../actions', () => ({
-  saveUserCategoryPresetAction: vi.fn(),
-  deleteUserCategoryPresetAction: vi.fn(),
-  uploadImagesAction: vi.fn(),
-}))
 
 import { MetadataPanel } from './metadata-panel'
 

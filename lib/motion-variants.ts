@@ -8,23 +8,23 @@ export function staggerIndex(i: number): number {
   return Math.min(i, MAX_STAGGER - 1)
 }
 
-export const fadeUpVariants: Variants = {
+export const fadeUpVariants = {
   hidden: { opacity: 0, y: 6 },
   visible: (delay: number = 0) => ({
     opacity: 1,
     y: 0,
     transition: { duration: 0.24, ease: EASE_SMOOTH, delay },
   }),
-}
+} satisfies Variants
 
-export const staggerContainerVariants: Variants = {
+export const staggerContainerVariants = {
   hidden: {},
   visible: {
     transition: { staggerChildren: STAGGER_DELAY },
   },
-}
+} satisfies Variants
 
-export const pageTransitionVariants: Variants = {
+export const pageTransitionVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -34,7 +34,7 @@ export const pageTransitionVariants: Variants = {
     opacity: 0,
     transition: { duration: 0.15, ease: 'easeInOut' },
   },
-}
+} satisfies Variants
 
 export const springTransition = {
   type: 'spring' as const,
@@ -54,7 +54,7 @@ export const statusFadeVariants: Variants = {
 
 const dragIdle = { scale: 1, opacity: 1, boxShadow: 'none', zIndex: 0 }
 
-export const dragActiveVariants: Variants = {
+export const dragActiveVariants = {
   idle: dragIdle,
   rest: dragIdle,
   hover: dragIdle,
@@ -65,7 +65,7 @@ export const dragActiveVariants: Variants = {
     zIndex: 50,
     transition: { duration: 0.12, ease: EASE_SMOOTH },
   },
-}
+} satisfies Variants
 
 export const sidebarVariants: Variants = {
   expanded: { width: 240 },
@@ -82,11 +82,11 @@ export const bentoIconFloatVariants = {
   transition: { repeat: Infinity, duration: 4, ease: 'easeInOut' as const },
 }
 
-export const bentoSpotlightVariants: Variants = {
+export const bentoSpotlightVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 0 },
   hovered: { opacity: 1, transition: { duration: 0.5, ease: EASE_SMOOTH } },
-}
+} satisfies Variants
 
 export function bentoIconFloat(delay = 0) {
   return {
@@ -100,10 +100,10 @@ export function bentoIconFloat(delay = 0) {
   }
 }
 
-export const cardLiftVariants: Variants = {
+export const cardLiftVariants = {
   hover: { y: -2, transition: springTransition },
   tap: { scale: 0.99, y: 0, transition: { duration: 0.1, ease: 'easeOut' } },
-}
+} satisfies Variants
 
 // ── Hero Demo animation variants ──────────────────────────────────────────────
 
@@ -178,10 +178,10 @@ export const likeHeartVariants: Variants = {
   },
 }
 
-export const hoverRevealVariants: Variants = {
+export const hoverRevealVariants = {
   rest: { opacity: 0 },
   hover: { opacity: 1, transition: { duration: 0.15, ease: EASE_SMOOTH } },
-}
+} satisfies Variants
 
 export const fadeSwapVariants: Variants = {
   hidden: { opacity: 0 },

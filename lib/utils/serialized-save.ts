@@ -13,7 +13,9 @@ export function createSerializedSaver<T>(
     try {
       while (queued) {
         queued = false
-        await save(pending as T)
+        const next = pending
+        if (next === undefined) break
+        await save(next)
       }
     } finally {
       inFlight = false

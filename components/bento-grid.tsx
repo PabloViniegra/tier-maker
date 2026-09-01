@@ -7,16 +7,16 @@ interface BentoCellProps {
   rowSpan?: 1 | 2
 }
 
-const COL_SPAN: Record<NonNullable<BentoCellProps['colSpan']>, string> = {
+const COL_SPAN = {
   4: 'col-span-12 md:col-span-6 lg:col-span-4',
   8: 'col-span-12 lg:col-span-8',
   12: 'col-span-12',
-}
+} as const satisfies Record<NonNullable<BentoCellProps['colSpan']>, string>
 
-const ROW_SPAN: Record<NonNullable<BentoCellProps['rowSpan']>, string> = {
+const ROW_SPAN = {
   1: '',
   2: 'lg:row-span-2',
-}
+} as const satisfies Record<NonNullable<BentoCellProps['rowSpan']>, string>
 
 export function BentoCell({
   className,

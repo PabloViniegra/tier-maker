@@ -1,20 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { GoogleButton } from './google-button'
-
-vi.mock('@/lib/auth-client', () => ({
-  authClient: {
-    signIn: {
-      social: vi.fn(),
-    },
-  },
-}))
-
-vi.mock('sonner', () => ({
-  toast: {
-    error: vi.fn(),
-  },
-}))
+import { asMock } from '@/test/as-mock'
 
 describe('GoogleButton', () => {
   it('renders a button with Google icon and text', () => {
@@ -38,7 +25,7 @@ describe('GoogleButton', () => {
   it('shows error toast when sign-in fails', async () => {
     const { authClient } = await import('@/lib/auth-client')
     const { toast } = await import('sonner')
-    vi.mocked(authClient.signIn.social).mockRejectedValueOnce(
+    asMock(authClient.signIn.social).mockRejectedValueOnce(
       new Error('Auth failed')
     )
     render(<GoogleButton />)

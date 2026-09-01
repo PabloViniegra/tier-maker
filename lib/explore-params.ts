@@ -10,9 +10,11 @@ export const VALID_SORTS = new Set<ExploreSort>([
 ])
 
 export function toSort(raw: string | undefined): ExploreSort {
-  return VALID_SORTS.has(raw as ExploreSort)
-    ? (raw as ExploreSort)
-    : DEFAULT_SORT
+  if (raw === undefined) return DEFAULT_SORT
+  for (const sort of VALID_SORTS) {
+    if (sort === raw) return sort
+  }
+  return DEFAULT_SORT
 }
 
 export type ExploreFilters = {

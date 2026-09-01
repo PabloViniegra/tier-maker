@@ -20,12 +20,12 @@ export const ALLOWED_IMAGE_TYPES = [
 ] as const
 export type AllowedImageType = (typeof ALLOWED_IMAGE_TYPES)[number]
 
-export const IMAGE_EXT_BY_MIME: Record<AllowedImageType, string> = {
+export const IMAGE_EXT_BY_MIME = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
   'image/webp': 'webp',
   'image/gif': 'gif',
-}
+} as const satisfies Record<AllowedImageType, string>
 
 export const TIER_COLORS = {
   S: 'oklch(0.65 0.22 250)',
@@ -141,13 +141,13 @@ export function buildCatalogue(
   return catalogue
 }
 
+const TIER_ORDER = ['S', 'A', 'B', 'C', 'D', 'F'] as const
+
 export function defaultTierRows(): TierRow[] {
-  return (
-    Object.entries(TIER_COLORS) as [keyof typeof TIER_COLORS, string][]
-  ).map(([label, color]) => ({
+  return TIER_ORDER.map((label) => ({
     id: `tier-${label.toLowerCase()}`,
     label,
-    color,
+    color: TIER_COLORS[label],
     items: [],
   }))
 }

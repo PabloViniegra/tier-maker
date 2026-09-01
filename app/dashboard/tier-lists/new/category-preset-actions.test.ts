@@ -1,33 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-vi.mock('server-only', () => ({}))
-
-const { mockGetSession, mockInsert, mockDelete } = vi.hoisted(() => ({
-  mockGetSession: vi.fn(),
-  mockInsert: vi.fn(),
-  mockDelete: vi.fn(),
-}))
-
-vi.mock('@/lib/session', () => ({ getSession: mockGetSession }))
-
-vi.mock('@/lib/db', () => ({
-  db: {
-    insert: mockInsert,
-    delete: mockDelete,
-  },
-}))
-
+import { getSession } from '@/lib/session'
+import { db } from '@/lib/db'
 import {
   saveUserCategoryPresetAction,
   deleteUserCategoryPresetAction,
 } from './actions'
+import { asMock } from '@/test/as-mock'
 
 function authedSession(userId = 'user-1') {
-  mockGetSession.mockResolvedValue({ user: { id: userId } })
+  asMock(getSession).mockResolvedValue({ user: { id: userId } })
 }
 
 function anonSession() {
-  mockGetSession.mockResolvedValue(null)
+  asMock(getSession).mockResolvedValue(null)
 }
 
 describe('saveUserCategoryPresetAction', () => {
@@ -43,7 +28,7 @@ describe('saveUserCategoryPresetAction', () => {
   it('inserts preset for authenticated user and returns it', async () => {
     authedSession()
     const preset = { id: 'p-1', name: 'Arquitectura' }
-    mockInsert.mockReturnValue({
+    asMock(db.insert).mockReturnValue({
       values: vi.fn().mockReturnValue({
         onConflictDoNothing: vi.fn().mockReturnValue({
           returning: vi.fn().mockResolvedValue([preset]),
@@ -58,7 +43,7 @@ describe('saveUserCategoryPresetAction', () => {
 
   it('returns existing preset silently on duplicate (upsert)', async () => {
     authedSession()
-    mockInsert.mockReturnValue({
+    asMock(db.insert).mockReturnValue({
       values: vi.fn().mockReturnValue({
         onConflictDoNothing: vi.fn().mockReturnValue({
           returning: vi.fn().mockResolvedValue([]),
@@ -87,11 +72,11 @@ describe('deleteUserCategoryPresetAction', () => {
 
   it('deletes the preset owned by the user', async () => {
     authedSession()
-    mockDelete.mockReturnValue({
+    asMock(db.delete).mockReturnValue({
       where: vi.fn().mockResolvedValue(undefined),
     })
 
     await expect(deleteUserCategoryPresetAction('p-1')).resolves.toBeUndefined()
-    expect(mockDelete).toHaveBeenCalledTimes(1)
+    expect(asMock(db.delete)).toHaveBeenCalledTimes(1)
   })
 })

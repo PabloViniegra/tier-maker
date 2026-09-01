@@ -1,16 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-vi.mock('server-only', () => ({}))
-
-const { mockGetSession, mockDel } = vi.hoisted(() => ({
-  mockGetSession: vi.fn(),
-  mockDel: vi.fn(),
-}))
-
-vi.mock('@/lib/session', () => ({ getSession: mockGetSession }))
-vi.mock('@vercel/blob', () => ({ del: mockDel }))
-
+import { getSession } from '@/lib/session'
+import { del } from '@vercel/blob'
 import { deleteImagesAction } from './delete-images'
+import { asMock } from '@/test/as-mock'
 
 const owned =
   'https://store.public.blob.vercel-storage.com/tier-items/user-1/abc.png'
@@ -23,21 +15,21 @@ describe('deleteImagesAction', () => {
   })
 
   it('throws when unauthenticated', async () => {
-    mockGetSession.mockResolvedValue(null)
+    asMock(getSession).mockResolvedValue(null)
     await expect(deleteImagesAction([owned])).rejects.toThrow(/auth/i)
-    expect(mockDel).not.toHaveBeenCalled()
+    expect(del).not.toHaveBeenCalled()
   })
 
   it('throws Forbidden when a URL belongs to another user', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'user-1' } })
+    asMock(getSession).mockResolvedValue({ user: { id: 'user-1' } })
     await expect(deleteImagesAction([otherUser])).rejects.toThrow(/forbidden/i)
-    expect(mockDel).not.toHaveBeenCalled()
+    expect(del).not.toHaveBeenCalled()
   })
 
   it('purges owned blob URLs', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'user-1' } })
-    mockDel.mockResolvedValue(undefined)
+    asMock(getSession).mockResolvedValue({ user: { id: 'user-1' } })
+    asMock(del).mockResolvedValue(undefined)
     await expect(deleteImagesAction([owned])).resolves.toEqual({ ok: true })
-    expect(mockDel).toHaveBeenCalledWith([owned])
+    expect(del).toHaveBeenCalledWith([owned])
   })
 })

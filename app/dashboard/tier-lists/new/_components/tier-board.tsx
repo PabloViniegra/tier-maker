@@ -215,7 +215,7 @@ export function TierBoard({
 
   return (
     <section
-      ref={boardRef as React.RefObject<HTMLElement>}
+      ref={boardRef}
       className="flex flex-col gap-1.5"
     >
       {rows.map((row, index) => (

@@ -22,10 +22,8 @@ import { slugify } from '@/lib/utils/slug'
 
 const MAX_SLUG_RETRIES = 50
 
-function isUniqueViolation(err: unknown): boolean {
-  if (!err || typeof err !== 'object') return false
-  const code = (err as { code?: string }).code
-  return code === '23505'
+function isUniqueViolation(err: Error): boolean {
+  return 'code' in err && err.code === '23505'
 }
 
 function uniquePath(userId: string, type: AllowedImageType): string {
@@ -126,7 +124,13 @@ export async function createTierListAction(
       revalidateExplore()
       return { id }
     } catch (err) {
-      if (isUniqueViolation(err) && attempt < MAX_SLUG_RETRIES - 1) continue
+      if (
+        err instanceof Error &&
+        isUniqueViolation(err) &&
+        attempt < MAX_SLUG_RETRIES - 1
+      ) {
+        continue
+      }
       throw err
     }
   }
