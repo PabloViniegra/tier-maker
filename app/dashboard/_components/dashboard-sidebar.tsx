@@ -41,7 +41,7 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
               collapsed ? 'justify-center px-0' : 'gap-2'
             )}
           >
-            <SidebarLogo />
+            <SidebarLogo showWordmark={!collapsed} />
           </div>
 
           <SidebarNav pathname={pathname} collapsed={collapsed} />
@@ -54,7 +54,7 @@ export function DashboardSidebar({ user }: { user: SidebarUser }) {
           onClick={toggleSidebar}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-expanded={!collapsed}
-          className="absolute top-4 -right-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-background shadow-sm transition-colors hover:bg-muted"
+          className="absolute top-2.5 -right-3 z-10 flex size-7 items-center justify-center rounded-md border border-border bg-surface text-muted-foreground shadow-overlay transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring"
         >
           <motion.span
             animate={{ rotate: collapsed ? 180 : 0 }}

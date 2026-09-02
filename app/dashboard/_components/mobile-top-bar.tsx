@@ -35,11 +35,11 @@ export function MobileTopBar({ user }: { user: SidebarUser }) {
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="flex w-[240px] flex-col border-border bg-surface p-0"
+          className="flex !w-[240px] flex-col border-border bg-surface p-0"
         >
           <SheetHeader className="flex h-12 flex-row items-center gap-2 space-y-0 border-b border-border px-4">
             <SheetTitle className="flex items-center gap-0">
-              <SidebarLogo />
+              <SidebarLogo showWordmark />
             </SheetTitle>
           </SheetHeader>
           <SidebarNav pathname={pathname} collapsed={false} />
@@ -47,7 +47,7 @@ export function MobileTopBar({ user }: { user: SidebarUser }) {
         </SheetContent>
       </Sheet>
 
-      <SidebarLogo />
+      <SidebarLogo showWordmark />
     </header>
   )
 }

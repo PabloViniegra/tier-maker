@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import {
+  SidebarLogo,
   SidebarNav,
   SidebarUserProfile,
   getInitials,
@@ -35,6 +36,25 @@ describe('SidebarNav', () => {
     const link = screen.getByRole('link', { name: /explore/i })
     expect(link).toHaveClass('text-foreground')
     expect(link).not.toHaveClass('text-muted-foreground')
+  })
+
+  it('exposes the active route to assistive technology', () => {
+    render(<SidebarNav pathname="/dashboard/explore" collapsed={false} />)
+    expect(screen.getByRole('link', { name: /explore/i })).toHaveAttribute(
+      'aria-current',
+      'page'
+    )
+    expect(
+      screen.getByRole('link', { name: /^dashboard$/i })
+    ).not.toHaveAttribute('aria-current')
+  })
+
+  it('exposes the active route when collapsed', () => {
+    render(<SidebarNav pathname="/dashboard/explore" collapsed={true} />)
+    expect(screen.getByRole('link', { name: /explore/i })).toHaveAttribute(
+      'aria-current',
+      'page'
+    )
   })
 
   it('keeps Dashboard and My Tier Lists links unchanged', () => {
@@ -93,6 +113,24 @@ describe('SidebarUserProfile', () => {
   it('always shows avatar initials', () => {
     render(<SidebarUserProfile user={mockUser} collapsed={true} />)
     expect(screen.getByText('PG')).toBeInTheDocument()
+  })
+})
+
+describe('SidebarLogo', () => {
+  it('renders only the icon by default', () => {
+    render(<SidebarLogo />)
+    expect(screen.getByTestId('tier-maker-icon')).toBeInTheDocument()
+    expect(screen.queryByText('Tier Maker')).not.toBeInTheDocument()
+  })
+
+  it('renders the wordmark when requested', () => {
+    render(<SidebarLogo showWordmark />)
+    expect(screen.getByText('Tier Maker')).toBeInTheDocument()
+  })
+
+  it('hides the wordmark when explicitly collapsed', () => {
+    render(<SidebarLogo showWordmark={false} />)
+    expect(screen.queryByText('Tier Maker')).not.toBeInTheDocument()
   })
 })
 

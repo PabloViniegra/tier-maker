@@ -25,7 +25,11 @@ export type SidebarUser = {
 type NavItem = {
   label: string
   href: string
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>
+  icon: React.ComponentType<{
+    size?: number
+    strokeWidth?: number
+    className?: string
+  }>
 }
 
 export const navItems: NavItem[] = [
@@ -46,8 +50,19 @@ export function getInitials(name: string | null, email: string): string {
   return (email[0] ?? '').toUpperCase()
 }
 
-export function SidebarLogo() {
-  return <TierMakerIcon size={20} aria-hidden="true" />
+export function SidebarLogo({
+  showWordmark = false,
+}: { showWordmark?: boolean } = {}) {
+  return (
+    <span className={cn('flex items-center', showWordmark && 'gap-2')}>
+      <TierMakerIcon size={20} aria-hidden="true" />
+      {showWordmark && (
+        <span className="font-heading text-sm font-semibold tracking-tight whitespace-nowrap text-foreground">
+          Tier Maker
+        </span>
+      )}
+    </span>
+  )
 }
 
 export function SidebarNav({
@@ -58,7 +73,10 @@ export function SidebarNav({
   collapsed: boolean
 }) {
   return (
-    <nav className="flex flex-1 flex-col gap-0.5 p-2">
+    <nav
+      aria-label="Primary navigation"
+      className="flex flex-1 flex-col gap-1 p-2"
+    >
       {navItems.map(({ label, href, icon: Icon }) => {
         const isActive =
           href === '/dashboard'
@@ -66,7 +84,7 @@ export function SidebarNav({
             : pathname.startsWith(href)
 
         const linkClassName = cn(
-          'relative flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors duration-150',
+          'relative flex min-h-9 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors duration-150 outline-none focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring',
           collapsed && 'justify-center px-0',
           isActive
             ? 'text-foreground'
@@ -78,12 +96,19 @@ export function SidebarNav({
             {isActive && (
               <motion.span
                 layoutId="sidebar-active-bg"
-                className="absolute inset-0 rounded-md bg-muted"
+                className="pointer-events-none absolute inset-0 rounded-md bg-muted"
                 transition={springTransition}
               />
             )}
+            {isActive && (
+              <span className="pointer-events-none absolute inset-y-1.5 left-0 w-0.5 rounded-r-sm bg-primary" />
+            )}
             <span className="relative flex items-center gap-2">
-              <Icon size={14} strokeWidth={1.5} />
+              <Icon
+                size={15}
+                strokeWidth={1.5}
+                className={cn(isActive && 'text-primary')}
+              />
               {!collapsed && (
                 <span data-testid="nav-label" className="whitespace-nowrap">
                   {label}
@@ -102,6 +127,7 @@ export function SidebarNav({
                     href={href}
                     prefetch={true}
                     aria-label={label}
+                    aria-current={isActive ? 'page' : undefined}
                     className={linkClassName}
                   >
                     {linkInner}
@@ -118,6 +144,7 @@ export function SidebarNav({
             key={href}
             href={href}
             prefetch={true}
+            aria-current={isActive ? 'page' : undefined}
             className={linkClassName}
           >
             {linkInner}
