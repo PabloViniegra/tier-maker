@@ -116,7 +116,7 @@ function TierRowChip({
             if (e.key === 'Enter') confirmEdit()
             if (e.key === 'Escape') cancelEdit()
           }}
-          className="w-[4.5rem] rounded bg-transparent text-center text-xs font-bold text-white outline-none placeholder:text-white/60 focus-visible:ring-2 focus-visible:ring-white/60"
+          className="relative z-10 w-[4.5rem] rounded bg-transparent text-center text-xs font-bold text-white outline-none placeholder:text-white/60 focus-visible:ring-2 focus-visible:ring-white/60"
           maxLength={20}
           aria-label="Edit tier label"
         />
@@ -131,7 +131,7 @@ function TierRowChip({
               startEdit()
             }
           }}
-          className="line-clamp-2 cursor-text rounded px-1 text-center text-xs leading-tight break-words select-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+          className="relative z-10 line-clamp-2 cursor-text rounded px-1 text-center text-xs leading-tight break-words select-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
           title="Double-click or press Enter to rename"
         >
           {label}
@@ -139,7 +139,7 @@ function TierRowChip({
       )}
 
       <Popover>
-        <div className="absolute bottom-0 left-0 size-11">
+        <div className="absolute bottom-0 left-0 size-7">
           <PopoverTrigger
             aria-label="Change tier color"
             className="group/color flex h-full w-full items-end justify-start p-1 focus-visible:outline-none"
@@ -177,7 +177,7 @@ function TierRowChip({
         <button
           type="button"
           onClick={onRemove}
-          className="group/remove absolute top-0 right-0 flex size-11 items-start justify-end p-1 focus-visible:outline-none"
+          className="group/remove absolute top-0 right-0 flex size-7 items-start justify-end p-1 focus-visible:outline-none"
           aria-label="Remove row"
         >
           <span className="flex size-6 items-center justify-center rounded-md text-white/80 group-hover/remove:bg-white/20 group-hover/remove:text-white group-focus-visible/remove:ring-2 group-focus-visible/remove:ring-white/70">
