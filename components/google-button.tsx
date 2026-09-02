@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
@@ -33,37 +35,66 @@ function GoogleIcon() {
   )
 }
 
-export function GoogleButton() {
+export function GoogleButton({
+  divider = 'after',
+}: {
+  divider?: 'before' | 'after'
+}) {
+  const [pending, setPending] = useState(false)
+
   const handleGoogleSignIn = async () => {
+    setPending(true)
     try {
       await authClient.signIn.social({
         provider: 'google',
         callbackURL: '/dashboard',
       })
     } catch {
+      setPending(false)
       toast.error('Something went wrong. Please try again.')
     }
   }
 
-  return (
-    <>
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full gap-2"
-        onClick={handleGoogleSignIn}
-      >
+  const button = (
+    <Button
+      type="button"
+      variant="outline"
+      className="h-8 w-full gap-2 [@media(pointer:coarse)]:h-11"
+      disabled={pending}
+      aria-busy={pending}
+      onClick={handleGoogleSignIn}
+    >
+      {pending ? (
+        <Loader2 className="animate-spin" aria-hidden="true" />
+      ) : (
         <GoogleIcon />
-        Continue with Google
-      </Button>
-      <div className="relative my-1">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs">
-          <span className="bg-card px-2 text-muted-foreground">or</span>
-        </div>
+      )}
+      Continue with Google
+    </Button>
+  )
+
+  const rule = (
+    <div className="relative my-1">
+      <div className="absolute inset-0 flex items-center">
+        <span className="w-full border-t border-border" />
       </div>
+      <div className="relative flex justify-center text-xs">
+        <span className="bg-card px-2 text-muted-foreground lg:bg-background">
+          or
+        </span>
+      </div>
+    </div>
+  )
+
+  return divider === 'before' ? (
+    <>
+      {rule}
+      {button}
+    </>
+  ) : (
+    <>
+      {button}
+      {rule}
     </>
   )
 }

@@ -6,7 +6,11 @@ const TIERS = [
   { label: 'D', color: 'oklch(0.62 0.18 15)' },
 ]
 
-export function TierRowsBackground() {
+export function TierRowsBackground({
+  showLabels = true,
+}: {
+  showLabels?: boolean
+}) {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden select-none">
       {TIERS.map((tier, i) => (
@@ -20,13 +24,24 @@ export function TierRowsBackground() {
             height: '52px',
           }}
         >
+          {showLabels ? (
+            <div
+              className="flex w-16 shrink-0 items-center justify-center font-heading text-2xl font-bold text-white"
+              style={{ background: tier.color }}
+            >
+              {tier.label}
+            </div>
+          ) : null}
           <div
-            className="flex w-16 shrink-0 items-center justify-center font-heading text-2xl font-bold text-white"
-            style={{ background: tier.color }}
-          >
-            {tier.label}
-          </div>
-          <div className="flex-1 border border-white/10 bg-white/[0.04]" />
+            className="flex-1 border border-white/10 bg-white/[0.04]"
+            style={
+              showLabels
+                ? undefined
+                : {
+                    background: `color-mix(in oklch, ${tier.color} 22%, transparent)`,
+                  }
+            }
+          />
         </div>
       ))}
     </div>

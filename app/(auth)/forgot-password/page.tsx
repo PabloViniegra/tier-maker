@@ -12,19 +12,19 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-center font-heading text-lg font-semibold tracking-tight text-card-foreground">
+        <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground">
           Reset your password
         </h1>
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           We will email you a secure reset link
         </p>
       </div>
       <RequestPasswordResetForm />
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Remembered your password?{' '}
         <Link
           href="/login"
-          className="font-medium text-primary underline-offset-4 hover:underline"
+          className="inline-flex min-h-8 items-center font-medium text-foreground underline-offset-4 hover:underline [@media(pointer:coarse)]:min-h-11"
         >
           Sign in
         </Link>

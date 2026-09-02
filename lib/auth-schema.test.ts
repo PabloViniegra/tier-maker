@@ -59,6 +59,26 @@ describe('registerSchema', () => {
       confirmPassword: 'password123',
     })
     expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.name?.[0]).toBe(
+        'Display name must be at least 2 characters'
+      )
+    }
+  })
+
+  it('requires a display name', () => {
+    const result = registerSchema.safeParse({
+      name: '',
+      email: 'john@example.com',
+      password: 'password123',
+      confirmPassword: 'password123',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.name?.[0]).toBe(
+        'Display name is required'
+      )
+    }
   })
 
   it('rejects a password with less than 8 characters', () => {

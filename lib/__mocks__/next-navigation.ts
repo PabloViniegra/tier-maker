@@ -8,9 +8,7 @@ export function useRouter() {
   return { push: mockPush, refresh: mockRefresh, replace: mockReplace }
 }
 
-export function usePathname() {
-  return '/'
-}
+export const usePathname = vi.fn(() => '/')
 
 export const useSearchParams = vi.fn(() => new URLSearchParams())
 

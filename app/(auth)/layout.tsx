@@ -1,3 +1,7 @@
+import Link from 'next/link'
+
+import { AuthTierPreview } from '@/components/auth-tier-preview'
+import { TierMakerIcon } from '@/components/tier-maker-icon'
 import { TierRowsBackground } from '@/components/tier-rows-background'
 import { FadeUp } from '@/components/ui/fade-up'
 
@@ -5,54 +9,46 @@ interface AuthLayoutProps {
   children: React.ReactNode
 }
 
+function Wordmark({ className }: { className?: string }) {
+  return (
+    <div className={className}>
+      <Link
+        href="/"
+        className="inline-flex items-center gap-2 font-heading text-2xl font-semibold tracking-tight text-foreground"
+      >
+        <TierMakerIcon size={20} aria-hidden="true" />
+        <span translate="no">Tier Maker</span>
+      </Link>
+    </div>
+  )
+}
+
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="flex min-h-dvh">
-      {/* Left decorative panel — desktop only */}
-      <div
-        aria-hidden="true"
-        className="relative hidden overflow-hidden border-r border-border bg-background lg:flex lg:w-1/2"
-      >
-        <TierRowsBackground />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_40%_50%,oklch(0.62_0.22_250/0.12)_0%,transparent_65%)]" />
-        <FadeUp
-          onMount
-          delay={0.1}
-          className="relative z-10 flex h-full w-full flex-col justify-end p-10"
-        >
-          <p
-            className="font-heading text-2xl font-semibold text-foreground"
-            translate="no"
-          >
-            Tier Maker
-          </p>
+      <div className="relative hidden min-h-dvh flex-col justify-center overflow-hidden border-r border-border bg-card px-10 py-10 lg:flex lg:w-1/2">
+        <TierRowsBackground showLabels={false} />
+        <div className="relative z-10">
+          <Wordmark />
           <p className="mt-1 text-sm text-muted-foreground">
             Create and share tier lists with the community
           </p>
-        </FadeUp>
+          <div className="mt-10">
+            <AuthTierPreview />
+          </div>
+        </div>
       </div>
 
-      {/* Right form panel */}
       <main
         id="main-content"
-        className="flex w-full flex-col items-center justify-center bg-background p-6 lg:w-1/2 lg:p-12"
+        className="flex w-full flex-col items-center justify-center bg-background p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] lg:w-1/2 lg:p-12"
       >
         <div className="w-full max-w-sm">
-          {/* Wordmark — mobile only (desktop shows it in left panel) */}
-          <div className="mb-6 text-center lg:hidden">
-            <p
-              className="font-heading text-2xl font-semibold tracking-tight text-foreground"
-              translate="no"
-            >
-              Tier Maker
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Create and share tier lists with the community
-            </p>
-          </div>
+          <AuthTierPreview compact className="mb-6 lg:hidden" />
+          <Wordmark className="mb-8 lg:hidden" />
           <FadeUp
             onMount
-            className="rounded-xl border border-border bg-card p-6 shadow-overlay"
+            className="rounded-lg border border-border bg-card p-6 lg:border-0 lg:bg-transparent lg:p-0"
           >
             {children}
           </FadeUp>

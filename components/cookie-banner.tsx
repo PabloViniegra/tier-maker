@@ -2,17 +2,34 @@
 
 import { useSyncExternalStore } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { useConsentStore } from '@/lib/stores/consent'
 import { slideUpVariants } from '@/lib/motion-variants'
 
+const AUTH_PREFIXES = [
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+]
+
+function isAuthPath(pathname: string) {
+  return AUTH_PREFIXES.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  )
+}
+
 export function CookieBanner() {
+  const pathname = usePathname()
   const status = useSyncExternalStore(
     useConsentStore.subscribe,
     () => useConsentStore.getState().status,
     () => 'pending' as const
   )
+
+  if (isAuthPath(pathname)) return null
 
   return (
     <AnimatePresence>

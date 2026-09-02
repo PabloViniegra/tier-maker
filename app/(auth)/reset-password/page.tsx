@@ -18,10 +18,10 @@ export default async function ResetPasswordPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-center font-heading text-lg font-semibold tracking-tight text-card-foreground">
+        <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground">
           Choose a new password
         </h1>
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Use at least eight characters
         </p>
       </div>

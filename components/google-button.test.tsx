@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { GoogleButton } from './google-button'
 import { asMock } from '@/test/as-mock'
 
@@ -22,7 +23,18 @@ describe('GoogleButton', () => {
     })
   })
 
+  it('marks the button busy while Google sign-in is pending', async () => {
+    const { authClient } = await import('@/lib/auth-client')
+    asMock(authClient.signIn.social).mockReturnValue(new Promise(() => {}))
+    render(<GoogleButton />)
+    const button = screen.getByRole('button', { name: /continue with google/i })
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-busy', 'true')
+    expect(button).toBeDisabled()
+  })
+
   it('shows error toast when sign-in fails', async () => {
+    const user = userEvent.setup()
     const { authClient } = await import('@/lib/auth-client')
     const { toast } = await import('sonner')
     asMock(authClient.signIn.social).mockRejectedValueOnce(
@@ -30,11 +42,10 @@ describe('GoogleButton', () => {
     )
     render(<GoogleButton />)
     const button = screen.getByRole('button', { name: /continue with google/i })
-    fireEvent.click(button)
-    await vi.waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith(
-        'Something went wrong. Please try again.'
-      )
-    })
+    await user.click(button)
+    expect(toast.error).toHaveBeenCalledWith(
+      'Something went wrong. Please try again.'
+    )
+    expect(button).not.toBeDisabled()
   })
 })
