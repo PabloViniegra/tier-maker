@@ -3,7 +3,7 @@
 import { useRef } from 'react'
 import { Droppable, Draggable } from '@hello-pangea/dnd'
 import { motion } from 'motion/react'
-import { ImagePlus, Loader2, X } from 'lucide-react'
+import { ImagePlus, ListPlus, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -16,7 +16,13 @@ import { BANK_DROPPABLE } from './constants'
 import { ALLOWED_IMAGE_TYPES, MAX_ITEM_COUNT } from '@/lib/validators/tier-list'
 import { deleteImagesAction } from '../../_actions/delete-images'
 import { cn } from '@/lib/utils'
-import { dragActiveVariants, hoverRevealVariants } from '@/lib/motion-variants'
+import { dragActiveVariants } from '@/lib/motion-variants'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export function ItemBank({
   onPickFiles,
@@ -24,7 +30,10 @@ export function ItemBank({
   onPickFiles: (files: File[]) => void
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const uploadButtonRef = useRef<HTMLButtonElement>(null)
   const bankItems = useTierEditor((s) => s.bankItems)
+  const rows = useTierEditor((s) => s.rows)
+  const moveItem = useTierEditor((s) => s.moveItem)
   const removeItemEverywhere = useTierEditor((s) => s.removeItemEverywhere)
 
   return (
@@ -54,9 +63,10 @@ export function ItemBank({
 
       <Button
         type="button"
+        ref={uploadButtonRef}
         variant="outline"
         size="sm"
-        className="w-full gap-2"
+        className="h-11 w-full gap-2"
         onClick={() => inputRef.current?.click()}
         data-testid="bank-upload-button"
       >
@@ -64,7 +74,7 @@ export function ItemBank({
         Upload images
       </Button>
 
-      <p className="text-[11px] leading-relaxed text-muted-foreground">
+      <p className="text-xs leading-relaxed text-muted-foreground">
         Drag files into the page, paste (Ctrl+V), or click. JPG, PNG, WEBP, GIF
         up to 5 MB each.
       </p>
@@ -94,13 +104,11 @@ export function ItemBank({
                       key={item.id}
                       draggableId={item.id}
                       index={index}
-                      disableInteractiveElementBlocking
                     >
                       {(dragProvided, dragSnapshot) => (
                         <li
                           ref={dragProvided.innerRef}
                           {...dragProvided.draggableProps}
-                          {...dragProvided.dragHandleProps}
                           className="group/item relative aspect-square"
                           data-testid="bank-item"
                         >
@@ -117,6 +125,7 @@ export function ItemBank({
                               <Tooltip>
                                 <TooltipTrigger
                                   render={<span />}
+                                  {...dragProvided.dragHandleProps}
                                   className="block h-full w-full"
                                   aria-label={item.label}
                                 >
@@ -134,29 +143,84 @@ export function ItemBank({
                                 <TooltipContent>{item.label}</TooltipContent>
                               </Tooltip>
                             ) : item.status === 'uploading' ? (
-                              <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                              <div
+                                {...dragProvided.dragHandleProps}
+                                className="flex h-full w-full items-center justify-center text-muted-foreground"
+                              >
                                 <Loader2 size={16} className="animate-spin" />
                               </div>
                             ) : (
-                              <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-destructive/10 p-1 text-center text-[10px] text-destructive">
+                              <div
+                                {...dragProvided.dragHandleProps}
+                                className="flex h-full w-full flex-col items-center justify-center gap-1 bg-destructive/10 p-1 text-center text-xs text-destructive"
+                              >
                                 <span>Failed</span>
                               </div>
                             )}
-                            <motion.button
+                            {item.status === 'uploaded' && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger
+                                  className="absolute bottom-0 left-0 flex size-11 items-center justify-center"
+                                  aria-label={`Move ${item.label} to a tier`}
+                                >
+                                  <span className="flex size-7 items-center justify-center rounded-md border border-border bg-background/90 text-foreground shadow-overlay">
+                                    <ListPlus size={14} aria-hidden="true" />
+                                  </span>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  side="top"
+                                  align="start"
+                                  className="min-w-36"
+                                >
+                                  {rows.map((row, rowIndex) => (
+                                    <DropdownMenuItem
+                                      key={row.id}
+                                      className="h-11"
+                                      aria-label={`${row.label} tier, row ${rowIndex + 1}`}
+                                      onClick={() => {
+                                        moveItem({
+                                          source: 'bank',
+                                          sourceIndex: index,
+                                          target: 'row',
+                                          targetId: row.id,
+                                          targetIndex: row.items.length,
+                                        })
+                                        setTimeout(
+                                          () =>
+                                            uploadButtonRef.current?.focus(),
+                                          0
+                                        )
+                                      }}
+                                    >
+                                      <span
+                                        className="size-3 rounded-sm"
+                                        style={{ backgroundColor: row.color }}
+                                        aria-hidden="true"
+                                      />
+                                      {row.label} tier
+                                      <span className="ml-auto text-xs text-muted-foreground">
+                                        Row {rowIndex + 1}
+                                      </span>
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                            <button
                               type="button"
-                              variants={hoverRevealVariants}
-                              whileFocus="hover"
                               onClick={() => {
                                 if (item.status === 'uploaded' && item.url) {
                                   deleteImagesAction([item.url]).catch(() => {})
                                 }
                                 removeItemEverywhere(item.id)
                               }}
-                              className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground hover:text-foreground"
+                              className="absolute top-0 right-0 flex size-11 items-center justify-center text-muted-foreground"
                               aria-label={`Remove ${item.label}`}
                             >
-                              <X size={12} />
-                            </motion.button>
+                              <span className="flex size-7 items-center justify-center rounded-md border border-border bg-background/90 shadow-overlay hover:text-foreground">
+                                <X size={12} aria-hidden="true" />
+                              </span>
+                            </button>
                           </motion.div>
                         </li>
                       )}

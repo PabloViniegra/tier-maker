@@ -12,10 +12,7 @@ import {
   type TierListDetailSeed,
 } from '@/lib/stores/tier-editor'
 import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
-import {
-  MAX_FILE_SIZE,
-  MAX_ITEM_COUNT,
-} from '@/lib/validators/tier-list'
+import { MAX_FILE_SIZE, MAX_ITEM_COUNT } from '@/lib/validators/tier-list'
 import { MetadataPanel } from './metadata-panel'
 import { ItemBank } from './item-bank'
 import { TierBoard } from './tier-board'
@@ -137,7 +134,10 @@ export function TierListCreator({
       }
     }
     function onDragLeave(e: DragEvent) {
-      if (e.target instanceof HTMLElement && e.target.id === 'page-dropzone-overlay') {
+      if (
+        e.target instanceof HTMLElement &&
+        e.target.id === 'page-dropzone-overlay'
+      ) {
         setIsDraggingFile(false)
       }
     }
@@ -212,13 +212,13 @@ export function TierListCreator({
       </PageHeader>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[260px_1fr_320px] lg:items-start">
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[320px_minmax(0,1fr)_260px] lg:items-start">
+          <ItemBank onPickFiles={openModal} />
+          <TierBoard />
           <MetadataPanel
             categoryPresets={categoryPresets}
             userPresets={userCategoryPresets}
           />
-          <TierBoard />
-          <ItemBank onPickFiles={openModal} />
         </div>
       </DragDropContext>
 

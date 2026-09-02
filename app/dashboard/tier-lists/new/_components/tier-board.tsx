@@ -139,17 +139,14 @@ function TierRowChip({
       )}
 
       <Popover>
-        <motion.div
-          variants={hoverRevealVariants}
-          className="absolute right-0.5 bottom-0.5"
-        >
+        <div className="absolute bottom-0 left-0 size-11">
           <PopoverTrigger
             aria-label="Change tier color"
-            className="flex h-4 w-4 items-center justify-center rounded-sm border border-white/30 bg-black/20 text-white hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+            className="flex h-full w-full items-center justify-center rounded-sm border border-white/30 bg-black/20 text-white hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
           >
             <Palette size={9} aria-hidden="true" />
           </PopoverTrigger>
-        </motion.div>
+        </div>
         <PopoverContent
           side="right"
           sideOffset={8}
@@ -175,16 +172,14 @@ function TierRowChip({
       </Popover>
 
       {canRemove && (
-        <motion.button
+        <button
           type="button"
-          variants={hoverRevealVariants}
-          whileFocus="hover"
           onClick={onRemove}
-          className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-border bg-background text-muted-foreground"
+          className="absolute top-0 -right-2 flex size-11 items-center justify-center rounded-full border border-border bg-background text-muted-foreground"
           aria-label="Remove row"
         >
           <X size={9} aria-hidden="true" />
-        </motion.button>
+        </button>
       )}
     </motion.div>
   )
@@ -214,10 +209,7 @@ export function TierBoard({
   const imgSize = lg ? 80 : 48
 
   return (
-    <section
-      ref={boardRef}
-      className="flex flex-col gap-1.5"
-    >
+    <section ref={boardRef} className="flex flex-col gap-1.5">
       {rows.map((row, index) => (
         <motion.div
           key={row.id}
@@ -353,7 +345,7 @@ export function TierBoard({
           variant="ghost"
           size="sm"
           onClick={addRow}
-          className="mt-1 w-fit gap-1.5 text-muted-foreground hover:text-foreground"
+          className="mt-1 h-11 w-fit gap-1.5 text-muted-foreground hover:text-foreground"
         >
           <Plus size={14} />
           Add row

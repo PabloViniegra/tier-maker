@@ -16,7 +16,7 @@ export function SaveBar({
       size="sm"
       onClick={onSave}
       disabled={isSaving}
-      className="gap-2"
+      className="h-11 gap-2"
       data-testid="save-button"
     >
       <Save size={14} aria-hidden="true" />

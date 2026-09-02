@@ -36,6 +36,21 @@ describe('TierListCreator — create mode (no initialData)', () => {
     expect(back).toHaveAttribute('href', '/dashboard')
   })
 
+  it('orders image intake before ranking and details', () => {
+    render(<TierListCreator {...baseProps} />)
+
+    const itemBank = screen.getByRole('heading', { name: /item bank/i })
+    const firstTier = screen.getAllByRole('list')[0]
+    const details = screen.getByRole('heading', { name: /details/i })
+
+    expect(itemBank.compareDocumentPosition(firstTier)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    )
+    expect(firstTier.compareDocumentPosition(details)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    )
+  })
+
   it('clears leftover editor state on mount', () => {
     useTierEditor.getState().setMetadata({ title: 'Stale' })
     render(<TierListCreator {...baseProps} />)

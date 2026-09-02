@@ -37,7 +37,7 @@ export function PageHeader({
           aria-label="Back"
           className={cn(
             buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'shrink-0 gap-1.5 text-muted-foreground hover:text-foreground'
+            'h-11 shrink-0 gap-1.5 text-muted-foreground hover:text-foreground'
           )}
         >
           <ArrowLeft size={14} aria-hidden="true" />
