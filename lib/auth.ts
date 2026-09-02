@@ -64,10 +64,13 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins: [
-    process.env.NEXT_PUBLIC_APP_URL ?? 'https://tier-maker.app',
+    'https://tier.pabloviniegra.dev',
+    'https://project-hbojo.vercel.app',
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.BETTER_AUTH_URL,
     'http://localhost:3000',
     'http://localhost:3001',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
-  ],
+  ].filter((origin): origin is string => Boolean(origin)),
 })

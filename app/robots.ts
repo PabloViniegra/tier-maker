@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tier-maker.app'
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tier.pabloviniegra.dev'
 
 export default function robots(): MetadataRoute.Robots {
   return {

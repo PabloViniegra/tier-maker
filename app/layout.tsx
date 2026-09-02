@@ -9,7 +9,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { CookieBanner } from '@/components/cookie-banner'
 import { cn } from '@/lib/utils'
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tier-maker.app'
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tier.pabloviniegra.dev'
 
 export const viewport: Viewport = {
   themeColor: '#1a1a1a',

@@ -23,7 +23,8 @@ function validateEmailUrl(rawUrl: string) {
   const allowedOrigins = [
     process.env.BETTER_AUTH_URL,
     process.env.NEXT_PUBLIC_APP_URL,
-    'https://tier-maker.app',
+    'https://tier.pabloviniegra.dev',
+    'https://project-hbojo.vercel.app',
     'http://localhost:3000',
     'http://localhost:3001',
     'http://127.0.0.1:3000',
