@@ -20,11 +20,7 @@ export function PublicTierRow({ row }: PublicTierRowProps) {
   const rowHeightCls = CHIP_HEIGHT === '24' ? 'min-h-24' : 'min-h-16'
 
   return (
-    <div
-      className="flex items-stretch gap-1.5"
-      data-testid="tier-row"
-      aria-label={`Tier ${row.label}`}
-    >
+    <div className="flex items-stretch gap-1.5" data-testid="tier-row">
       {/* Tier label chip — visual-only, no interactive controls */}
       <div
         className={cn(
@@ -32,7 +28,6 @@ export function PublicTierRow({ row }: PublicTierRowProps) {
           chipCls
         )}
         style={{ background: row.color }}
-        aria-label={`Tier ${row.label}`}
       >
         <span className="line-clamp-2 px-1 text-center text-xs leading-tight break-words select-none">
           {row.label}
@@ -48,7 +43,7 @@ export function PublicTierRow({ row }: PublicTierRowProps) {
         data-testid="tier-row-droppable"
       >
         {row.items.length === 0 && (
-          <span className="text-xs text-muted-foreground">Drag items here</span>
+          <span className="text-xs text-muted-foreground">Empty tier</span>
         )}
         {row.items.map((item) => (
           <PublicTierItem key={item.url} url={item.url} label={item.label} />

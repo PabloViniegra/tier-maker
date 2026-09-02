@@ -86,11 +86,7 @@ function TierRowChip({
 
   if (readOnly) {
     return (
-      <div
-        className={chipClassName}
-        style={{ background: color }}
-        aria-label={`Tier ${label}`}
-      >
+      <div className={chipClassName} style={{ background: color }}>
         <span className="line-clamp-2 px-1 text-center text-xs leading-tight break-words select-none">
           {label}
         </span>
@@ -102,7 +98,6 @@ function TierRowChip({
     <motion.div
       className={chipClassName}
       style={{ background: color }}
-      aria-label={`Tier ${label}`}
       initial="rest"
       whileHover="hover"
     >
@@ -213,7 +208,11 @@ export function TierBoard({
   const imgSize = lg ? 80 : 64
 
   return (
-    <section ref={boardRef} className="flex flex-col gap-1.5">
+    <section
+      ref={boardRef}
+      className="flex flex-col gap-1.5"
+      aria-label="Tier list board"
+    >
       {rows.map((row, index) => (
         <motion.div
           key={row.id}
@@ -252,7 +251,7 @@ export function TierBoard({
               >
                 {row.items.length === 0 && !snapshot.isDraggingOver && (
                   <span className="text-xs text-muted-foreground">
-                    Drag items here
+                    Drop items here
                   </span>
                 )}
                 <TooltipProvider>

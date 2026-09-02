@@ -5,9 +5,10 @@ import { cn } from '@/lib/utils'
 
 type Props = {
   isLoggedIn: boolean
+  isDetail?: boolean
 }
 
-export function ExploreHeader({ isLoggedIn }: Props) {
+export function ExploreHeader({ isLoggedIn, isDetail = false }: Props) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -27,7 +28,15 @@ export function ExploreHeader({ isLoggedIn }: Props) {
             Go to Dashboard
           </Link>
         ) : (
-          <Link href="/login" className={cn(buttonVariants({ size: 'sm' }))}>
+          <Link
+            href="/login"
+            className={cn(
+              buttonVariants({
+                variant: isDetail ? 'ghost' : 'default',
+                size: 'sm',
+              })
+            )}
+          >
             Sign in
           </Link>
         )}

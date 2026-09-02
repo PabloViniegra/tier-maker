@@ -17,9 +17,10 @@ function resolvedBg(): string {
 type Props = {
   boardRef: React.RefObject<HTMLElement | null>
   title: string
+  variant?: 'default' | 'outline'
 }
 
-export function ExportButton({ boardRef, title }: Props) {
+export function ExportButton({ boardRef, title, variant = 'outline' }: Props) {
   const [exporting, setExporting] = useState(false)
 
   async function handleExport() {
@@ -42,7 +43,7 @@ export function ExportButton({ boardRef, title }: Props) {
       link.download = `${title || 'tier-list'}.png`
       link.href = dataUrl
       link.click()
-    } catch (err) {
+    } catch {
       toast.error('Export failed. Try again.')
     } finally {
       setExporting(false)
@@ -51,7 +52,7 @@ export function ExportButton({ boardRef, title }: Props) {
 
   return (
     <Button
-      variant="outline"
+      variant={variant}
       size="sm"
       onClick={handleExport}
       disabled={exporting}

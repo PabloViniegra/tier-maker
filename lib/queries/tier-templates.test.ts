@@ -511,8 +511,10 @@ describe('getPublicTierListBySlug', () => {
   function mockTemplate<T>(tpl: T) {
     asMock(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([tpl]),
+        leftJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([tpl]),
+          }),
         }),
       }),
     })
@@ -521,8 +523,10 @@ describe('getPublicTierListBySlug', () => {
   function mockNoTemplate() {
     asMock(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([]),
+        leftJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([]),
+          }),
         }),
       }),
     })

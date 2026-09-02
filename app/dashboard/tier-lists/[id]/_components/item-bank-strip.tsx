@@ -16,8 +16,10 @@ import {
 
 export function ItemBankStrip({
   mode = 'fill',
+  showInstructions = false,
 }: {
   mode?: 'structure' | 'fill'
+  showInstructions?: boolean
 }) {
   const bankItems = useTierEditor((s) => s.bankItems)
   const removeItem = useTierEditor((s) => s.removeItem)
@@ -28,10 +30,16 @@ export function ItemBankStrip({
       suppressHydrationWarning
       className="border-t-2 border-border bg-surface shadow-[0_-4px_16px_oklch(0_0_0/0.07)]"
     >
-      <div className="px-4 pt-2 pb-1">
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-4 pt-2 pb-1">
         <p className="text-xs font-medium text-muted-foreground">
-          Items ({bankItems.length})
+          {showInstructions ? 'Items to place' : 'Items'} ({bankItems.length})
         </p>
+        {showInstructions && (
+          <p className="text-xs text-muted-foreground">
+            Drag an item into a tier. Keyboard: focus an item, press Space, use
+            the arrow keys, then press Space to place it.
+          </p>
+        )}
       </div>
       <Droppable droppableId={BANK_DROPPABLE} direction="horizontal">
         {(provided, snapshot) => (
@@ -39,7 +47,7 @@ export function ItemBankStrip({
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={cn(
-              'flex min-h-24 items-center gap-2 overflow-x-auto px-4 pt-1 pb-3 transition-colors',
+              'flex min-h-24 items-center gap-2 overflow-x-auto overscroll-contain px-4 pt-1 pb-3 transition-colors',
               snapshot.isDraggingOver && 'bg-primary/5'
             )}
           >

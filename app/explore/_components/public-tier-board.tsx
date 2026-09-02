@@ -14,8 +14,8 @@ export function PublicTierBoard({
   boardRef,
 }: PublicTierBoardProps) {
   return (
-    <div className="flex h-full flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto p-4">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
         <section
           ref={boardRef}
           className="flex flex-col gap-1.5"
@@ -27,7 +27,7 @@ export function PublicTierBoard({
         </section>
       </div>
       <div className="shrink-0">
-        <PublicItemBankStrip items={sidebarItems} />
+        <PublicItemBankStrip items={sidebarItems} showInstructions />
       </div>
     </div>
   )

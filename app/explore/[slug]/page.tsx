@@ -2,9 +2,11 @@ import { cache, ViewTransition } from 'react'
 import { notFound, permanentRedirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getSession } from '@/lib/session'
-import { getPublicTierListBySlug, getPublicTierListById } from '@/lib/queries/tier-templates'
+import {
+  getPublicTierListBySlug,
+  getPublicTierListById,
+} from '@/lib/queries/tier-templates'
 import { getIsLiked } from '@/lib/queries/tier-likes'
-import { LikeButton } from '@/components/like-button'
 import { ExploreHeader } from '../_components/explore-header'
 import { AnonymousCTABanner } from '../_components/anonymous-cta-banner'
 import { PublicTierFill } from '../_components/public-tier-fill'
@@ -69,32 +71,30 @@ export default async function PublicTierFillPage({ params }: Props) {
   const isOwner = userId !== null && data.creatorId === userId
 
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <ExploreHeader isLoggedIn={!!session} />
+    <div className="flex h-dvh flex-col bg-background">
+      <ExploreHeader isLoggedIn={!!session} isDetail />
       {!session && <AnonymousCTABanner />}
 
-      <div className="flex items-center justify-between border-b border-border bg-surface px-4 py-2">
-        <h1 className="truncate text-sm font-medium text-foreground">
-          {data.title}
-        </h1>
-        {!isOwner && (
-          <LikeButton
-            templateId={data.id}
-            initialCount={data.likeCount}
-            initialIsLiked={isLiked}
-            isAuthenticated={!!session}
-          />
-        )}
-      </div>
-
-      <main id="main-content" className="flex-1 overflow-hidden">
+      <main id="main-content" className="min-h-0 flex-1 overflow-hidden">
         <ViewTransition name={`tier-cover-${data.id}`}>
           <PublicTierFill
             tierId={data.id}
+            userId={userId}
+            like={
+              isOwner
+                ? undefined
+                : {
+                    templateId: data.id,
+                    initialCount: data.likeCount,
+                    initialIsLiked: isLiked,
+                    isAuthenticated: !!session,
+                  }
+            }
             data={{
               title: data.title,
               description: data.description,
               category: data.category,
+              creatorName: data.creatorName,
               coverImageUrl: data.coverImageUrl,
               sidebarItems: data.sidebarItems,
               rows: data.rows,

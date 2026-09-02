@@ -44,6 +44,7 @@ describe('getPublicTierListById', () => {
       title: 'Anime Rankings',
       description: 'Best shows',
       category: 'Anime',
+      creatorName: 'Alice',
       isPublic: true,
       sidebarItems: ['https://img.com/a.png', 'https://img.com/b.png'],
       createdAt: new Date('2026-01-01'),
@@ -77,6 +78,7 @@ describe('getPublicTierListById', () => {
     expect(result!.id).toBe('tid')
     expect(result!.title).toBe('Anime Rankings')
     expect(result!.description).toBe('Best shows')
+    expect(result!.creatorName).toBe('Alice')
     expect(result!.sidebarItems).toEqual([
       'https://img.com/a.png',
       'https://img.com/b.png',

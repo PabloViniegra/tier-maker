@@ -31,6 +31,7 @@ export type TierListDetailSeed = {
   title: string
   description?: string | null
   category: string
+  creatorName?: string | null
   coverImageUrl?: string | null
   sidebarItems: ImageItem[]
   rows: {
@@ -270,7 +271,9 @@ function toImageItem(item: TierItem & { url: string }): ImageItem {
 
 function uploadedItems(items: TierItem[]): ImageItem[] {
   return items.flatMap((item) =>
-    item.status === 'uploaded' && item.url ? [toImageItem({ ...item, url: item.url })] : []
+    item.status === 'uploaded' && item.url
+      ? [toImageItem({ ...item, url: item.url })]
+      : []
   )
 }
 

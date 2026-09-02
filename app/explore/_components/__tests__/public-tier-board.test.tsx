@@ -49,10 +49,9 @@ describe('PublicTierBoard', () => {
     expect(screen.getByAltText('Item C')).toBeInTheDocument()
   })
 
-  it('shows "Drag items here" placeholder for empty rows', () => {
+  it('shows an empty-state placeholder for empty rows', () => {
     render(<PublicTierBoard rows={mockRows} sidebarItems={mockSidebarItems} />)
-    // Row 2 (A) has no items
-    expect(screen.getByText('Drag items here')).toBeInTheDocument()
+    expect(screen.getByText('Empty tier')).toBeInTheDocument()
   })
 
   it('renders "All items placed" when sidebar is empty', () => {
@@ -64,7 +63,7 @@ describe('PublicTierBoard', () => {
     render(<PublicTierBoard rows={mockRows} sidebarItems={mockSidebarItems} />)
     // The component should emit plain HTML with no interactive elements.
     // Click handlers and DnD are NOT present in the server-rendered version.
-    const itemBank = screen.getByText('Items (1)')
+    const itemBank = screen.getByText('Items to place (1)')
     expect(itemBank).toBeInTheDocument()
   })
 

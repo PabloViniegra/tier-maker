@@ -215,6 +215,7 @@ export type TierListDetail = {
   title: string
   description: string | null
   category: string
+  creatorName?: string | null
   coverImageUrl: string | null
   sidebarItems: ImageItem[]
   createdAt: Date
@@ -256,6 +257,7 @@ export async function getPublicTierListById(
         title: tierTemplates.title,
         description: tierTemplates.description,
         category: tierTemplates.category,
+        creatorName: user.name,
         coverImageUrl: tierTemplates.coverImageUrl,
         sidebarItems: tierTemplates.sidebarItems,
         createdAt: tierTemplates.createdAt,
@@ -263,6 +265,7 @@ export async function getPublicTierListById(
         likeCount: likeCountExpr,
       })
       .from(tierTemplates)
+      .leftJoin(user, eq(tierTemplates.creatorId, user.id))
       .where(and(eq(tierTemplates.id, id), eq(tierTemplates.isPublic, true))),
     db
       .select()
@@ -279,6 +282,7 @@ export async function getPublicTierListById(
     title: tpl.title,
     description: tpl.description,
     category: tpl.category,
+    creatorName: tpl.creatorName ?? null,
     coverImageUrl: tpl.coverImageUrl ?? null,
     sidebarItems: tpl.sidebarItems,
     createdAt: tpl.createdAt,
@@ -304,6 +308,7 @@ export async function getPublicTierListBySlug(
       title: tierTemplates.title,
       description: tierTemplates.description,
       category: tierTemplates.category,
+      creatorName: user.name,
       coverImageUrl: tierTemplates.coverImageUrl,
       sidebarItems: tierTemplates.sidebarItems,
       createdAt: tierTemplates.createdAt,
@@ -311,6 +316,7 @@ export async function getPublicTierListBySlug(
       likeCount: likeCountExpr,
     })
     .from(tierTemplates)
+    .leftJoin(user, eq(tierTemplates.creatorId, user.id))
     .where(and(eq(tierTemplates.slug, slug), eq(tierTemplates.isPublic, true)))
     .limit(1)
 
@@ -328,6 +334,7 @@ export async function getPublicTierListBySlug(
     title: tpl.title,
     description: tpl.description,
     category: tpl.category,
+    creatorName: tpl.creatorName ?? null,
     coverImageUrl: tpl.coverImageUrl ?? null,
     sidebarItems: tpl.sidebarItems,
     createdAt: tpl.createdAt,
