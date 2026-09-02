@@ -64,7 +64,7 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins: [
-    'https://tier.pabloviniegra.dev',
+    'https://tiermaker.pabloviniegra.dev',
     'https://project-hbojo.vercel.app',
     process.env.NEXT_PUBLIC_APP_URL,
     process.env.BETTER_AUTH_URL,

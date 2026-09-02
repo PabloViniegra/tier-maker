@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tier.pabloviniegra.dev'
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tiermaker.pabloviniegra.dev'
 
 const websiteJsonLd = {
   '@context': 'https://schema.org',

@@ -14,7 +14,7 @@ describe('authentication email delivery', () => {
   it('sends verification from the authorized domain with idempotency', async () => {
     await sendVerificationEmail({
       to: 'user@example.com',
-      url: 'https://tier.pabloviniegra.dev/verify',
+      url: 'https://tiermaker.pabloviniegra.dev/verify',
       token: 'verification-token',
     })
 
@@ -37,20 +37,20 @@ describe('authentication email delivery', () => {
     expect(payload.html).toContain('TIER MAKER')
     expect(payload.html).toContain('ACCOUNT VERIFICATION')
     expect(payload.html).toContain('role="presentation"')
-    expect(payload.html).toContain('href="https://tier.pabloviniegra.dev/verify"')
+    expect(payload.html).toContain('href="https://tiermaker.pabloviniegra.dev/verify"')
     expect(
-      payload.html.match(/href="https:\/\/tier\.pabloviniegra\.dev\/verify"/g)
+      payload.html.match(/href="https:\/\/tiermaker\.pabloviniegra\.dev\/verify"/g)
     ).toHaveLength(2)
     expect(payload.html).toContain('width:100%')
     expect(payload.text).toContain('SECURE LINK')
-    expect(payload.text).toContain('https://tier.pabloviniegra.dev/verify')
+    expect(payload.text).toContain('https://tiermaker.pabloviniegra.dev/verify')
     expect(payload.text).not.toContain('\u00a0')
   })
 
   it('sends password reset with separate idempotency', async () => {
     await sendPasswordResetEmail({
       to: 'user@example.com',
-      url: 'https://tier.pabloviniegra.dev/reset',
+      url: 'https://tiermaker.pabloviniegra.dev/reset',
       token: 'reset-token',
     })
 
@@ -68,10 +68,10 @@ describe('authentication email delivery', () => {
     expect(payload.html).toContain('PASSWORD RESET')
     expect(payload.html).toContain('Reset your password')
     expect(
-      payload.html.match(/href="https:\/\/tier\.pabloviniegra\.dev\/reset"/g)
+      payload.html.match(/href="https:\/\/tiermaker\.pabloviniegra\.dev\/reset"/g)
     ).toHaveLength(2)
     expect(payload.text).toContain('This private link will expire.')
-    expect(payload.text).toContain('https://tier.pabloviniegra.dev/reset')
+    expect(payload.text).toContain('https://tiermaker.pabloviniegra.dev/reset')
     expect(payload.text).not.toContain('\u00a0')
   })
 
@@ -84,7 +84,7 @@ describe('authentication email delivery', () => {
     await expect(
       sendVerificationEmail({
         to: 'user@example.com',
-        url: 'https://tier.pabloviniegra.dev/verify',
+        url: 'https://tiermaker.pabloviniegra.dev/verify',
         token: 'verification-token',
       })
     ).rejects.toThrow('Resend failed: Rejected sender')
