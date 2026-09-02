@@ -41,7 +41,7 @@ type TierRowChipProps = {
   color: string
   canRemove: boolean
   readOnly?: boolean
-  height?: '16' | '24'
+  height?: '20' | '24'
   onLabelChange: (label: string) => void
   onColorChange: (color: string) => void
   onRemove: () => void
@@ -52,7 +52,7 @@ function TierRowChip({
   color,
   canRemove,
   readOnly = false,
-  height = '16',
+  height = '20',
   onLabelChange,
   onColorChange,
   onRemove,
@@ -78,7 +78,7 @@ function TierRowChip({
     setEditing(false)
   }
 
-  const chipCls = height === '24' ? 'h-24 w-24' : 'h-16 w-20'
+  const chipCls = height === '24' ? 'h-24 w-24' : 'h-20 w-20'
   const chipClassName = cn(
     'group/chip relative flex shrink-0 items-center justify-center rounded font-heading text-sm font-bold text-white',
     chipCls
@@ -142,9 +142,11 @@ function TierRowChip({
         <div className="absolute bottom-0 left-0 size-11">
           <PopoverTrigger
             aria-label="Change tier color"
-            className="flex h-full w-full items-center justify-center rounded-sm border border-white/30 bg-black/20 text-white hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+            className="group/color flex h-full w-full items-end justify-start p-1 focus-visible:outline-none"
           >
-            <Palette size={9} aria-hidden="true" />
+            <span className="flex size-6 items-center justify-center rounded-md text-white/80 group-hover/color:bg-white/20 group-hover/color:text-white group-focus-visible/color:ring-2 group-focus-visible/color:ring-white/70">
+              <Palette size={14} strokeWidth={1.75} aria-hidden="true" />
+            </span>
           </PopoverTrigger>
         </div>
         <PopoverContent
@@ -175,10 +177,12 @@ function TierRowChip({
         <button
           type="button"
           onClick={onRemove}
-          className="absolute top-0 -right-2 flex size-11 items-center justify-center rounded-full border border-border bg-background text-muted-foreground"
+          className="group/remove absolute top-0 right-0 flex size-11 items-start justify-end p-1 focus-visible:outline-none"
           aria-label="Remove row"
         >
-          <X size={9} aria-hidden="true" />
+          <span className="flex size-6 items-center justify-center rounded-md text-white/80 group-hover/remove:bg-white/20 group-hover/remove:text-white group-focus-visible/remove:ring-2 group-focus-visible/remove:ring-white/70">
+            <X size={14} strokeWidth={1.75} aria-hidden="true" />
+          </span>
         </button>
       )}
     </motion.div>
@@ -186,13 +190,13 @@ function TierRowChip({
 }
 
 type TierBoardProps = {
-  rowMinHeight?: '16' | '24'
+  rowMinHeight?: '20' | '24'
   boardRef?: React.RefObject<HTMLElement | null>
   mode?: 'structure' | 'fill'
 }
 
 export function TierBoard({
-  rowMinHeight = '16',
+  rowMinHeight = '20',
   boardRef,
   mode = 'structure',
 }: TierBoardProps) {
@@ -204,9 +208,9 @@ export function TierBoard({
 
   const isStructure = mode === 'structure'
   const lg = rowMinHeight === '24'
-  const itemCls = lg ? 'h-20 w-20' : 'h-12 w-12'
-  const rowHeightCls = lg ? 'min-h-24' : 'min-h-16'
-  const imgSize = lg ? 80 : 48
+  const itemCls = lg ? 'h-20 w-20' : 'h-16 w-16'
+  const rowHeightCls = lg ? 'min-h-24' : 'min-h-20'
+  const imgSize = lg ? 80 : 64
 
   return (
     <section ref={boardRef} className="flex flex-col gap-1.5">
