@@ -41,6 +41,8 @@ AGENTS.md
 .mcp.json
 opencode.json
 .playwright-mcp/*
+specs/
+tasks/
 
 # vercel
 .vercel
