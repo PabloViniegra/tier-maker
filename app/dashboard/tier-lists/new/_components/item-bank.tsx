@@ -24,6 +24,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+function pasteShortcutLabel() {
+  const platform =
+    globalThis.navigator?.platform || globalThis.navigator?.userAgent || ''
+  return /Mac|iPhone|iPad|iPod/.test(platform) ? '⌘V' : 'Ctrl+V'
+}
+
 export function ItemBank({
   onPickFiles,
 }: {
@@ -66,17 +72,25 @@ export function ItemBank({
         ref={uploadButtonRef}
         variant="outline"
         size="sm"
-        className="h-11 w-full gap-2"
+        className="h-11 w-full justify-between gap-2"
         onClick={() => inputRef.current?.click()}
         data-testid="bank-upload-button"
       >
-        <ImagePlus size={14} aria-hidden="true" />
-        Upload images
+        <span className="flex items-center gap-2">
+          <ImagePlus size={14} aria-hidden="true" />
+          Upload images
+        </span>
+        <kbd
+          aria-hidden="true"
+          suppressHydrationWarning
+          className="rounded-md border border-border bg-background px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
+        >
+          {pasteShortcutLabel()}
+        </kbd>
       </Button>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Drag files into the page, paste (Ctrl+V), or click. JPG, PNG, WEBP, GIF
-        up to 5 MB each.
+        JPG, PNG, WEBP, GIF up to 5 MB each.
       </p>
 
       <Droppable droppableId={BANK_DROPPABLE} direction="vertical">
@@ -94,7 +108,7 @@ export function ItemBank({
             {bankItems.length === 0 ? (
               <div className="flex h-32 flex-col items-center justify-center gap-1 text-center text-xs text-muted-foreground">
                 <ImagePlus size={20} strokeWidth={1.25} aria-hidden="true" />
-                <p>Drop or upload images to start</p>
+                <p>Paste, drop, or upload to start</p>
               </div>
             ) : (
               <TooltipProvider>

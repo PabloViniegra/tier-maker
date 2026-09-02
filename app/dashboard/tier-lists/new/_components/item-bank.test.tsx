@@ -77,3 +77,33 @@ describe('ItemBank', () => {
     ).toBeInTheDocument()
   })
 })
+
+describe('ItemBank paste discoverability', () => {
+  beforeEach(() => {
+    useTierEditor.getState().reset()
+  })
+
+  it('tells an empty bank that paste works', () => {
+    render(<ItemBank onPickFiles={() => undefined} />)
+
+    expect(
+      screen.getByText('Paste, drop, or upload to start')
+    ).toBeInTheDocument()
+  })
+
+  it('shows a paste shortcut on the upload button without changing its name', () => {
+    render(<ItemBank onPickFiles={() => undefined} />)
+
+    const button = screen.getByRole('button', { name: 'Upload images' })
+    expect(button).toHaveTextContent('Ctrl+V')
+  })
+
+  it('keeps format limits as the only helper under the button', () => {
+    render(<ItemBank onPickFiles={() => undefined} />)
+
+    expect(
+      screen.getByText('JPG, PNG, WEBP, GIF up to 5 MB each.')
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/paste \(Ctrl\+V\)/i)).not.toBeInTheDocument()
+  })
+})
