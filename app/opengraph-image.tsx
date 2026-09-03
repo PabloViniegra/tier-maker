@@ -12,7 +12,10 @@ const geistSansFetch = fetch(
   new URL(
     'https://cdn.jsdelivr.net/fontsource/fonts/geist-sans@latest/latin-700-normal.woff'
   )
-).then((res) => res.arrayBuffer())
+).then((res) => {
+  if (!res.ok) throw new Error(`Failed to load font (${res.status})`)
+  return res.arrayBuffer()
+})
 
 export default async function OgImage() {
   const geistSans = await geistSansFetch

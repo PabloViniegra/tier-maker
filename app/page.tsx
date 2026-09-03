@@ -8,6 +8,7 @@ import { BentoFeatureCells } from '@/components/bento-feature-cells'
 import { FadeUp } from '@/components/ui/fade-up'
 import { SiteFooter } from '@/components/site-footer'
 import { cn } from '@/lib/utils'
+import { htmlSafeJson } from '@/lib/utils/html-safe-json'
 import { buttonVariants } from '@/components/ui/button'
 
 export const metadata: Metadata = {
@@ -41,7 +42,7 @@ export default function HomePage() {
     <div className="flex min-h-[100dvh] flex-col bg-background">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: htmlSafeJson(websiteJsonLd) }}
       />
       {/* Minimal nav */}
       <header className="sticky top-0 z-10 border-b border-border/50 bg-background/80 backdrop-blur-sm">

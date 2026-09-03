@@ -8,8 +8,7 @@ type Props = {
 }
 
 export default async function TierListDetailPage({ params }: Props) {
-  const { id } = await params
-  const session = await getSession()
+  const [{ id }, session] = await Promise.all([params, getSession()])
   if (!session) notFound()
 
   const data = await getTierListById(id, session.user.id)

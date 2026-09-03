@@ -35,6 +35,12 @@ describe('ColorPicker', () => {
     expect(screen.getByRole('slider', { name: /hue/i })).toBeInTheDocument()
   })
 
+  it('does not call onChange on mount', () => {
+    const onChange = vi.fn()
+    render(<ControlledPicker value="#ff0000" onChange={onChange} />)
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   it('calls onChange with a hex string when the user drags the selection surface', async () => {
     const onChange = vi.fn()
     const user = userEvent.setup()

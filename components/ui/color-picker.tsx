@@ -11,6 +11,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -29,6 +30,13 @@ declare global {
 
 type ColorFormat = 'hex' | 'rgb' | 'css' | 'hsl'
 
+type HslAlpha = {
+  hue: number
+  saturation: number
+  lightness: number
+  alpha: number
+}
+
 type ColorPickerContextValue = {
   hue: number
   saturation: number
@@ -40,6 +48,7 @@ type ColorPickerContextValue = {
   setLightness: (lightness: number) => void
   setAlpha: (alpha: number) => void
   setMode: (mode: ColorFormat) => void
+  setHsl: (next: HslAlpha) => void
 }
 
 const ColorPickerContext = createContext<ColorPickerContextValue | undefined>(
@@ -85,42 +94,106 @@ export const ColorPicker = ({
     }
   }, [incoming])
 
-  const [hue, setHue] = useState(hsl.hue)
-  const [saturation, setSaturation] = useState(hsl.saturation)
-  const [lightness, setLightness] = useState(hsl.lightness)
-  const [alpha, setAlpha] = useState(incoming.alpha() * 100)
+  const [hue, setHueState] = useState(hsl.hue)
+  const [saturation, setSaturationState] = useState(hsl.saturation)
+  const [lightness, setLightnessState] = useState(hsl.lightness)
+  const [alpha, setAlphaState] = useState(incoming.alpha() * 100)
   const [mode, setMode] = useState<ColorFormat>('hex')
   const [lastSyncedValue, setLastSyncedValue] = useState(value)
 
   if (lastSyncedValue !== value) {
     setLastSyncedValue(value)
-    setHue(hsl.hue)
-    setSaturation(hsl.saturation)
-    setLightness(hsl.lightness)
-    setAlpha(incoming.alpha() * 100)
+    setHueState(hsl.hue)
+    setSaturationState(hsl.saturation)
+    setLightnessState(hsl.lightness)
+    setAlphaState(incoming.alpha() * 100)
   }
 
+  const colorRef = useRef<HslAlpha>({
+    hue,
+    saturation,
+    lightness,
+    alpha,
+  })
+
   useEffect(() => {
-    const color = Color.hsl(hue, saturation, lightness).alpha(alpha / 100)
-    onChange(color.hex())
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    colorRef.current = { hue, saturation, lightness, alpha }
   }, [hue, saturation, lightness, alpha])
 
+  const emit = useCallback(
+    (next: HslAlpha) => {
+      onChange(
+        Color.hsl(next.hue, next.saturation, next.lightness)
+          .alpha(next.alpha / 100)
+          .hex()
+      )
+    },
+    [onChange]
+  )
+
+  const patch = useCallback(
+    (partial: Partial<HslAlpha>) => {
+      const next = { ...colorRef.current, ...partial }
+      colorRef.current = next
+      if (partial.hue !== undefined) setHueState(partial.hue)
+      if (partial.saturation !== undefined) {
+        setSaturationState(partial.saturation)
+      }
+      if (partial.lightness !== undefined) setLightnessState(partial.lightness)
+      if (partial.alpha !== undefined) setAlphaState(partial.alpha)
+      emit(next)
+    },
+    [emit]
+  )
+
+  const setHue = useCallback(
+    (nextHue: number) => patch({ hue: nextHue }),
+    [patch]
+  )
+  const setSaturation = useCallback(
+    (nextSaturation: number) => patch({ saturation: nextSaturation }),
+    [patch]
+  )
+  const setLightness = useCallback(
+    (nextLightness: number) => patch({ lightness: nextLightness }),
+    [patch]
+  )
+  const setAlpha = useCallback(
+    (nextAlpha: number) => patch({ alpha: nextAlpha }),
+    [patch]
+  )
+  const setHsl = useCallback((next: HslAlpha) => patch(next), [patch])
+
+  const contextValue = useMemo(
+    () => ({
+      hue,
+      saturation,
+      lightness,
+      alpha,
+      mode,
+      setHue,
+      setSaturation,
+      setLightness,
+      setAlpha,
+      setMode,
+      setHsl,
+    }),
+    [
+      hue,
+      saturation,
+      lightness,
+      alpha,
+      mode,
+      setHue,
+      setSaturation,
+      setLightness,
+      setAlpha,
+      setHsl,
+    ]
+  )
+
   return (
-    <ColorPickerContext.Provider
-      value={{
-        hue,
-        saturation,
-        lightness,
-        alpha,
-        mode,
-        setHue,
-        setSaturation,
-        setLightness,
-        setAlpha,
-        setMode,
-      }}
-    >
+    <ColorPickerContext.Provider value={contextValue}>
       <div className={cn('flex w-full flex-col gap-3', className)} {...props} />
     </ColorPickerContext.Provider>
   )
@@ -165,10 +238,13 @@ export const ColorPickerSelection = memo(
       [setSaturation, setLightness]
     )
 
+    const onPointerMove = useEffectEvent((e: PointerEvent) => {
+      updateFromEvent(e.clientX, e.clientY)
+    })
+
     useEffect(() => {
       if (!isDragging) return
-      const handleMove = (e: PointerEvent) =>
-        updateFromEvent(e.clientX, e.clientY)
+      const handleMove = (e: PointerEvent) => onPointerMove(e)
       const handleUp = () => setIsDragging(false)
       window.addEventListener('pointermove', handleMove)
       window.addEventListener('pointerup', handleUp)
@@ -176,7 +252,7 @@ export const ColorPickerSelection = memo(
         window.removeEventListener('pointermove', handleMove)
         window.removeEventListener('pointerup', handleUp)
       }
-    }, [isDragging, updateFromEvent])
+    }, [isDragging])
 
     return (
       <div
@@ -289,7 +365,7 @@ export const ColorPickerEyeDropper = ({
   className,
   ...props
 }: ColorPickerEyeDropperProps) => {
-  const { setHue, setSaturation, setLightness, setAlpha } = useColorPicker()
+  const { setHsl } = useColorPicker()
 
   const handlePick = async () => {
     const EyeDropperCtor = window.EyeDropper
@@ -299,10 +375,12 @@ export const ColorPickerEyeDropper = ({
       const result = await dropper.open()
       const picked = Color(result.sRGBHex)
       const [h, s, l] = picked.hsl().array()
-      setHue(Number.isNaN(h) ? 0 : h)
-      setSaturation(Number.isNaN(s) ? 0 : s)
-      setLightness(Number.isNaN(l) ? 0 : l)
-      setAlpha(100)
+      setHsl({
+        hue: Number.isNaN(h) ? 0 : h,
+        saturation: Number.isNaN(s) ? 0 : s,
+        lightness: Number.isNaN(l) ? 0 : l,
+        alpha: 100,
+      })
     } catch {
       // user cancelled
     }

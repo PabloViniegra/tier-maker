@@ -14,8 +14,7 @@ type Props = {
 }
 
 export default async function EditTierListPage({ params }: Props) {
-  const { id } = await params
-  const session = await getSession()
+  const [{ id }, session] = await Promise.all([params, getSession()])
   if (!session) notFound()
 
   const [data, presets, userPresets] = await Promise.all([

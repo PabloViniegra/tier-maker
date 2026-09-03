@@ -9,14 +9,22 @@ import { Toaster } from '@/components/ui/sonner'
 import { CookieBanner } from '@/components/cookie-banner'
 import { cn } from '@/lib/utils'
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tiermaker.pabloviniegra.dev'
+const fallbackAppUrl = 'https://tiermaker.pabloviniegra.dev'
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? fallbackAppUrl
+
+let metadataBase: URL
+try {
+  metadataBase = new URL(baseUrl)
+} catch {
+  metadataBase = new URL(fallbackAppUrl)
+}
 
 export const viewport: Viewport = {
   themeColor: '#1a1a1a',
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(baseUrl),
+  metadataBase,
   title: { default: 'Tier Maker', template: '%s | Tier Maker' },
   description:
     'Build and share tier lists for anything. Movies, games, albums — drag, rank, and share with one link.',
