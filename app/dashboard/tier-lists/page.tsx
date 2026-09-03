@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { ViewTransition } from 'react'
 import { Plus } from 'lucide-react'
@@ -38,10 +39,11 @@ export default function TierListsIndexPage() {
   )
 }
 
-async function TierListsIndexContent() {
+export async function TierListsIndexContent() {
   const session = await getSession()
-  const userId = session!.user.id
-  const tierLists = await getAllUserTierLists(userId)
+  if (!session) redirect('/login')
+
+  const tierLists = await getAllUserTierLists(session.user.id)
 
   return (
     <div className="flex flex-col gap-3">
