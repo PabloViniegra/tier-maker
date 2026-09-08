@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Download, Loader2 } from 'lucide-react'
+import { ActionTooltip } from '@/components/action-tooltip'
 import { Button } from '@/components/ui/button'
 
 // Resolved at export time from the live document so dark/light mode is respected.
@@ -18,9 +19,17 @@ type Props = {
   boardRef: React.RefObject<HTMLElement | null>
   title: string
   variant?: 'default' | 'outline'
+  iconOnly?: boolean
+  showTooltip?: boolean
 }
 
-export function ExportButton({ boardRef, title, variant = 'outline' }: Props) {
+export function ExportButton({
+  boardRef,
+  title,
+  variant = 'outline',
+  iconOnly = false,
+  showTooltip = false,
+}: Props) {
   const [exporting, setExporting] = useState(false)
 
   async function handleExport() {
@@ -50,20 +59,30 @@ export function ExportButton({ boardRef, title, variant = 'outline' }: Props) {
     }
   }
 
-  return (
+  const button = (
     <Button
       variant={variant}
       size="sm"
       onClick={handleExport}
       disabled={exporting}
-      className="gap-1.5"
+      aria-label="Export"
+      aria-busy={exporting}
+      className={iconOnly ? 'h-11 w-11 gap-1.5 p-0 sm:h-9 sm:w-9' : 'gap-1.5'}
     >
       {exporting ? (
         <Loader2 size={14} className="animate-spin" aria-hidden="true" />
       ) : (
         <Download size={14} aria-hidden="true" />
       )}
-      {exporting ? 'Exporting…' : 'Export'}
+      <span className={iconOnly ? 'sr-only' : undefined}>
+        {exporting ? 'Exporting…' : 'Export'}
+      </span>
     </Button>
+  )
+
+  return showTooltip ? (
+    <ActionTooltip label="Export">{button}</ActionTooltip>
+  ) : (
+    button
   )
 }

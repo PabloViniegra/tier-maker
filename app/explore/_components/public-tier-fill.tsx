@@ -9,8 +9,11 @@ import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
 import { TierBoard } from '@/app/dashboard/tier-lists/new/_components/tier-board'
 import { ItemBankStrip } from '@/app/dashboard/tier-lists/[id]/_components/item-bank-strip'
 import { ExportButton } from '@/app/dashboard/tier-lists/[id]/_components/export-button'
+import { ActionTooltip } from '@/components/action-tooltip'
 import { LikeButton } from '@/components/like-button'
+import { ShareButton } from '@/components/share-button'
 import { Button, buttonVariants } from '@/components/ui/button'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import {
   useTierFillPersistence,
@@ -25,6 +28,7 @@ type Props = {
   tierId: string
   data: TierListDetailSeed
   backHref?: string
+  shareUrl?: string
   userId?: string | null
   like?: {
     templateId: string
@@ -71,6 +75,7 @@ export function PublicTierFill({
   tierId,
   data,
   backHref = '/explore',
+  shareUrl,
   userId = null,
   like,
 }: Props) {
@@ -153,43 +158,63 @@ export function PublicTierFill({
           >
             {persistenceLabel(persistenceStatus)}
           </span>
-          {like && <LikeButton {...like} />}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={undoLastMove}
-            disabled={!canUndo}
-            aria-label="Undo last move"
-            title="Undo last move"
-            className="min-h-11 min-w-11 sm:min-h-7 sm:min-w-0"
-          >
-            <Undo2 size={14} aria-hidden="true" />
-            <span className="sr-only sm:not-sr-only">Undo</span>
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={resetting || persistenceStatus === 'loading'}
-            aria-label="Reset tier list"
-            title="Reset tier list"
-            className="min-h-11 min-w-11 sm:min-h-7 sm:min-w-0"
-            onClick={async () => {
-              setResetting(true)
-              const reset = await resetDraft()
-              if (reset) clearHistory()
-              setResetting(false)
-            }}
-          >
-            <RotateCcw size={14} aria-hidden="true" />
-            <span className="sr-only sm:not-sr-only">Reset</span>
-          </Button>
-          <ExportButton
-            boardRef={boardRef}
-            title={data.title}
-            variant="default"
-          />
+          <TooltipProvider delay={150}>
+            <div
+              role="group"
+              aria-label="Tier list actions"
+              className="inline-flex min-h-11 items-center gap-0.5 rounded-xl border border-border/80 bg-muted/40 p-1 shadow-sm sm:min-h-0"
+            >
+              {like && <LikeButton {...like} iconOnly showTooltip />}
+              {shareUrl && (
+                <ShareButton
+                  title={data.title}
+                  text={data.description ?? undefined}
+                  url={shareUrl}
+                  iconOnly
+                  showTooltip
+                />
+              )}
+              <ActionTooltip label="Undo last move">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-lg"
+                  onClick={undoLastMove}
+                  disabled={!canUndo}
+                  focusableWhenDisabled
+                  aria-label="Undo last move"
+                  className="h-11 w-11 sm:h-9 sm:w-9"
+                >
+                  <Undo2 size={14} aria-hidden="true" />
+                </Button>
+              </ActionTooltip>
+              <ActionTooltip label="Reset tier list">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-lg"
+                  disabled={resetting || persistenceStatus === 'loading'}
+                  aria-label="Reset tier list"
+                  className="h-11 w-11 sm:h-9 sm:w-9"
+                  onClick={async () => {
+                    setResetting(true)
+                    const reset = await resetDraft()
+                    if (reset) clearHistory()
+                    setResetting(false)
+                  }}
+                >
+                  <RotateCcw size={14} aria-hidden="true" />
+                </Button>
+              </ActionTooltip>
+              <ExportButton
+                boardRef={boardRef}
+                title={data.title}
+                variant="default"
+                iconOnly
+                showTooltip
+              />
+            </div>
+          </TooltipProvider>
         </div>
       </header>
 

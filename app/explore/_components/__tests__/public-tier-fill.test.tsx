@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { renderToString } from 'react-dom/server'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { PublicTierFill } from '../public-tier-fill'
@@ -22,8 +22,24 @@ const mockData = {
   ],
 }
 
-async function renderPublicTierFill() {
-  render(<PublicTierFill tierId="test-id" data={mockData} />)
+async function renderPublicTierFill(shareUrl?: string, withLike = false) {
+  render(
+    <PublicTierFill
+      tierId="test-id"
+      data={mockData}
+      shareUrl={shareUrl}
+      like={
+        withLike
+          ? {
+              templateId: 'test-id',
+              initialCount: 1,
+              initialIsLiked: false,
+              isAuthenticated: false,
+            }
+          : undefined
+      }
+    />
+  )
   await waitFor(() => {
     expect(screen.queryByText('Preparing your list')).not.toBeInTheDocument()
   })
@@ -58,6 +74,39 @@ describe('PublicTierFill', () => {
     expect(screen.getByRole('button', { name: /export/i })).toBeInTheDocument()
   })
 
+  it('renders the share button when a public URL is provided', async () => {
+    await renderPublicTierFill('/explore/test-tier-list')
+    expect(screen.getByRole('button', { name: /share/i })).toBeInTheDocument()
+  })
+
+  it('groups the detail actions in an accessible compact toolbar', async () => {
+    await renderPublicTierFill('/explore/test-tier-list', true)
+    const toolbar = screen.getByRole('group', { name: /tier list actions/i })
+
+    expect(
+      within(toolbar).getByRole('link', { name: /like/i })
+    ).toBeInTheDocument()
+    expect(
+      within(toolbar).getByRole('button', { name: /share/i })
+    ).toBeInTheDocument()
+    expect(
+      within(toolbar).getByRole('button', { name: /undo last move/i })
+    ).toBeInTheDocument()
+    expect(
+      within(toolbar).getByRole('button', { name: /reset tier list/i })
+    ).toBeInTheDocument()
+    expect(
+      within(toolbar).getByRole('button', { name: /export/i })
+    ).toBeInTheDocument()
+  })
+
+  it('does not render the share button without a public URL', async () => {
+    await renderPublicTierFill()
+    expect(
+      screen.queryByRole('button', { name: /share/i })
+    ).not.toBeInTheDocument()
+  })
+
   it('names the interactive board for assistive technology', async () => {
     await renderPublicTierFill()
     expect(
@@ -69,7 +118,7 @@ describe('PublicTierFill', () => {
     await renderPublicTierFill()
     expect(
       screen.getByRole('button', { name: /undo last move/i })
-    ).toBeDisabled()
+    ).toHaveAttribute('aria-disabled', 'true')
     expect(
       screen.getByRole('button', { name: /reset tier list/i })
     ).toBeInTheDocument()

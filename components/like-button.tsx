@@ -6,6 +6,7 @@ import { Heart } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { ActionTooltip } from '@/components/action-tooltip'
 import { cn } from '@/lib/utils'
 import { likeHeartVariants } from '@/lib/motion-variants'
 import { toggleLike } from '@/app/explore/_actions/toggle-like'
@@ -15,12 +16,16 @@ type Props = {
   initialCount: number
   initialIsLiked: boolean
   isAuthenticated: boolean
+  iconOnly?: boolean
+  showTooltip?: boolean
 }
 
-const likeClassName = (isLiked: boolean) =>
+const likeClassName = (isLiked: boolean, iconOnly: boolean) =>
   cn(
     'flex items-center gap-1 rounded text-xs transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-    isLiked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-400'
+    isLiked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-400',
+    iconOnly &&
+      'min-h-11 min-w-11 justify-center rounded-lg px-2 sm:min-h-9 sm:min-w-9'
   )
 
 export function LikeButton({
@@ -28,6 +33,8 @@ export function LikeButton({
   initialCount,
   initialIsLiked,
   isAuthenticated,
+  iconOnly = false,
+  showTooltip = false,
 }: Props) {
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -72,26 +79,30 @@ export function LikeButton({
     </>
   )
 
-  if (!isAuthenticated) {
-    return (
-      <Link
-        href="/login"
-        aria-label="Like"
-        className={likeClassName(state.isLiked)}
-      >
-        {content}
-      </Link>
-    )
-  }
-
-  return (
+  const control = !isAuthenticated ? (
+    <Link
+      href="/login"
+      aria-label="Like"
+      className={likeClassName(state.isLiked, iconOnly)}
+    >
+      {content}
+    </Link>
+  ) : (
     <button
       type="button"
       onClick={handleClick}
       aria-label={state.isLiked ? 'Unlike' : 'Like'}
-      className={likeClassName(state.isLiked)}
+      className={likeClassName(state.isLiked, iconOnly)}
     >
       {content}
     </button>
+  )
+
+  return showTooltip ? (
+    <ActionTooltip label={state.isLiked ? 'Unlike' : 'Like'}>
+      {control}
+    </ActionTooltip>
+  ) : (
+    control
   )
 }
