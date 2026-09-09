@@ -41,15 +41,14 @@ describe('staggerIndex', () => {
 })
 
 describe('fadeUpVariants', () => {
-  it('hidden state has opacity 0 and positive y offset', () => {
+  it('uses full transform strings for the vertical offset', () => {
     expect(fadeUpVariants.hidden.opacity).toBe(0)
-    expect(fadeUpVariants.hidden.y).toBeGreaterThan(0)
-  })
-
-  it('visible factory returns opacity 1 and y 0', () => {
     const visible = fadeUpVariants.visible(0)
     expect(visible.opacity).toBe(1)
-    expect(visible.y).toBe(0)
+    expect(fadeUpVariants.hidden.transform).toBe('translateY(6px)')
+    expect(visible.transform).toBe('translateY(0)')
+    expect(fadeUpVariants.hidden).not.toHaveProperty('y')
+    expect(visible).not.toHaveProperty('y')
   })
 
   it('visible transition duration is within design spec (≤ 0.3s)', () => {

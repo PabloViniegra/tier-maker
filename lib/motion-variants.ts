@@ -9,10 +9,10 @@ export function staggerIndex(i: number): number {
 }
 
 export const fadeUpVariants = {
-  hidden: { opacity: 0, y: 6 },
+  hidden: { opacity: 0, transform: 'translateY(6px)' },
   visible: (delay: number = 0) => ({
     opacity: 1,
-    y: 0,
+    transform: 'translateY(0)',
     transition: { duration: 0.24, ease: EASE_SMOOTH, delay },
   }),
 } satisfies Variants
