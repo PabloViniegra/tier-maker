@@ -41,6 +41,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
       <main
         id="main-content"
+        tabIndex={-1}
         className="flex w-full flex-col items-center justify-center bg-background p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] lg:w-1/2 lg:p-12"
       >
         <div className="w-full max-w-sm">

@@ -70,7 +70,11 @@ export function ExportButton({
       className={iconOnly ? 'h-11 w-11 gap-1.5 p-0 sm:h-9 sm:w-9' : 'gap-1.5'}
     >
       {exporting ? (
-        <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+        <Loader2
+          size={14}
+          className="animate-spin motion-reduce:animate-none"
+          aria-hidden="true"
+        />
       ) : (
         <Download size={14} aria-hidden="true" />
       )}

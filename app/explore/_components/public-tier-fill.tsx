@@ -197,6 +197,13 @@ export function PublicTierFill({
                   aria-label="Reset tier list"
                   className="h-11 w-11 sm:h-9 sm:w-9"
                   onClick={async () => {
+                    if (
+                      !window.confirm(
+                        'Reset this tier list? Your placements will be cleared.'
+                      )
+                    ) {
+                      return
+                    }
                     setResetting(true)
                     const reset = await resetDraft()
                     if (reset) clearHistory()

@@ -72,13 +72,13 @@ export function BentoFeatureCells() {
             />
             <div className="relative flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary ring-1 ring-primary/10 transition-[ring-color,background-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ring-inset group-hover:ring-primary/20">
               <motion.span animate={bentoIconFloat(iconDelay)}>
-                <Icon size={16} strokeWidth={1.5} />
+                <Icon size={16} strokeWidth={1.5} aria-hidden="true" />
               </motion.span>
             </div>
             <div className="relative">
-              <h3 className="font-heading text-sm font-semibold text-foreground transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-primary">
+              <h2 className="font-heading text-sm font-semibold text-foreground transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-primary">
                 {title}
-              </h3>
+              </h2>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 {description}
               </p>

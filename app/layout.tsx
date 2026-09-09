@@ -20,7 +20,11 @@ try {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1a1a1a',
+  colorScheme: 'light dark',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fafafa' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1a1a' },
+  ],
 }
 
 export const metadata: Metadata = {

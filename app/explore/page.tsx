@@ -121,6 +121,7 @@ export default async function ExplorePage({ searchParams }: Props) {
       {/* Grid section */}
       <main
         id="main-content"
+        tabIndex={-1}
         className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:py-8"
       >
         <ViewTransition>

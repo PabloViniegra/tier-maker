@@ -100,11 +100,15 @@ export function ItemBankStrip({
                           </Tooltip>
                         ) : item.status === 'uploading' ? (
                           <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                            <Loader2 size={14} className="animate-spin" />
+                            <Loader2
+                              size={14}
+                              className="animate-spin motion-reduce:animate-none"
+                              aria-hidden="true"
+                            />
                           </div>
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-destructive/20 text-destructive">
-                            <X size={14} />
+                            <X size={14} aria-hidden="true" />
                           </div>
                         )}
                         {canRemove && (
@@ -112,13 +116,19 @@ export function ItemBankStrip({
                             type="button"
                             variants={hoverRevealVariants}
                             whileFocus="hover"
-                            onClick={() =>
-                              removeItem({ source: 'bank', id: item.id })
-                            }
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `Remove ${item.label} from this tier list?`
+                                )
+                              ) {
+                                removeItem({ source: 'bank', id: item.id })
+                              }
+                            }}
                             className="absolute top-0 right-0 rounded bg-background/80 p-0.5 text-muted-foreground hover:text-foreground"
                             aria-label={`Remove ${item.label}`}
                           >
-                            <X size={10} />
+                            <X size={10} aria-hidden="true" />
                           </motion.button>
                         )}
                       </motion.div>

@@ -131,7 +131,6 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                         }}
                         autoComplete="off"
                         spellCheck={false}
-                        autoFocus
                         aria-describedby={[
                           'delete-account-hint',
                           !matches ? 'delete-account-mismatch' : null,
@@ -200,11 +199,7 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                   {deleting ? 'Deleting account…' : 'Delete account'}
                 </Button>
               ) : (
-                <Button
-                  type="submit"
-                  variant="outline"
-                  className="h-11 sm:h-8"
-                >
+                <Button type="submit" variant="outline" className="h-11 sm:h-8">
                   Continue
                 </Button>
               )}

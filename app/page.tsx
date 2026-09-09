@@ -28,7 +28,8 @@ export const metadata: Metadata = {
   },
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tiermaker.pabloviniegra.dev'
+const baseUrl =
+  process.env.NEXT_PUBLIC_APP_URL ?? 'https://tiermaker.pabloviniegra.dev'
 
 const websiteJsonLd = {
   '@context': 'https://schema.org',
@@ -76,6 +77,7 @@ export default function HomePage() {
       {/* Bento grid */}
       <main
         id="main-content"
+        tabIndex={-1}
         className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-6 md:py-8"
       >
         <BentoGrid>

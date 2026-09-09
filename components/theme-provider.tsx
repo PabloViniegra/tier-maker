@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import { ThemeProvider as NextThemesProvider, useTheme } from 'next-themes'
 import { useThemeToggle } from '@/hooks/use-theme-toggle'
 
 function ThemeProvider({
@@ -16,9 +16,25 @@ function ThemeProvider({
       {...props}
     >
       <ThemeHotkey />
+      <ThemeColorSync />
       {children}
     </NextThemesProvider>
   )
+}
+
+function ThemeColorSync() {
+  const { resolvedTheme } = useTheme()
+
+  React.useEffect(() => {
+    const color = resolvedTheme === 'light' ? '#fafafa' : '#1a1a1a'
+    document
+      .querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
+      .forEach((meta) => {
+        meta.content = color
+      })
+  }, [resolvedTheme])
+
+  return null
 }
 
 function isTypingTarget(target: EventTarget | null) {

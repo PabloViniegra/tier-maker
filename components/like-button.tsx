@@ -78,11 +78,12 @@ export function LikeButton({
       <span className="tabular-nums">{state.count}</span>
     </>
   )
+  const accessibleLabel = `${state.isLiked ? 'Unlike' : 'Like'} (${state.count})`
 
   const control = !isAuthenticated ? (
     <Link
       href="/login"
-      aria-label="Like"
+      aria-label={accessibleLabel}
       className={likeClassName(state.isLiked, iconOnly)}
     >
       {content}
@@ -91,7 +92,7 @@ export function LikeButton({
     <button
       type="button"
       onClick={handleClick}
-      aria-label={state.isLiked ? 'Unlike' : 'Like'}
+      aria-label={accessibleLabel}
       className={likeClassName(state.isLiked, iconOnly)}
     >
       {content}

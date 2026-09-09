@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { afterEach, describe, it, expect, beforeEach, vi } from 'vitest'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import { renderToString } from 'react-dom/server'
+import userEvent from '@testing-library/user-event'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { PublicTierFill } from '../public-tier-fill'
 
@@ -48,6 +49,10 @@ async function renderPublicTierFill(shareUrl?: string, withLike = false) {
 describe('PublicTierFill', () => {
   beforeEach(() => {
     useTierEditor.getState().reset()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('renders the tier list title from props', async () => {
@@ -127,6 +132,26 @@ describe('PublicTierFill', () => {
   it('renders the board after hydration', async () => {
     await renderPublicTierFill()
     expect(screen.getByText('S')).toBeInTheDocument()
+  })
+
+  it('keeps placements when reset is not confirmed', async () => {
+    const user = userEvent.setup()
+    await renderPublicTierFill()
+    act(() => {
+      useTierEditor.getState().moveItem({
+        source: 'bank',
+        sourceIndex: 0,
+        target: 'row',
+        targetId: 'row-1',
+        targetIndex: 0,
+      })
+    })
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+
+    await user.click(screen.getByRole('button', { name: /reset tier list/i }))
+
+    expect(window.confirm).toHaveBeenCalled()
+    expect(useTierEditor.getState().rows[0].items).toHaveLength(2)
   })
 
   it('renders on the server without browser-only APIs', () => {

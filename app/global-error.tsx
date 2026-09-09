@@ -16,13 +16,19 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-foreground">
-        <h1 className="text-xl font-semibold">Something went wrong</h1>
-        <button
-          onClick={reset}
-          className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex flex-col items-center justify-center gap-4"
         >
-          Try again
-        </button>
+          <h1 className="text-xl font-semibold">Something went wrong</h1>
+          <button
+            onClick={reset}
+            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+          >
+            Try again
+          </button>
+        </main>
       </body>
     </html>
   )

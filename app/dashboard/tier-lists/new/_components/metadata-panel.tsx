@@ -260,6 +260,7 @@ export function MetadataPanel({
                               'ml-auto opacity-0',
                               metadata.category === preset && 'opacity-100'
                             )}
+                            aria-hidden="true"
                           />
                         </CommandItem>
                       ))}
@@ -284,6 +285,7 @@ export function MetadataPanel({
                                 metadata.category === preset.name &&
                                   'opacity-100'
                               )}
+                              aria-hidden="true"
                             />
                             <button
                               type="button"
@@ -294,7 +296,7 @@ export function MetadataPanel({
                               }}
                               className="ml-1 shrink-0 rounded opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100"
                             >
-                              <X size={12} />
+                              <X size={12} aria-hidden="true" />
                             </button>
                           </CommandItem>
                         ))}
@@ -354,7 +356,7 @@ export function MetadataPanel({
                     className="absolute top-1 right-1 rounded bg-background/80 p-0.5 text-muted-foreground hover:text-foreground"
                     aria-label="Remove cover"
                   >
-                    <X size={14} />
+                    <X size={14} aria-hidden="true" />
                   </motion.button>
                 </motion.div>
               </motion.div>
@@ -377,7 +379,7 @@ export function MetadataPanel({
                   {isUploadingCover ? (
                     <Loader2
                       size={14}
-                      className="animate-spin"
+                      className="animate-spin motion-reduce:animate-none"
                       aria-hidden="true"
                     />
                   ) : (

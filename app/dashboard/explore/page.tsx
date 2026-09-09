@@ -70,7 +70,7 @@ export default async function DashboardExplorePage({ searchParams }: Props) {
         <FadeUp delay={0.12} onMount>
           <Suspense
             fallback={
-              <div className="h-9 w-full max-w-md animate-pulse rounded-md bg-surface" />
+              <div className="h-9 w-full max-w-md animate-pulse rounded-md bg-surface motion-reduce:animate-none" />
             }
           >
             <ExploreSearchInput defaultValue={q} />
@@ -79,7 +79,7 @@ export default async function DashboardExplorePage({ searchParams }: Props) {
         <FadeUp delay={0.18} onMount>
           <Suspense
             fallback={
-              <div className="h-8 w-[160px] animate-pulse rounded-md bg-surface" />
+              <div className="h-8 w-[160px] animate-pulse rounded-md bg-surface motion-reduce:animate-none" />
             }
           >
             <ExploreCategoryFilter categories={categories} value={category} />
@@ -88,7 +88,7 @@ export default async function DashboardExplorePage({ searchParams }: Props) {
         <FadeUp delay={0.24} onMount>
           <Suspense
             fallback={
-              <div className="h-8 w-[150px] animate-pulse rounded-md bg-surface" />
+              <div className="h-8 w-[150px] animate-pulse rounded-md bg-surface motion-reduce:animate-none" />
             }
           >
             <ExploreSortSelect value={sort} />

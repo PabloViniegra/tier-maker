@@ -17,7 +17,11 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main id="main-content" className="mx-auto max-w-3xl px-4 py-12">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="mx-auto max-w-3xl px-4 py-12"
+    >
       <h1 className="mb-1 font-heading text-2xl font-bold text-foreground">
         Privacy Policy
       </h1>

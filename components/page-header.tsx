@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { MouseEventHandler, ReactNode } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,7 @@ interface PageHeaderProps {
   /** Actions slot — rendered at the trailing end of the header */
   children?: ReactNode
   className?: string
+  onBack?: MouseEventHandler<HTMLAnchorElement>
 }
 
 /**
@@ -23,6 +24,7 @@ export function PageHeader({
   title,
   children,
   className,
+  onBack,
 }: PageHeaderProps) {
   return (
     <header
@@ -34,6 +36,7 @@ export function PageHeader({
       <div className="flex min-w-0 items-center gap-3">
         <Link
           href={backHref}
+          onClick={onBack}
           aria-label="Back"
           className={cn(
             buttonVariants({ variant: 'ghost', size: 'sm' }),

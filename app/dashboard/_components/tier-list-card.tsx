@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { formatRelativeDate } from '@/lib/utils/format-date'
+import { RelativeDate } from '@/components/relative-date'
 import { deleteTierList } from '@/app/dashboard/tier-lists/_actions/delete-tier-list'
 
 export type TierListCardProps = {
@@ -126,7 +126,7 @@ export function TierListCard({
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <span className="text-xs text-muted-foreground">
-              {formatRelativeDate(createdAt)}
+              <RelativeDate date={createdAt} />
             </span>
             <DropdownMenu>
               <DropdownMenuTrigger

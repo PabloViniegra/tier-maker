@@ -1,10 +1,14 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { ItemBank } from './item-bank'
 
 describe('ItemBank', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   beforeEach(() => {
     useTierEditor.getState().reset()
     useTierEditor.setState({
@@ -75,6 +79,19 @@ describe('ItemBank', () => {
     expect(
       screen.getByRole('menuitem', { name: /S tier, row 2/i })
     ).toBeInTheDocument()
+  })
+
+  it('keeps an item when removal is not confirmed', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    const user = userEvent.setup()
+    render(<ItemBank onPickFiles={() => undefined} />)
+
+    await user.click(
+      screen.getByRole('button', { name: /remove princess mononoke/i })
+    )
+
+    expect(window.confirm).toHaveBeenCalled()
+    expect(useTierEditor.getState().bankItems).toHaveLength(1)
   })
 })
 

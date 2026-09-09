@@ -12,17 +12,23 @@ type Props = { state: SaveState }
 const CONFIG = {
   saving: {
     label: 'Saving…',
-    icon: <Loader2 size={12} className="animate-spin" />,
+    icon: (
+      <Loader2
+        size={12}
+        className="animate-spin motion-reduce:animate-none"
+        aria-hidden="true"
+      />
+    ),
     className: 'text-muted-foreground',
   },
   saved: {
     label: 'Saved',
-    icon: <Check size={12} />,
+    icon: <Check size={12} aria-hidden="true" />,
     className: 'text-emerald-500',
   },
   error: {
     label: 'Save failed. Try again.',
-    icon: <AlertCircle size={12} />,
+    icon: <AlertCircle size={12} aria-hidden="true" />,
     className: 'text-destructive',
   },
 }

@@ -99,7 +99,10 @@ export function RequestPasswordResetForm() {
       </div>
       <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting && (
-          <Loader2 className="animate-spin" aria-hidden="true" />
+          <Loader2
+            className="animate-spin motion-reduce:animate-none"
+            aria-hidden="true"
+          />
         )}
         Send reset link
       </Button>
@@ -235,7 +238,10 @@ export function ResetPasswordForm({
       </div>
       <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting && (
-          <Loader2 className="animate-spin" aria-hidden="true" />
+          <Loader2
+            className="animate-spin motion-reduce:animate-none"
+            aria-hidden="true"
+          />
         )}
         Reset password
       </Button>

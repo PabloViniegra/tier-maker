@@ -7,6 +7,7 @@ import {
   type ComponentProps,
   createContext,
   type HTMLAttributes,
+  type KeyboardEvent as ReactKeyboardEvent,
   memo,
   useCallback,
   useContext,
@@ -242,6 +243,25 @@ export const ColorPickerSelection = memo(
       updateFromEvent(e.clientX, e.clientY)
     })
 
+    function handleKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+      const step = event.shiftKey ? 10 : 1
+      let handled = true
+
+      if (event.key === 'ArrowLeft') {
+        setSaturation(Math.max(0, saturation - step))
+      } else if (event.key === 'ArrowRight') {
+        setSaturation(Math.min(100, saturation + step))
+      } else if (event.key === 'ArrowUp') {
+        setLightness(Math.min(100, lightness + step))
+      } else if (event.key === 'ArrowDown') {
+        setLightness(Math.max(0, lightness - step))
+      } else {
+        handled = false
+      }
+
+      if (handled) event.preventDefault()
+    }
+
     useEffect(() => {
       if (!isDragging) return
       const handleMove = (e: PointerEvent) => onPointerMove(e)
@@ -257,13 +277,19 @@ export const ColorPickerSelection = memo(
     return (
       <div
         ref={containerRef}
-        role="application"
+        role="slider"
         aria-label="Color saturation and brightness"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(saturation)}
+        aria-valuetext={`${Math.round(saturation)}% saturation, ${Math.round(lightness)}% brightness`}
+        tabIndex={0}
         className={cn(
-          'relative aspect-[2/1] w-full cursor-crosshair touch-none rounded-md',
+          'relative aspect-[2/1] w-full cursor-crosshair touch-none rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           className
         )}
         style={{ background: backgroundGradient }}
+        onKeyDown={handleKeyDown}
         onPointerDown={(e) => {
           e.preventDefault()
           setIsDragging(true)
@@ -396,7 +422,7 @@ export const ColorPickerEyeDropper = ({
       className={cn('shrink-0 text-muted-foreground', className)}
       {...props}
     >
-      <PipetteIcon size={14} />
+      <PipetteIcon size={14} aria-hidden="true" />
     </Button>
   )
 }

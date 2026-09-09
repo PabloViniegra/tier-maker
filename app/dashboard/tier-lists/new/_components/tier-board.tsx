@@ -231,7 +231,15 @@ export function TierBoard({
             canRemove={isStructure && rows.length > 1}
             onLabelChange={(label) => updateRow(row.id, { label })}
             onColorChange={(color) => updateRow(row.id, { color })}
-            onRemove={() => removeRow(row.id)}
+            onRemove={() => {
+              if (
+                window.confirm(
+                  `Remove the ${row.label} tier? Its items will return to the item bank.`
+                )
+              ) {
+                removeRow(row.id)
+              }
+            }}
           />
           <Droppable
             droppableId={droppableIdForRow(row.id)}
@@ -304,11 +312,15 @@ export function TierBoard({
                               </Tooltip>
                             ) : item.status === 'uploading' ? (
                               <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                                <Loader2 size={12} className="animate-spin" />
+                                <Loader2
+                                  size={12}
+                                  className="animate-spin motion-reduce:animate-none"
+                                  aria-hidden="true"
+                                />
                               </div>
                             ) : (
                               <div className="flex h-full w-full items-center justify-center bg-destructive/20 text-destructive">
-                                <X size={12} />
+                                <X size={12} aria-hidden="true" />
                               </div>
                             )}
                             {isStructure && (
@@ -316,17 +328,23 @@ export function TierBoard({
                                 type="button"
                                 variants={hoverRevealVariants}
                                 whileFocus="hover"
-                                onClick={() =>
-                                  removeItem({
-                                    source: 'row',
-                                    id: item.id,
-                                    rowId: row.id,
-                                  })
-                                }
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      `Remove ${item.label} from the ${row.label} tier?`
+                                    )
+                                  ) {
+                                    removeItem({
+                                      source: 'row',
+                                      id: item.id,
+                                      rowId: row.id,
+                                    })
+                                  }
+                                }}
                                 className="absolute top-0 right-0 rounded bg-background/80 p-0.5 text-muted-foreground hover:text-foreground"
                                 aria-label={`Remove ${item.label}`}
                               >
-                                <X size={10} />
+                                <X size={10} aria-hidden="true" />
                               </motion.button>
                             )}
                           </motion.div>
@@ -350,7 +368,7 @@ export function TierBoard({
           onClick={addRow}
           className="mt-1 h-11 w-fit gap-1.5 text-muted-foreground hover:text-foreground"
         >
-          <Plus size={14} />
+          <Plus size={14} aria-hidden="true" />
           Add row
         </Button>
       )}

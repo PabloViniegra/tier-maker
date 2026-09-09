@@ -6,7 +6,9 @@ import { toast } from 'sonner'
 import {
   useTierEditor,
   buildUpdatePayload,
+  editorSnapshotFromSeed,
   hasPendingUploads,
+  serializeEditorState,
 } from '@/lib/stores/tier-editor'
 import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
 import { createSerializedSaver } from '@/lib/utils/serialized-save'
@@ -17,6 +19,7 @@ import { SaveIndicator, type SaveState } from './save-indicator'
 import { ExportButton } from './export-button'
 import { PageHeader } from '@/components/page-header'
 import type { TierListDetailSeed } from '@/lib/stores/tier-editor'
+import { useUnsavedChangesGuard } from '@/lib/hooks/use-unsaved-changes-guard'
 
 type Props = {
   id: string
@@ -27,17 +30,22 @@ export function TierListEditor({ id, data }: Props) {
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const boardRef = useRef<HTMLElement>(null)
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [savedSnapshot, setSavedSnapshot] = useState(() =>
+    serializeEditorState(editorSnapshotFromSeed(data))
+  )
+  const editorState = useTierEditor()
+  const isDirty = serializeEditorState(editorState) !== savedSnapshot
+  const confirmNavigation = useUnsavedChangesGuard(isDirty)
 
   useEffect(() => {
     useTierEditor.getState().initFromDb(data)
-
     let seeded = false
     let debounceTimer: ReturnType<typeof setTimeout> | null = null
-    const saver = createSerializedSaver(async (payload: ReturnType<
-      typeof buildUpdatePayload
-    >) => {
-      await updateTierListAction(id, payload)
-    })
+    const saver = createSerializedSaver(
+      async (payload: ReturnType<typeof buildUpdatePayload>) => {
+        await updateTierListAction(id, payload)
+      }
+    )
 
     const raf = requestAnimationFrame(() => {
       seeded = true
@@ -52,6 +60,13 @@ export function TierListEditor({ id, data }: Props) {
         if (hasPendingUploads(state)) return
         try {
           await saver(buildUpdatePayload(state))
+          const latestState = useTierEditor.getState()
+          if (
+            JSON.stringify(buildUpdatePayload(latestState)) ===
+            JSON.stringify(buildUpdatePayload(state))
+          ) {
+            setSavedSnapshot(serializeEditorState(latestState))
+          }
           setSaveState('saved')
           if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
           savedTimerRef.current = setTimeout(() => setSaveState('idle'), 2000)
@@ -76,7 +91,11 @@ export function TierListEditor({ id, data }: Props) {
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col">
-      <PageHeader backHref="/dashboard/tier-lists" title={data.title}>
+      <PageHeader
+        backHref="/dashboard/tier-lists"
+        title={data.title}
+        onBack={confirmNavigation}
+      >
         <SaveIndicator state={saveState} />
         <ExportButton boardRef={boardRef} title={data.title} />
       </PageHeader>

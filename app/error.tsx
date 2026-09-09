@@ -17,6 +17,7 @@ export default function Error({
   return (
     <main
       id="main-content"
+      tabIndex={-1}
       className="flex min-h-[400px] flex-col items-center justify-center gap-4"
     >
       <h1 className="font-heading text-xl">Something went wrong</h1>

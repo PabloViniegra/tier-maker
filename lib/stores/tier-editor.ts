@@ -65,6 +65,8 @@ type State = {
   bankItems: TierItem[]
 }
 
+export type TierEditorSnapshot = Pick<State, 'metadata' | 'rows' | 'bankItems'>
+
 type Actions = {
   setMetadata: (patch: Partial<EditorMetadata>) => void
   addUploadingItem: (label: string) => string
@@ -244,6 +246,47 @@ export const useTierEditor = create<State & Actions>()((set) => ({
       })),
     }),
 }))
+
+export function editorSnapshotFromSeed(
+  data: TierListDetailSeed
+): TierEditorSnapshot {
+  return {
+    metadata: {
+      title: data.title,
+      description: data.description ?? '',
+      category: data.category,
+      coverImageUrl: data.coverImageUrl ?? undefined,
+    },
+    bankItems: data.sidebarItems.map((item) => ({
+      id: '',
+      url: item.url,
+      label: item.label,
+      status: 'uploaded' as const,
+    })),
+    rows: data.rows.map((row) => ({
+      id: row.id,
+      label: row.label,
+      color: row.color,
+      items: row.items.map((item) => ({
+        id: '',
+        url: item.url,
+        label: item.label,
+        status: 'uploaded' as const,
+      })),
+    })),
+  }
+}
+
+export function serializeEditorState(state: TierEditorSnapshot): string {
+  return JSON.stringify({
+    metadata: state.metadata,
+    rows: state.rows.map(({ items, ...row }) => ({
+      ...row,
+      items: items.map(({ label, url }) => ({ label, url })),
+    })),
+    bankItems: state.bankItems.map(({ label, url }) => ({ label, url })),
+  })
+}
 
 export function collectSavedItemUrls(state: State): string[] {
   const urls: string[] = []

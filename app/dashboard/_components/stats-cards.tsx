@@ -3,7 +3,7 @@
 import { motion } from 'motion/react'
 import { LayoutList, Tag, Clock } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { formatRelativeDate } from '@/lib/utils/format-date'
+import { RelativeDate } from '@/components/relative-date'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Sparkline } from '@/components/sparkline'
 import { formatDelta } from '@/lib/utils/delta'
@@ -58,7 +58,7 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
   const displayValues = {
     total: String(stats.total),
     categories: String(stats.categories),
-    lastActivity: formatRelativeDate(stats.lastActivity),
+    lastActivity: stats.lastActivity,
   }
 
   // Deltas compare current-window vs previous-window counts — not all-time totals
@@ -104,7 +104,11 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
             {/* Value + sparkline row */}
             <div className="mt-1 flex items-end justify-between gap-2">
               <p className="font-mono text-2xl font-semibold text-foreground tabular-nums">
-                {displayValues[key]}
+                {key === 'lastActivity' ? (
+                  <RelativeDate date={displayValues[key]} />
+                ) : (
+                  displayValues[key]
+                )}
               </p>
               {hasSeries && stats.totalSeries.length > 0 && (
                 <Sparkline series={stats.totalSeries} width={64} height={24} />

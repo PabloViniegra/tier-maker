@@ -75,7 +75,11 @@ export default async function PublicTierFillPage({ params }: Props) {
       <ExploreHeader isLoggedIn={!!session} isDetail />
       {!session && <AnonymousCTABanner />}
 
-      <main id="main-content" className="min-h-0 flex-1 overflow-hidden">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="min-h-0 flex-1 overflow-hidden"
+      >
         <ViewTransition name={`tier-cover-${data.id}`}>
           <PublicTierFill
             tierId={data.id}

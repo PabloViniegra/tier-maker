@@ -29,7 +29,9 @@ describe('LikeButton', () => {
 
     fireEvent.click(screen.getByRole('button'))
 
-    await waitFor(() => expect(toggleLikeAction.toggleLike).toHaveBeenCalledWith('tpl-1'))
+    await waitFor(() =>
+      expect(toggleLikeAction.toggleLike).toHaveBeenCalledWith('tpl-1')
+    )
   })
 
   it('keeps incremented count after successful like', async () => {
@@ -44,13 +46,15 @@ describe('LikeButton', () => {
   it('links to sign-in when unauthenticated', () => {
     render(<LikeButton {...baseProps} isAuthenticated={false} />)
 
-    const link = screen.getByRole('link', { name: 'Like' })
+    const link = screen.getByRole('link', { name: 'Like (5)' })
     expect(link).toHaveAttribute('href', '/login')
     expect(toggleLikeAction.toggleLike).not.toHaveBeenCalled()
   })
 
   it('shows error toast and does not increment count on server error', async () => {
-    asMock(toggleLikeAction.toggleLike).mockRejectedValue(new Error('Server error'))
+    asMock(toggleLikeAction.toggleLike).mockRejectedValue(
+      new Error('Server error')
+    )
     render(<LikeButton {...baseProps} initialCount={5} />)
 
     fireEvent.click(screen.getByRole('button'))

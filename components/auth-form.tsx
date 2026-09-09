@@ -238,7 +238,10 @@ export function LoginForm() {
               onClick={resendVerification}
             >
               {resending && (
-                <Loader2 className="animate-spin" aria-hidden="true" />
+                <Loader2
+                  className="animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
               )}
               Resend verification
             </Button>
@@ -252,7 +255,12 @@ export function LoginForm() {
         aria-busy={isSubmitting}
         className={`mt-2 w-full ${controlClassName}`}
       >
-        {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+        {isSubmitting && (
+          <Loader2
+            className="animate-spin motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+        )}
         Sign in
       </Button>
       <GoogleButton divider="before" />
@@ -320,7 +328,12 @@ function RegisterConfirmation({ email }: { email: string }) {
         aria-busy={resending}
         onClick={resendVerification}
       >
-        {resending && <Loader2 className="animate-spin" aria-hidden="true" />}
+        {resending && (
+          <Loader2
+            className="animate-spin motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+        )}
         Resend verification
       </Button>
       <p className="text-sm text-muted-foreground">
@@ -403,9 +416,7 @@ export function RegisterForm() {
         <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground">
           Create an account
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Save the lists you make
-        </p>
+        <p className="text-sm text-muted-foreground">Save the lists you make</p>
       </div>
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
@@ -420,7 +431,11 @@ export function RegisterForm() {
             aria-describedby={errors.name ? 'name-error' : undefined}
           />
           {errors.name && (
-            <p id="name-error" className="text-xs text-destructive" role="alert">
+            <p
+              id="name-error"
+              className="text-xs text-destructive"
+              role="alert"
+            >
               {errors.name.message}
             </p>
           )}
@@ -439,7 +454,11 @@ export function RegisterForm() {
             aria-describedby={errors.email ? 'email-error' : undefined}
           />
           {errors.email && (
-            <p id="email-error" className="text-xs text-destructive" role="alert">
+            <p
+              id="email-error"
+              className="text-xs text-destructive"
+              role="alert"
+            >
               {errors.email.message}
             </p>
           )}
@@ -490,7 +509,12 @@ export function RegisterForm() {
           aria-busy={isSubmitting}
           className={`mt-2 w-full ${controlClassName}`}
         >
-          {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+          {isSubmitting && (
+            <Loader2
+              className="animate-spin motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          )}
           Sign up
         </Button>
         <GoogleButton divider="before" />

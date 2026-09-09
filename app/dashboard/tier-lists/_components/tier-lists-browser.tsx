@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { SearchX } from 'lucide-react'
 
 import { Input } from '@/components/ui/input'
@@ -13,7 +14,26 @@ export function TierListsBrowser({
 }: {
   tierLists: TierListCardProps[]
 }) {
-  const [query, setQuery] = useState('')
+  const pathname = usePathname()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const query = searchParams.get('q') ?? ''
+
+  const setQuery = useCallback(
+    (nextQuery: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (nextQuery.trim()) {
+        params.set('q', nextQuery)
+      } else {
+        params.delete('q')
+      }
+      const queryString = params.toString()
+      router.replace(`${pathname}${queryString ? `?${queryString}` : ''}`, {
+        scroll: false,
+      })
+    },
+    [pathname, router, searchParams]
+  )
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -36,6 +56,9 @@ export function TierListsBrowser({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search by title or category"
+        name="q"
+        autoComplete="off"
+        enterKeyHint="search"
         aria-label="Search your tier lists"
         className="max-w-xs"
       />

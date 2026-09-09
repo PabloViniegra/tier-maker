@@ -7,7 +7,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { LikeButton } from '@/components/like-button'
 import { cn } from '@/lib/utils'
-import { formatRelativeDate } from '@/lib/utils/format-date'
+import { RelativeDate } from '@/components/relative-date'
 import { getCategoryGradient, getInitials } from '@/lib/utils/cover-placeholder'
 import type { PublicTierListSummary } from '@/lib/queries/tier-templates'
 
@@ -84,9 +84,10 @@ export function ExploreCard({
           >
             {category.length > 20 ? category.slice(0, 20) + '…' : category}
           </Badge>
-          <span className="shrink-0 text-xs text-muted-foreground">
-            {formatRelativeDate(createdAt)}
-          </span>
+          <RelativeDate
+            date={createdAt}
+            className="shrink-0 text-xs text-muted-foreground"
+          />
         </div>
 
         <Link href={fillHref}>

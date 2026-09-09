@@ -50,6 +50,7 @@
 }
 
 :root {
+  color-scheme: light;
   --accent-base: #2e62d4;
 
   --background: oklch(0.98 0 0);
@@ -88,6 +89,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.1 0 0);
   --foreground: oklch(0.92 0 0);
   --card: oklch(0.14 0 0);
@@ -181,6 +183,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {

@@ -52,7 +52,7 @@ export function CookieBanner() {
                 href="/privacy"
                 className="underline underline-offset-4 hover:text-foreground"
               >
-                Learn more
+                Learn about privacy
               </Link>
             </p>
             <div className="flex shrink-0 gap-2">

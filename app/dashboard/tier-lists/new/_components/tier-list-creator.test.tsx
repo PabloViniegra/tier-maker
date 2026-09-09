@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { afterEach, describe, it, expect, beforeEach, vi } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 
@@ -20,6 +20,10 @@ const seedData = {
 }
 
 describe('TierListCreator — create mode (no initialData)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   beforeEach(() => {
     useTierEditor.getState().reset()
   })
@@ -90,6 +94,39 @@ describe('TierListCreator — create mode (no initialData)', () => {
     useTierEditor.getState().setMetadata({ title: 'Stale' })
     render(<TierListCreator {...baseProps} />)
     expect(useTierEditor.getState().metadata.title).toBe('')
+  })
+
+  it('does not intercept image paste while editing text', () => {
+    render(<TierListCreator {...baseProps} />)
+    const pasteEvent = new Event('paste', { bubbles: true, cancelable: true })
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      value: {
+        items: [
+          {
+            kind: 'file',
+            getAsFile: () =>
+              new File(['image'], 'pasted.png', { type: 'image/png' }),
+          },
+        ],
+      },
+    })
+
+    fireEvent(screen.getByLabelText('Title'), pasteEvent)
+
+    expect(pasteEvent.defaultPrevented).toBe(false)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('keeps a row when removal is not confirmed', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    const user = userEvent.setup()
+    render(<TierListCreator {...baseProps} />)
+    const initialRows = useTierEditor.getState().rows.length
+
+    await user.click(screen.getAllByRole('button', { name: 'Remove row' })[0])
+
+    expect(window.confirm).toHaveBeenCalled()
+    expect(useTierEditor.getState().rows).toHaveLength(initialRows)
   })
 })
 

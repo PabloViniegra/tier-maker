@@ -28,7 +28,7 @@ export default async function DashboardLayout({
       <DashboardSidebar user={user} />
       <div className="flex min-w-0 flex-1 flex-col">
         <MobileTopBar user={user} />
-        <main id="main-content" className="flex-1 overflow-auto">
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto">
           {children}
         </main>
       </div>

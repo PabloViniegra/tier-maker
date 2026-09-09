@@ -60,6 +60,20 @@ describe('ColorPicker', () => {
     expect(lastCall).toMatch(/^#/)
   })
 
+  it('supports keyboard adjustments on the selection surface', async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+    render(<ControlledPicker value="#ff0000" onChange={onChange} />)
+
+    const surface = screen.getByTestId('selection')
+    surface.focus()
+    await user.keyboard('{ArrowLeft}{ArrowUp}')
+
+    expect(surface).toHaveAttribute('tabindex', '0')
+    expect(surface).toHaveAttribute('role', 'slider')
+    expect(onChange).toHaveBeenCalled()
+  })
+
   it('is a controlled component — external value updates are reflected in the hue', () => {
     const { container, rerender } = render(<ControlledPicker value="#ff0000" />)
     rerender(<ControlledPicker value="#0000ff" />)

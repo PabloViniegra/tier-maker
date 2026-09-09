@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import { Droppable, Draggable } from '@hello-pangea/dnd'
 import { motion } from 'motion/react'
 import { ImagePlus, ListPlus, Loader2, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -161,7 +162,11 @@ export function ItemBank({
                                 {...dragProvided.dragHandleProps}
                                 className="flex h-full w-full items-center justify-center text-muted-foreground"
                               >
-                                <Loader2 size={16} className="animate-spin" />
+                                <Loader2
+                                  size={16}
+                                  className="animate-spin motion-reduce:animate-none"
+                                  aria-hidden="true"
+                                />
                               </div>
                             ) : (
                               <div
@@ -222,9 +227,23 @@ export function ItemBank({
                             )}
                             <button
                               type="button"
-                              onClick={() => {
+                              onClick={async () => {
+                                if (
+                                  !window.confirm(
+                                    `Remove ${item.label} from this tier list?`
+                                  )
+                                ) {
+                                  return
+                                }
                                 if (item.status === 'uploaded' && item.url) {
-                                  deleteImagesAction([item.url]).catch(() => {})
+                                  try {
+                                    await deleteImagesAction([item.url])
+                                  } catch {
+                                    toast.error(
+                                      'Could not remove the image. Try again.'
+                                    )
+                                    return
+                                  }
                                 }
                                 removeItemEverywhere(item.id)
                               }}

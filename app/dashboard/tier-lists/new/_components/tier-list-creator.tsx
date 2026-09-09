@@ -7,8 +7,11 @@ import { DragDropContext } from '@hello-pangea/dnd'
 import { Plus } from 'lucide-react'
 import {
   useTierEditor,
+  initialState,
   buildSavePayload,
+  editorSnapshotFromSeed,
   hasPendingUploads,
+  serializeEditorState,
   type TierListDetailSeed,
 } from '@/lib/stores/tier-editor'
 import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
@@ -22,6 +25,7 @@ import { uploadImagesAction, createTierListAction } from '../actions'
 import { updateTierListStructureAction } from '../../[id]/edit/actions'
 import { PageHeader } from '@/components/page-header'
 import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
+import { useUnsavedChangesGuard } from '@/lib/hooks/use-unsaved-changes-guard'
 
 type TierListCreatorProps = {
   categoryPresets: string[]
@@ -30,6 +34,16 @@ type TierListCreatorProps = {
   | { initialData: TierListDetailSeed; editId: string }
   | { initialData?: never; editId?: never }
 )
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false
+  return (
+    target.isContentEditable ||
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.tagName === 'SELECT'
+  )
+}
 
 export function TierListCreator({
   categoryPresets,
@@ -43,6 +57,14 @@ export function TierListCreator({
   const { onDragEnd } = useTierDnd()
   const [isDraggingFile, setIsDraggingFile] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<File[] | null>(null)
+  const [savedSnapshot] = useState(() =>
+    serializeEditorState(
+      initialData ? editorSnapshotFromSeed(initialData) : initialState
+    )
+  )
+  const editorState = useTierEditor()
+  const isDirty = serializeEditorState(editorState) !== savedSnapshot
+  const confirmNavigation = useUnsavedChangesGuard(isDirty)
 
   useEffect(() => {
     if (initialData) {
@@ -110,6 +132,7 @@ export function TierListCreator({
 
   useEffect(() => {
     function onPaste(e: ClipboardEvent) {
+      if (isEditableTarget(e.target)) return
       const items = Array.from(e.clipboardData?.items ?? [])
       const files: File[] = []
       for (const item of items) {
@@ -119,7 +142,6 @@ export function TierListCreator({
         }
       }
       if (files.length === 0) return
-      e.preventDefault()
       openModalRef.current(files)
     }
     window.addEventListener('paste', onPaste)
@@ -207,6 +229,7 @@ export function TierListCreator({
       <PageHeader
         backHref={isEditMode ? '/dashboard/tier-lists' : '/dashboard'}
         title={isEditMode ? 'Edit tier list' : 'New tier list'}
+        onBack={confirmNavigation}
       >
         <SaveBar onSave={handleSave} isSaving={isPending} />
       </PageHeader>
@@ -242,7 +265,12 @@ function PageDropOverlay() {
       className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm"
     >
       <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-primary bg-surface px-10 py-8 shadow-overlay">
-        <Plus size={28} strokeWidth={1.5} className="text-primary" />
+        <Plus
+          size={28}
+          strokeWidth={1.5}
+          className="text-primary"
+          aria-hidden="true"
+        />
         <p className="font-heading text-base">Drop images to upload</p>
         <p className="text-xs text-muted-foreground">
           JPG, PNG, WEBP, GIF · up to 5 MB each
