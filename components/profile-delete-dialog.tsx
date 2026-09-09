@@ -1,21 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import { Trash2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -33,19 +22,22 @@ import { authClient } from '@/lib/auth-client'
 
 export function ProfileDeleteDialog({ name }: { name: string }) {
   const router = useRouter()
+  const [step, setStep] = useState<'review' | 'confirm'>('review')
   const [typed, setTyped] = useState('')
-  const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const matches = typed.trim() === name.trim()
+  const isConfirm = step === 'confirm'
 
   const onOpenChange = (open: boolean) => {
     if (!open) {
       setTyped('')
-      setConfirmOpen(false)
+      setStep('review')
+      setDeleting(false)
     }
   }
 
   const deleteAccount = async () => {
+    if (!matches) return
     setDeleting(true)
     try {
       const result = await authClient.deleteUser()
@@ -63,6 +55,15 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
     }
   }
 
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (step === 'review') {
+      setStep('confirm')
+      return
+    }
+    void deleteAccount()
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <h2 className="font-heading text-sm text-muted-foreground">
@@ -75,73 +76,89 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
         <DialogTrigger render={<Button variant="destructive" />}>
           Delete account
         </DialogTrigger>
-        <DialogContent className="data-nested-dialog-open:after:absolute data-nested-dialog-open:after:inset-0 data-nested-dialog-open:after:bg-black/25">
-          <DialogHeader>
-            <DialogTitle>Type your display name</DialogTitle>
-            <DialogDescription id="delete-account-hint">
-              Enter {name} to continue.
-            </DialogDescription>
-          </DialogHeader>
-          <p className="font-mono text-sm text-foreground">{name}</p>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="delete-account-name">Display name</Label>
-            <Input
-              id="delete-account-name"
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              autoComplete="off"
-              aria-describedby={
-                matches ? 'delete-account-hint' : 'delete-account-mismatch'
-              }
-              className={matches ? 'border-primary' : undefined}
-            />
-            {!matches && (
-              <p
-                id="delete-account-mismatch"
-                className="text-xs text-muted-foreground"
-              >
-                Type your display name exactly to continue.
-              </p>
-            )}
-          </div>
-          <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>
-              Cancel
-            </DialogClose>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!matches}
-              onClick={() => setConfirmOpen(true)}
-            >
-              Continue
-            </Button>
-          </DialogFooter>
-          <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-            <AlertDialogContent showOverlay={false}>
-              <AlertDialogHeader>
-                <AlertDialogMedia className="bg-destructive/10 text-destructive">
-                  <Trash2 aria-hidden="true" />
-                </AlertDialogMedia>
-                <AlertDialogTitle className="text-destructive">
-                  Delete {name}?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This cannot be undone. All of your lists will be removed.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  variant="destructive"
-                  disabled={deleting}
-                  onClick={deleteAccount}
+        <DialogContent>
+          <form onSubmit={onSubmit} className="contents">
+            <DialogHeader>
+              <div className="flex items-baseline justify-between gap-3">
+                <DialogTitle>
+                  {isConfirm ? 'Confirm deletion' : 'Delete account'}
+                </DialogTitle>
+                <p
+                  className="text-xs text-muted-foreground tabular-nums"
+                  aria-hidden="true"
                 >
+                  {isConfirm ? '2 / 2' : '1 / 2'}
+                </p>
+              </div>
+              <DialogDescription id="delete-account-hint">
+                {isConfirm
+                  ? `Type ${name} to delete your account.`
+                  : 'This cannot be undone. Your account and all of your lists will be removed.'}
+              </DialogDescription>
+            </DialogHeader>
+            {isConfirm && (
+              <>
+                <p className="font-mono text-sm text-foreground">{name}</p>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="delete-account-name">Display name</Label>
+                  <Input
+                    id="delete-account-name"
+                    value={typed}
+                    onChange={(e) => setTyped(e.target.value)}
+                    autoComplete="off"
+                    spellCheck={false}
+                    autoFocus
+                    aria-describedby={
+                      matches
+                        ? 'delete-account-hint'
+                        : 'delete-account-mismatch'
+                    }
+                    className={matches ? 'border-primary' : undefined}
+                  />
+                  {!matches && (
+                    <p
+                      id="delete-account-mismatch"
+                      className="text-xs text-muted-foreground"
+                    >
+                      Type your display name exactly.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+            <DialogFooter>
+              {isConfirm ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep('review')}
+                  disabled={deleting}
+                >
+                  Back
+                </Button>
+              ) : (
+                <DialogClose render={<Button variant="outline" />}>
+                  Cancel
+                </DialogClose>
+              )}
+              {isConfirm ? (
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  disabled={!matches || deleting}
+                >
+                  {deleting && (
+                    <Loader2 className="animate-spin" aria-hidden="true" />
+                  )}
                   Delete account
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                </Button>
+              ) : (
+                <Button type="submit" variant="outline">
+                  Continue
+                </Button>
+              )}
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

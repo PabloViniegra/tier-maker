@@ -8,68 +8,104 @@ import { asMock } from '@/test/as-mock'
 
 import { ProfileDeleteDialog } from './profile-delete-dialog'
 
+async function openDialog(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: /delete account/i }))
+}
+
+async function goToConfirmStep(user: ReturnType<typeof userEvent.setup>) {
+  await openDialog(user)
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+}
+
 describe('ProfileDeleteDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     asMock(authClient.deleteUser).mockResolvedValue({ data: {}, error: null })
   })
 
-  it('keeps continue disabled until the display name matches', async () => {
+  it('opens on the review step without the name field', async () => {
     const user = userEvent.setup()
     render(<ProfileDeleteDialog name="Pablo García" />)
 
-    await user.click(screen.getByRole('button', { name: /delete account/i }))
-    const confirm = screen.getByRole('button', { name: /continue/i })
-    expect(confirm).toBeDisabled()
-
-    await user.type(screen.getByRole('textbox', { name: /display name/i }), 'Wrong Name')
-    expect(confirm).toBeDisabled()
-  })
-
-  it('closes the name dialog from the footer cancel', async () => {
-    const user = userEvent.setup()
-    render(<ProfileDeleteDialog name="Pablo García" />)
-
-    await user.click(screen.getByRole('button', { name: /delete account/i }))
-    await user.click(screen.getByRole('button', { name: /cancel/i }))
+    await openDialog(user)
 
     expect(
       screen.queryByRole('textbox', { name: /display name/i })
     ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /continue/i })).toBeEnabled()
   })
 
-  it('does not delete when the nested alert is cancelled', async () => {
+  it('closes from the review cancel', async () => {
     const user = userEvent.setup()
     render(<ProfileDeleteDialog name="Pablo García" />)
 
-    await user.click(screen.getByRole('button', { name: /delete account/i }))
-    await user.type(
-      screen.getByRole('textbox', { name: /display name/i }),
-      'Pablo García'
-    )
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await openDialog(user)
     await user.click(screen.getByRole('button', { name: /cancel/i }))
 
-    expect(authClient.deleteUser).not.toHaveBeenCalled()
+    expect(
+      screen.queryByRole('button', { name: /continue/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it('advances to the name field after continue', async () => {
+    const user = userEvent.setup()
+    render(<ProfileDeleteDialog name="Pablo García" />)
+
+    await goToConfirmStep(user)
+
     expect(
       screen.getByRole('textbox', { name: /display name/i })
     ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /continue/i })
+    ).not.toBeInTheDocument()
   })
 
-  it('deletes the account after destructive confirm', async () => {
+  it('keeps delete disabled until the display name matches', async () => {
     const user = userEvent.setup()
     render(<ProfileDeleteDialog name="Pablo García" />)
 
-    await user.click(screen.getByRole('button', { name: /delete account/i }))
+    await goToConfirmStep(user)
+    const submit = screen.getByRole('button', { name: /^delete account$/i })
+    expect(submit).toBeDisabled()
+
+    await user.type(
+      screen.getByRole('textbox', { name: /display name/i }),
+      'Wrong Name'
+    )
+    expect(submit).toBeDisabled()
+  })
+
+  it('returns to review when back is pressed without deleting', async () => {
+    const user = userEvent.setup()
+    render(<ProfileDeleteDialog name="Pablo García" />)
+
+    await goToConfirmStep(user)
     await user.type(
       screen.getByRole('textbox', { name: /display name/i }),
       'Pablo García'
     )
-    await user.click(screen.getByRole('button', { name: /continue/i }))
-    const deleteButtons = screen.getAllByRole('button', {
-      name: /^delete account$/i,
-    })
-    await user.click(deleteButtons[deleteButtons.length - 1])
+    await user.click(screen.getByRole('button', { name: /back/i }))
+
+    expect(authClient.deleteUser).not.toHaveBeenCalled()
+    expect(
+      screen.queryByRole('textbox', { name: /display name/i })
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument()
+  })
+
+  it('deletes the account after typing the display name', async () => {
+    const user = userEvent.setup()
+    render(<ProfileDeleteDialog name="Pablo García" />)
+
+    await goToConfirmStep(user)
+    await user.type(
+      screen.getByRole('textbox', { name: /display name/i }),
+      'Pablo García'
+    )
+    await user.click(
+      screen.getByRole('button', { name: /^delete account$/i })
+    )
 
     await waitFor(() => {
       expect(authClient.deleteUser).toHaveBeenCalled()
