@@ -47,6 +47,9 @@ describe('ProfileActivity', () => {
     expect(screen.getByText('4')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
     expect(screen.getByText('9')).toBeInTheDocument()
+    expect(
+      screen.getByText(/created activity over the last 14 days/i)
+    ).toBeInTheDocument()
   })
 
   it('links list activity to list management', () => {
