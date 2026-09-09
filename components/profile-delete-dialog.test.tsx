@@ -34,6 +34,10 @@ describe('ProfileDeleteDialog', () => {
       screen.queryByRole('textbox', { name: /display name/i })
     ).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /continue/i })).toBeEnabled()
+    expect(screen.getByRole('dialog')).toHaveClass(
+      'duration-200',
+      'ease-[cubic-bezier(0.16,1,0.3,1)]'
+    )
   })
 
   it('closes from the review cancel', async () => {
