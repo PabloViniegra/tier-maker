@@ -1,8 +1,11 @@
 import { Layers } from 'lucide-react'
+import Link from 'next/link'
 
 import { EmptyState } from '@/components/empty-state'
+import { buttonVariants } from '@/components/ui/button'
 import { Sparkline } from '@/components/sparkline'
 import type { ProfileStats } from '@/lib/queries/tier-templates'
+import { cn } from '@/lib/utils'
 
 export function ProfileActivity({ stats }: { stats: ProfileStats }) {
   if (stats.created === 0) {
@@ -39,7 +42,15 @@ export function ProfileActivity({ stats }: { stats: ProfileStats }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="font-heading text-base">Your lists</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="font-heading text-base">Your lists</h2>
+        <Link
+          href="/dashboard/tier-lists"
+          className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-7')}
+        >
+          View all lists
+        </Link>
+      </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {cards.map(({ label, value, series }) => (
           <div

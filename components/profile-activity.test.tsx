@@ -48,4 +48,23 @@ describe('ProfileActivity', () => {
     expect(screen.getByText('2')).toBeInTheDocument()
     expect(screen.getByText('9')).toBeInTheDocument()
   })
+
+  it('links list activity to list management', () => {
+    render(
+      <ProfileActivity
+        stats={{
+          created: 4,
+          published: 2,
+          likesReceived: 9,
+          createdSeries: new Array(14).fill(0),
+          publishedSeries: new Array(14).fill(0),
+        }}
+      />
+    )
+
+    expect(screen.getByRole('link', { name: /view all lists/i })).toHaveAttribute(
+      'href',
+      '/dashboard/tier-lists'
+    )
+  })
 })
