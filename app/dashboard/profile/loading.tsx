@@ -4,6 +4,7 @@ export default function Loading() {
   return (
     <div
       className="flex flex-col gap-6 p-6"
+      role="status"
       aria-busy="true"
       aria-label="Loading profile"
     >

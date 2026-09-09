@@ -41,7 +41,7 @@ export default async function ProfilePage() {
       </FadeUp>
       {hasCredential && (
         <FadeUp delay={0.18} onMount>
-          <div className="max-w-xl rounded-lg border border-border bg-surface p-4 sm:p-5">
+          <div className="max-w-xl rounded-lg border border-border bg-surface p-4">
             <ProfilePasswordForm email={user.email} />
           </div>
         </FadeUp>

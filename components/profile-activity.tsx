@@ -58,7 +58,7 @@ export function ProfileActivity({ stats }: { stats: ProfileStats }) {
         {cards.map(({ label, value, series }) => (
           <div
             key={label}
-            className="rounded-lg border border-border bg-surface p-5"
+            className="rounded-lg border border-border bg-surface p-4"
           >
             <p className="text-xs text-muted-foreground">{label}</p>
             <div className="mt-1 flex items-end justify-between gap-2">

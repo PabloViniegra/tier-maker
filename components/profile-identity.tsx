@@ -23,7 +23,7 @@ export function ProfileIdentity({
     : (email[0] ?? '').toUpperCase()
 
   return (
-    <div className="relative overflow-hidden rounded-lg border border-border bg-surface p-5">
+    <div className="relative overflow-hidden rounded-lg border border-border bg-surface p-4">
       <TierRowsBackground showLabels={false} />
       <div className="relative z-10 flex items-center gap-4">
         <div
