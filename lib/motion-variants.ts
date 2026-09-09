@@ -31,6 +31,20 @@ export const profileStepVariants = {
   },
 } satisfies Variants
 
+export const profileDialogStepVariants = {
+  hidden: { opacity: 0, transform: 'scale(0.97)' },
+  visible: {
+    opacity: 1,
+    transform: 'scale(1)',
+    transition: { duration: 0.2, ease: EASE_SMOOTH },
+  },
+  exit: {
+    opacity: 0,
+    transform: 'scale(0.97)',
+    transition: { duration: 0.15, ease: EASE_SMOOTH },
+  },
+} satisfies Variants
+
 export const staggerContainerVariants = {
   hidden: {},
   visible: {

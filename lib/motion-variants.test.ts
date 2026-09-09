@@ -13,6 +13,7 @@ import {
   bentoIconFloat,
   cardLiftVariants,
   hoverRevealVariants,
+  profileDialogStepVariants,
   profileStepVariants,
 } from './motion-variants'
 
@@ -88,6 +89,34 @@ describe('profileStepVariants', () => {
       ease: EASE_SMOOTH,
     })
     expect(profileStepVariants.exit.transition).toMatchObject({
+      duration: 0.15,
+      ease: EASE_SMOOTH,
+    })
+  })
+})
+
+describe('profileDialogStepVariants', () => {
+  it('uses a subtle scale with opacity for dialog step swaps', () => {
+    expect(profileDialogStepVariants.hidden).toMatchObject({
+      opacity: 0,
+      transform: 'scale(0.97)',
+    })
+    expect(profileDialogStepVariants.visible).toMatchObject({
+      opacity: 1,
+      transform: 'scale(1)',
+    })
+    expect(profileDialogStepVariants.exit).toMatchObject({
+      opacity: 0,
+      transform: 'scale(0.97)',
+    })
+  })
+
+  it('uses the dialog step transition timings', () => {
+    expect(profileDialogStepVariants.visible.transition).toMatchObject({
+      duration: 0.2,
+      ease: EASE_SMOOTH,
+    })
+    expect(profileDialogStepVariants.exit.transition).toMatchObject({
       duration: 0.15,
       ease: EASE_SMOOTH,
     })

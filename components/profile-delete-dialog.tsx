@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -19,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { authClient } from '@/lib/auth-client'
+import { profileDialogStepVariants } from '@/lib/motion-variants'
 
 export function ProfileDeleteDialog({ name }: { name: string }) {
   const router = useRouter()
@@ -83,73 +85,95 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
         </DialogTrigger>
         <DialogContent>
           <form onSubmit={onSubmit} className="contents">
-            <DialogHeader>
-              <div className="flex items-baseline justify-between gap-3">
-                <DialogTitle>
-                  {isConfirm ? 'Confirm deletion' : 'Delete account'}
-                </DialogTitle>
-                <p
-                  className="text-xs text-muted-foreground tabular-nums"
-                  role="status"
-                  aria-live="polite"
-                >
-                  {isConfirm ? '2 / 2' : '1 / 2'}
-                </p>
-              </div>
-              <DialogDescription id="delete-account-hint">
-                {isConfirm
-                  ? `Type ${confirmationText} to delete your account.`
-                  : 'This cannot be undone. Your account and all of your lists will be removed.'}
-              </DialogDescription>
-            </DialogHeader>
-            {isConfirm && (
-              <>
-                <p className="font-mono text-sm text-foreground">
-                  {confirmationText}
-                </p>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="delete-account-name">
-                    {name.trim() ? 'Display name' : 'Confirmation'}
-                  </Label>
-                  <Input
-                    id="delete-account-name"
-                    value={typed}
-                    onChange={(e) => {
-                      setTyped(e.target.value)
-                      if (deleteError) setDeleteError(undefined)
-                    }}
-                    autoComplete="off"
-                    spellCheck={false}
-                    autoFocus
-                    aria-describedby={[
-                      'delete-account-hint',
-                      !matches ? 'delete-account-mismatch' : null,
-                      deleteError ? 'delete-account-error' : null,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    className={matches ? 'h-11 border-primary sm:h-8' : 'h-11 sm:h-8'}
-                  />
-                  {!matches && (
+            <AnimatePresence initial={false} mode="wait">
+              <motion.div
+                key={step}
+                variants={profileDialogStepVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="col-span-full"
+              >
+                <DialogHeader>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <DialogTitle>
+                      {isConfirm ? 'Confirm deletion' : 'Delete account'}
+                    </DialogTitle>
                     <p
-                      id="delete-account-mismatch"
-                      className="text-xs text-muted-foreground"
+                      className="text-xs text-muted-foreground tabular-nums"
+                      role="status"
+                      aria-live="polite"
                     >
-                      Type {confirmationText} exactly.
+                      {isConfirm ? '2 / 2' : '1 / 2'}
+                    </p>
+                  </div>
+                  <DialogDescription id="delete-account-hint">
+                    {isConfirm
+                      ? `Type ${confirmationText} to delete your account.`
+                      : 'This cannot be undone. Your account and all of your lists will be removed.'}
+                  </DialogDescription>
+                </DialogHeader>
+              </motion.div>
+            </AnimatePresence>
+            <AnimatePresence initial={false} mode="wait">
+              {isConfirm && (
+                <motion.div
+                  key="confirm-fields"
+                  variants={profileDialogStepVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="col-span-full flex flex-col gap-4"
+                >
+                  <p className="font-mono text-sm text-foreground">
+                    {confirmationText}
+                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="delete-account-name">
+                      {name.trim() ? 'Display name' : 'Confirmation'}
+                    </Label>
+                    <Input
+                      id="delete-account-name"
+                      value={typed}
+                      onChange={(e) => {
+                        setTyped(e.target.value)
+                        if (deleteError) setDeleteError(undefined)
+                      }}
+                      autoComplete="off"
+                      spellCheck={false}
+                      autoFocus
+                      aria-describedby={[
+                        'delete-account-hint',
+                        !matches ? 'delete-account-mismatch' : null,
+                        deleteError ? 'delete-account-error' : null,
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      className={
+                        matches ? 'h-11 border-primary sm:h-8' : 'h-11 sm:h-8'
+                      }
+                    />
+                    {!matches && (
+                      <p
+                        id="delete-account-mismatch"
+                        className="text-xs text-muted-foreground"
+                      >
+                        Type {confirmationText} exactly.
+                      </p>
+                    )}
+                  </div>
+                  {deleteError && (
+                    <p
+                      id="delete-account-error"
+                      className="text-sm text-destructive"
+                      role="alert"
+                    >
+                      {deleteError}
                     </p>
                   )}
-                </div>
-                {deleteError && (
-                  <p
-                    id="delete-account-error"
-                    className="text-sm text-destructive"
-                    role="alert"
-                  >
-                    {deleteError}
-                  </p>
-                )}
-              </>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
             <DialogFooter>
               {isConfirm ? (
                 <Button

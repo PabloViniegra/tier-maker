@@ -15,6 +15,7 @@ async function openDialog(user: ReturnType<typeof userEvent.setup>) {
 async function goToConfirmStep(user: ReturnType<typeof userEvent.setup>) {
   await openDialog(user)
   await user.click(screen.getByRole('button', { name: /continue/i }))
+  await screen.findByRole('textbox', { name: /display name|confirmation/i })
 }
 
 describe('ProfileDeleteDialog', () => {
@@ -88,10 +89,14 @@ describe('ProfileDeleteDialog', () => {
     await user.click(screen.getByRole('button', { name: /back/i }))
 
     expect(authClient.deleteUser).not.toHaveBeenCalled()
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('textbox', { name: /display name/i })
+      ).not.toBeInTheDocument()
+    })
     expect(
-      screen.queryByRole('textbox', { name: /display name/i })
-    ).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument()
+      await screen.findByRole('button', { name: /continue/i })
+    ).toBeInTheDocument()
   })
 
   it('deletes the account after typing the display name', async () => {
@@ -149,8 +154,10 @@ describe('ProfileDeleteDialog', () => {
 
     await goToConfirmStep(user)
 
-    expect(screen.getByText(/type DELETE to delete your account/i)).toBeInTheDocument()
-    const input = screen.getByRole('textbox', { name: /confirmation/i })
+    expect(
+      await screen.findByText(/type DELETE to delete your account/i)
+    ).toBeInTheDocument()
+    const input = await screen.findByRole('textbox', { name: /confirmation/i })
     const submit = screen.getByRole('button', { name: /^delete account$/i })
 
     expect(submit).toBeDisabled()
