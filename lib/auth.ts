@@ -4,7 +4,12 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from './db'
 import * as schema from './db/schema'
-import { sendPasswordResetEmail, sendVerificationEmail } from './email'
+import { emailOTP } from 'better-auth/plugins/email-otp'
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+  sendVerificationOtpEmail,
+} from './email'
 
 function reportEmailError() {
   console.error('Authentication email failed')
@@ -22,6 +27,20 @@ export const auth = betterAuth({
     provider: 'pg',
     schema,
   }),
+  user: {
+    deleteUser: {
+      enabled: true,
+    },
+  },
+  plugins: [
+    emailOTP({
+      sendVerificationOTP: async ({ email, otp }) => {
+        waitUntil(
+          sendVerificationOtpEmail({ to: email, otp }).catch(reportEmailError)
+        )
+      },
+    }),
+  ],
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
@@ -55,6 +74,7 @@ export const auth = betterAuth({
       '/sign-up/email': { window: 3600, max: 5 },
       '/request-password-reset': { window: 3600, max: 5 },
       '/send-verification-email': { window: 3600, max: 5 },
+      '/email-otp/send-verification-otp': { window: 3600, max: 5 },
     },
   },
   socialProviders: {

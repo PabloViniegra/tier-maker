@@ -4,6 +4,8 @@ import {
   registerSchema,
   requestPasswordResetSchema,
   resetPasswordSchema,
+  changePasswordSchema,
+  verificationOtpSchema,
 } from './auth-schema'
 
 describe('loginSchema', () => {
@@ -146,5 +148,49 @@ describe('password reset schemas', () => {
         confirmPassword: 'different123',
       }).success
     ).toBe(false)
+  })
+})
+
+describe('changePasswordSchema', () => {
+  it('requires the current password and matching new passwords', () => {
+    expect(
+      changePasswordSchema.safeParse({
+        currentPassword: 'oldpass12',
+        password: 'password123',
+        confirmPassword: 'password123',
+      }).success
+    ).toBe(true)
+  })
+
+  it('rejects a missing current password', () => {
+    expect(
+      changePasswordSchema.safeParse({
+        currentPassword: '',
+        password: 'password123',
+        confirmPassword: 'password123',
+      }).success
+    ).toBe(false)
+  })
+
+  it('rejects a new password shorter than eight characters', () => {
+    expect(
+      changePasswordSchema.safeParse({
+        currentPassword: 'oldpass12',
+        password: 'short',
+        confirmPassword: 'short',
+      }).success
+    ).toBe(false)
+  })
+})
+
+describe('verificationOtpSchema', () => {
+  it('accepts a six-digit code', () => {
+    expect(verificationOtpSchema.safeParse({ otp: '482193' }).success).toBe(
+      true
+    )
+  })
+
+  it('rejects a short code', () => {
+    expect(verificationOtpSchema.safeParse({ otp: '123' }).success).toBe(false)
   })
 })

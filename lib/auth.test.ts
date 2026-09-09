@@ -10,6 +10,7 @@ describe('auth — module shape', () => {
   beforeAll(async () => {
     vi.spyOn(email, 'sendVerificationEmail').mockResolvedValue(undefined)
     vi.spyOn(email, 'sendPasswordResetEmail').mockResolvedValue(undefined)
+    vi.spyOn(email, 'sendVerificationOtpEmail').mockResolvedValue(undefined)
     const mod = await import('./auth')
     auth = mod.auth
   })
@@ -18,6 +19,7 @@ describe('auth — module shape', () => {
     asMock(waitUntil).mockClear()
     asMock(email.sendVerificationEmail).mockClear()
     asMock(email.sendPasswordResetEmail).mockClear()
+    asMock(email.sendVerificationOtpEmail).mockClear()
   })
 
   it('exports an auth instance', () => {
@@ -99,6 +101,26 @@ describe('auth — module shape', () => {
       window: 3600,
       max: 5,
     })
+    expect(
+      config.rateLimit?.customRules?.['/email-otp/send-verification-otp']
+    ).toEqual({
+      window: 3600,
+      max: 5,
+    })
+  })
+
+  it('enables email OTP without overriding link verification', () => {
+    const config = asMock(betterAuth).mock.calls[0][0]
+    expect(config.plugins?.[0]).toEqual(
+      expect.objectContaining({ id: 'email-otp' })
+    )
+    expect(config.emailVerification?.sendOnSignUp).toBe(true)
+    expect(config.emailVerification?.sendOnSignIn).toBe(true)
+  })
+
+  it('enables authenticated account deletion', () => {
+    const config = asMock(betterAuth).mock.calls[0][0]
+    expect(config.user?.deleteUser?.enabled).toBe(true)
   })
 
   it('betterAuth was called with a database adapter', () => {

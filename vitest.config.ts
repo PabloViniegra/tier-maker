@@ -33,7 +33,7 @@ export default defineConfig({
         find: 'better-auth/adapters/drizzle',
         replacement: mock('better-auth-drizzle.ts'),
       },
-      { find: 'better-auth', replacement: mock('better-auth.ts') },
+      { find: /^better-auth$/, replacement: mock('better-auth.ts') },
       { find: 'resend', replacement: mock('resend.ts') },
       { find: '@hello-pangea/dnd', replacement: mock('dnd.tsx') },
     ],

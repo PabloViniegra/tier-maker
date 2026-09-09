@@ -5,6 +5,7 @@ import {
   getAllUserTierLists,
   getTierListById,
   getPublicTierListBySlug,
+  getProfileStats,
 } from './tier-templates'
 import { db } from '@/lib/db'
 import { asMock } from '@/test/as-mock'
@@ -603,5 +604,110 @@ describe('getPublicTierListBySlug', () => {
     const result = await getPublicTierListBySlug('deleted-list')
 
     expect(result).toBeNull()
+  })
+})
+
+function mockProfileQueries(
+  aggregate: { created: number; published: number } | undefined,
+  listRows: { createdAt: Date; isPublic: boolean }[],
+  likes: number
+) {
+  asMock(db.select).mockReturnValueOnce({
+    from: vi.fn().mockReturnValue({
+      where: vi.fn().mockResolvedValue(aggregate ? [aggregate] : []),
+    }),
+  })
+  asMock(db.select).mockReturnValueOnce({
+    from: vi.fn().mockReturnValue({
+      where: vi.fn().mockReturnValue({
+        limit: vi.fn().mockResolvedValue(listRows),
+      }),
+    }),
+  })
+  asMock(db.select).mockReturnValueOnce({
+    from: vi.fn().mockReturnValue({
+      innerJoin: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([{ likes }]),
+      }),
+    }),
+  })
+}
+
+describe('getProfileStats', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns zeros and 14-day series when the user has no lists', async () => {
+    mockProfileQueries({ created: 0, published: 0 }, [], 0)
+
+    const result = await getProfileStats('user-empty')
+
+    expect(result.created).toBe(0)
+    expect(result.published).toBe(0)
+    expect(result.likesReceived).toBe(0)
+    expect(result.createdSeries).toHaveLength(14)
+    expect(result.publishedSeries).toHaveLength(14)
+    expect(result.createdSeries.every((n) => n === 0)).toBe(true)
+  })
+
+  it('splits created vs published totals', async () => {
+    const now = new Date()
+    mockProfileQueries(
+      { created: 3, published: 2 },
+      [
+        { createdAt: now, isPublic: true },
+        { createdAt: now, isPublic: false },
+        { createdAt: now, isPublic: true },
+      ],
+      0
+    )
+
+    const result = await getProfileStats('user-1')
+
+    expect(result.created).toBe(3)
+    expect(result.published).toBe(2)
+  })
+
+  it('counts likes received on the user lists', async () => {
+    mockProfileQueries(
+      { created: 1, published: 1 },
+      [{ createdAt: new Date(), isPublic: true }],
+      7
+    )
+
+    const result = await getProfileStats('user-1')
+
+    expect(result.likesReceived).toBe(7)
+  })
+
+  it('buckets only public lists into publishedSeries', async () => {
+    const now = new Date()
+    mockProfileQueries(
+      { created: 2, published: 1 },
+      [
+        { createdAt: now, isPublic: true },
+        { createdAt: now, isPublic: false },
+      ],
+      0
+    )
+
+    const result = await getProfileStats('user-1')
+
+    expect(result.createdSeries.at(-1)).toBe(2)
+    expect(result.publishedSeries.at(-1)).toBe(1)
+  })
+
+  it('uses aggregate totals when series rows are fewer than all-time lists', async () => {
+    mockProfileQueries(
+      { created: 50, published: 10 },
+      [{ createdAt: new Date(), isPublic: true }],
+      0
+    )
+
+    const result = await getProfileStats('user-1')
+
+    expect(result.created).toBe(50)
+    expect(result.published).toBe(10)
   })
 })

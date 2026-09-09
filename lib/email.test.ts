@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { Resend } from 'resend'
-import { sendPasswordResetEmail, sendVerificationEmail } from './email'
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+  sendVerificationOtpEmail,
+} from './email'
 import { asMock } from '@/test/as-mock'
 
 const send = new Resend('test').emails.send
@@ -88,6 +92,31 @@ describe('authentication email delivery', () => {
         token: 'verification-token',
       })
     ).rejects.toThrow('Resend failed: Rejected sender')
+  })
+
+  it('sends a verification OTP code without a link', async () => {
+    await sendVerificationOtpEmail({
+      to: 'user@example.com',
+      otp: '482193',
+    })
+
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 'Tier Maker <auth@send.pabloviniegra.dev>',
+        to: 'user@example.com',
+        subject: 'Your Tier Maker verification code',
+        html: expect.stringContaining('482193'),
+        text: expect.stringContaining('482193'),
+      }),
+      {
+        idempotencyKey: expect.stringMatching(/^email-otp\/[a-f0-9]{64}$/),
+      }
+    )
+
+    const payload = asMock(send).mock.calls[0][0]
+    expect(payload.html).toContain('TIER MAKER')
+    expect(payload.html).not.toContain('href=')
+    expect(payload.text).not.toContain('http')
   })
 
   it('rejects authentication links outside the application origin', async () => {

@@ -202,10 +202,15 @@ export function SidebarUserProfile({
 }) {
   return (
     <div className="border-t border-border p-3">
-      <div
-        className={cn('flex items-center gap-2', collapsed && 'justify-center')}
+      <Link
+        href="/dashboard/profile"
+        aria-label="Profile"
+        className={cn(
+          'flex items-center gap-2 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          collapsed && 'justify-center'
+        )}
       >
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-semibold text-primary">
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-semibold text-primary">
           {getInitials(user.name, user.email)}
         </div>
         {!collapsed && (
@@ -220,7 +225,7 @@ export function SidebarUserProfile({
             </p>
           </div>
         )}
-      </div>
+      </Link>
       <div
         className={cn('mt-2 flex items-center gap-1', collapsed && 'flex-col')}
       >

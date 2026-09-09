@@ -22,7 +22,12 @@ export type BetterAuthTestConfig = {
     storage?: string
     customRules?: {
       '/request-password-reset'?: { window: number; max: number }
+      '/email-otp/send-verification-otp'?: { window: number; max: number }
     }
+  }
+  plugins?: Array<{ id?: string }>
+  user?: {
+    deleteUser?: { enabled?: boolean }
   }
   database?: { type: string }
   socialProviders?: {

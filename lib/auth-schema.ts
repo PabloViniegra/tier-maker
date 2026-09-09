@@ -43,3 +43,21 @@ export type RequestPasswordResetInput = z.infer<
   typeof requestPasswordResetSchema
 >
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
+
+export const verificationOtpSchema = z.object({
+  otp: z.string().length(6, 'Enter the 6-digit code'),
+})
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  })
+
+export type VerificationOtpInput = z.infer<typeof verificationOtpSchema>
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>

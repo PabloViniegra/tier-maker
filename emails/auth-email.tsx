@@ -3,9 +3,10 @@ interface AuthEmailProps {
   eyebrow: string
   title: string
   message: string
-  action: string
-  url: string
   note: string
+  action?: string
+  url?: string
+  code?: string
 }
 
 const accent = '#0086ff'
@@ -63,6 +64,7 @@ function AuthEmail({
   message,
   action,
   url,
+  code,
   note,
 }: AuthEmailProps) {
   return (
@@ -123,24 +125,43 @@ function AuthEmail({
                         <p style={eyebrowStyle}>{eyebrow}</p>
                         <h1 style={heading}>{title}</h1>
                         <p style={messageStyle}>{message}</p>
-                        <table
-                          border={0}
-                          cellPadding={0}
-                          cellSpacing={0}
-                          role="presentation"
-                          style={buttonTable}
-                          width="100%"
-                        >
-                          <tbody>
-                            <tr>
-                              <td align="center" style={buttonCell}>
-                                <a href={url} style={button}>
-                                  {action}
-                                </a>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                        {code ? (
+                          <table
+                            border={0}
+                            cellPadding={0}
+                            cellSpacing={0}
+                            role="presentation"
+                            style={buttonTable}
+                            width="100%"
+                          >
+                            <tbody>
+                              <tr>
+                                <td align="center" style={codeCell}>
+                                  <p style={codeText}>{code}</p>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        ) : (
+                          <table
+                            border={0}
+                            cellPadding={0}
+                            cellSpacing={0}
+                            role="presentation"
+                            style={buttonTable}
+                            width="100%"
+                          >
+                            <tbody>
+                              <tr>
+                                <td align="center" style={buttonCell}>
+                                  <a href={url} style={button}>
+                                    {action}
+                                  </a>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        )}
                         <table
                           border={0}
                           cellPadding={0}
@@ -158,28 +179,32 @@ function AuthEmail({
                             </tr>
                           </tbody>
                         </table>
-                        <p style={fallbackIntro}>
-                          Having trouble with the button? Open this link:
-                        </p>
-                        <table
-                          border={0}
-                          cellPadding={0}
-                          cellSpacing={0}
-                          role="presentation"
-                          style={linkTable}
-                          width="100%"
-                        >
-                          <tbody>
-                            <tr>
-                              <td style={linkCell}>
-                                <p style={linkLabel}>SECURE LINK</p>
-                                <a href={url} style={link}>
-                                  {url}
-                                </a>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                        {url ? (
+                          <>
+                            <p style={fallbackIntro}>
+                              Having trouble with the button? Open this link:
+                            </p>
+                            <table
+                              border={0}
+                              cellPadding={0}
+                              cellSpacing={0}
+                              role="presentation"
+                              style={linkTable}
+                              width="100%"
+                            >
+                              <tbody>
+                                <tr>
+                                  <td style={linkCell}>
+                                    <p style={linkLabel}>SECURE LINK</p>
+                                    <a href={url} style={link}>
+                                      {url}
+                                    </a>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </>
+                        ) : null}
                       </td>
                     </tr>
                     <tr>
@@ -228,6 +253,19 @@ export function PasswordResetEmail({ url }: { url: string }) {
       preview="Reset your Tier Maker password"
       title="Reset your password"
       url={url}
+    />
+  )
+}
+
+export function VerificationOtpEmail({ otp }: { otp: string }) {
+  return (
+    <AuthEmail
+      code={otp}
+      eyebrow="VERIFICATION CODE"
+      message="Enter this code on your profile to confirm it is you before changing your password."
+      note="This code expires in five minutes. If you did not request it, ignore this email."
+      preview="Your Tier Maker verification code"
+      title="Your verification code"
     />
   )
 }
@@ -359,6 +397,23 @@ const messageStyle = {
 
 const buttonTable = {
   margin: '0 0 22px',
+}
+
+const codeCell = {
+  backgroundColor: softBlue,
+  borderRadius: '9px',
+  padding: '16px 20px',
+}
+
+const codeText = {
+  color: ink,
+  fontFamily: 'Courier New, Courier, monospace',
+  fontSize: '28px',
+  fontWeight: 700,
+  letterSpacing: '8px',
+  lineHeight: '36px',
+  margin: 0,
+  textAlign: 'center' as const,
 }
 
 const buttonCell = {

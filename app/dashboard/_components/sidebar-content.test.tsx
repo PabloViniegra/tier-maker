@@ -114,6 +114,22 @@ describe('SidebarUserProfile', () => {
     render(<SidebarUserProfile user={mockUser} collapsed={true} />)
     expect(screen.getByText('PG')).toBeInTheDocument()
   })
+
+  it('links the user identity to the profile page', () => {
+    render(<SidebarUserProfile user={mockUser} collapsed={false} />)
+    expect(screen.getByRole('link', { name: /profile/i })).toHaveAttribute(
+      'href',
+      '/dashboard/profile'
+    )
+  })
+
+  it('keeps the profile link when collapsed', () => {
+    render(<SidebarUserProfile user={mockUser} collapsed={true} />)
+    expect(screen.getByRole('link', { name: /profile/i })).toHaveAttribute(
+      'href',
+      '/dashboard/profile'
+    )
+  })
 })
 
 describe('SidebarLogo', () => {

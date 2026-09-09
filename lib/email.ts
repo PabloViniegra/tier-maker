@@ -3,7 +3,11 @@ import { createHash } from 'node:crypto'
 import { render } from '@react-email/render'
 import { Resend } from 'resend'
 
-import { PasswordResetEmail, VerificationEmail } from '@/emails/auth-email'
+import {
+  PasswordResetEmail,
+  VerificationEmail,
+  VerificationOtpEmail,
+} from '@/emails/auth-email'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const from = 'Tier Maker <auth@send.pabloviniegra.dev>'
@@ -90,6 +94,21 @@ export async function sendVerificationEmail({
     subject: 'Verify your Tier Maker email',
     react: VerificationEmail({ url: safeUrl }),
     idempotencyKey: emailKey('email-verification', token),
+  })
+}
+
+export async function sendVerificationOtpEmail({
+  to,
+  otp,
+}: {
+  to: string
+  otp: string
+}) {
+  return sendEmail({
+    to,
+    subject: 'Your Tier Maker verification code',
+    react: VerificationOtpEmail({ otp }),
+    idempotencyKey: emailKey('email-otp', otp),
   })
 }
 

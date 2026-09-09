@@ -15,6 +15,12 @@ export const forgetPassword = vi.fn()
 export const resetPassword = vi.fn()
 export const requestPasswordReset = vi.fn()
 export const sendVerificationEmail = vi.fn()
+export const changePassword = vi.fn()
+export const deleteUser = vi.fn()
+export const emailOtp = {
+  sendVerificationOtp: vi.fn(),
+  checkVerificationOtp: vi.fn(),
+}
 
 export const useSession = vi.fn(() => ({
   data: null,
@@ -29,5 +35,8 @@ export const authClient = {
   forgetPassword,
   resetPassword,
   sendVerificationEmail,
+  changePassword,
+  deleteUser,
+  emailOtp,
   useSession,
 }

@@ -15,7 +15,7 @@ import {
   gte,
 } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { tierRows, tierTemplates } from '@/lib/db/schema'
+import { tierLikes, tierRows, tierTemplates } from '@/lib/db/schema'
 import { user } from '@/lib/db/schema/auth'
 import { CACHE_TAGS } from '@/lib/cache-tags'
 import { likeCountExpr } from '@/lib/queries/tier-likes'
@@ -123,6 +123,72 @@ export const getUserTierListStats = cache(async function getUserTierListStats(
     totalPrev,
     categoriesCurrent,
     categoriesPrev,
+  }
+})
+
+export type ProfileStats = {
+  created: number
+  published: number
+  likesReceived: number
+  createdSeries: number[]
+  publishedSeries: number[]
+}
+
+export const getProfileStats = cache(async function getProfileStats(
+  userId: string
+): Promise<ProfileStats> {
+  const now = new Date()
+  const windowStart = new Date(
+    now.getTime() - STATS_WINDOW_DAYS * 24 * 60 * 60 * 1000
+  )
+
+  const [aggregateRow, listRows, likeRow] = await Promise.all([
+    db
+      .select({
+        created: count(),
+        published: sql<number>`coalesce(sum(case when ${tierTemplates.isPublic} then 1 else 0 end), 0)::int`,
+      })
+      .from(tierTemplates)
+      .where(eq(tierTemplates.creatorId, userId))
+      .then((rows) => rows[0]),
+    db
+      .select({
+        createdAt: tierTemplates.createdAt,
+        isPublic: tierTemplates.isPublic,
+      })
+      .from(tierTemplates)
+      .where(
+        and(
+          eq(tierTemplates.creatorId, userId),
+          gte(tierTemplates.createdAt, windowStart)
+        )
+      )
+      .limit(2000),
+    db
+      .select({ likes: count() })
+      .from(tierLikes)
+      .innerJoin(
+        tierTemplates,
+        eq(tierLikes.templateId, tierTemplates.id)
+      )
+      .where(eq(tierTemplates.creatorId, userId))
+      .then((rows) => rows[0]),
+  ])
+
+  return {
+    created: aggregateRow?.created ?? 0,
+    published: aggregateRow?.published ?? 0,
+    likesReceived: likeRow?.likes ?? 0,
+    createdSeries: bucketByDay(
+      listRows.map((r) => r.createdAt),
+      STATS_WINDOW_DAYS,
+      now
+    ),
+    publishedSeries: bucketByDay(
+      listRows.filter((r) => r.isPublic).map((r) => r.createdAt),
+      STATS_WINDOW_DAYS,
+      now
+    ),
   }
 })
 
