@@ -51,6 +51,29 @@ describe('ProfilePasswordForm', () => {
     expect(authClient.changePassword).not.toHaveBeenCalled()
   })
 
+  it('marks the password loading indicator for reduced motion', async () => {
+    let resolveRequest!: (value: { data: Record<string, never>; error: null }) => void
+    asMock(authClient.emailOtp.sendVerificationOtp).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = resolve
+        })
+    )
+    const user = userEvent.setup()
+    render(<ProfilePasswordForm email="user@example.com" />)
+
+    await user.click(screen.getByRole('button', { name: /send code/i }))
+
+    expect(
+      screen
+        .getByRole('button', { name: /sending code/i })
+        .querySelector('svg')
+    ).toHaveClass('motion-reduce:animate-none')
+
+    resolveRequest({ data: {}, error: null })
+    await screen.findByRole('button', { name: /verify code/i })
+  })
+
   it('keeps verify disabled until six digits are entered', async () => {
     const user = userEvent.setup()
     render(<ProfilePasswordForm email="user@example.com" />)

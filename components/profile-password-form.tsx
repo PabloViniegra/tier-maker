@@ -306,7 +306,12 @@ export function ProfilePasswordForm({ email }: { email: string }) {
             aria-busy={sending}
             className="h-11 sm:h-8"
           >
-            {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
+            {sending && (
+              <Loader2
+                className="animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+            )}
             {sending ? 'Sending code…' : 'Send code'}
           </Button>
         </div>
@@ -370,7 +375,12 @@ export function ProfilePasswordForm({ email }: { email: string }) {
             aria-busy={verifying}
             className="h-11 sm:h-8"
           >
-            {verifying && <Loader2 className="animate-spin" aria-hidden="true" />}
+            {verifying && (
+              <Loader2
+                className="animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+            )}
             {verifying ? 'Verifying code…' : 'Verify code'}
           </Button>
           <div className="flex gap-2">
@@ -390,7 +400,12 @@ export function ProfilePasswordForm({ email }: { email: string }) {
               aria-busy={sending}
               className="h-11 sm:h-8"
             >
-              {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
+              {sending && (
+                <Loader2
+                  className="animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+              )}
               {sending ? 'Sending again…' : 'Resend code'}
             </Button>
           </div>
@@ -443,7 +458,12 @@ export function ProfilePasswordForm({ email }: { email: string }) {
           aria-busy={isSubmitting}
           className="h-11 sm:h-8"
         >
-          {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+          {isSubmitting && (
+            <Loader2
+              className="animate-spin motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          )}
           {isSubmitting ? 'Updating password…' : 'Update password'}
         </Button>
       </form>

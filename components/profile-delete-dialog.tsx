@@ -201,7 +201,10 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                   className="h-11 sm:h-8"
                 >
                   {deleting && (
-                    <Loader2 className="animate-spin" aria-hidden="true" />
+                    <Loader2
+                      className="animate-spin motion-reduce:animate-none"
+                      aria-hidden="true"
+                    />
                   )}
                   {deleting ? 'Deleting account…' : 'Delete account'}
                 </Button>
