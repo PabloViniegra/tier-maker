@@ -92,7 +92,7 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="col-span-full"
+                className="flex flex-col gap-4"
               >
                 <DialogHeader>
                   <div className="flex items-baseline justify-between gap-3">
@@ -113,66 +113,57 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                       : 'This cannot be undone. Your account and all of your lists will be removed.'}
                   </DialogDescription>
                 </DialogHeader>
-              </motion.div>
-            </AnimatePresence>
-            <AnimatePresence initial={false} mode="wait">
-              {isConfirm && (
-                <motion.div
-                  key="confirm-fields"
-                  variants={profileDialogStepVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="col-span-full flex flex-col gap-4"
-                >
-                  <p className="font-mono text-sm text-foreground">
-                    {confirmationText}
-                  </p>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="delete-account-name">
-                      {name.trim() ? 'Display name' : 'Confirmation'}
-                    </Label>
-                    <Input
-                      id="delete-account-name"
-                      value={typed}
-                      onChange={(e) => {
-                        setTyped(e.target.value)
-                        if (deleteError) setDeleteError(undefined)
-                      }}
-                      autoComplete="off"
-                      spellCheck={false}
-                      autoFocus
-                      aria-describedby={[
-                        'delete-account-hint',
-                        !matches ? 'delete-account-mismatch' : null,
-                        deleteError ? 'delete-account-error' : null,
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      className={
-                        matches ? 'h-11 border-primary sm:h-8' : 'h-11 sm:h-8'
-                      }
-                    />
-                    {!matches && (
+                {isConfirm && (
+                  <>
+                    <p className="font-mono text-sm text-foreground">
+                      {confirmationText}
+                    </p>
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="delete-account-name">
+                        {name.trim() ? 'Display name' : 'Confirmation'}
+                      </Label>
+                      <Input
+                        id="delete-account-name"
+                        value={typed}
+                        onChange={(e) => {
+                          setTyped(e.target.value)
+                          if (deleteError) setDeleteError(undefined)
+                        }}
+                        autoComplete="off"
+                        spellCheck={false}
+                        autoFocus
+                        aria-describedby={[
+                          'delete-account-hint',
+                          !matches ? 'delete-account-mismatch' : null,
+                          deleteError ? 'delete-account-error' : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        className={
+                          matches ? 'h-11 border-primary sm:h-8' : 'h-11 sm:h-8'
+                        }
+                      />
+                      {!matches && (
+                        <p
+                          id="delete-account-mismatch"
+                          className="text-xs text-muted-foreground"
+                        >
+                          Type {confirmationText} exactly.
+                        </p>
+                      )}
+                    </div>
+                    {deleteError && (
                       <p
-                        id="delete-account-mismatch"
-                        className="text-xs text-muted-foreground"
+                        id="delete-account-error"
+                        className="text-sm text-destructive"
+                        role="alert"
                       >
-                        Type {confirmationText} exactly.
+                        {deleteError}
                       </p>
                     )}
-                  </div>
-                  {deleteError && (
-                    <p
-                      id="delete-account-error"
-                      className="text-sm text-destructive"
-                      role="alert"
-                    >
-                      {deleteError}
-                    </p>
-                  )}
-                </motion.div>
-              )}
+                  </>
+                )}
+              </motion.div>
             </AnimatePresence>
             <DialogFooter>
               {isConfirm ? (
