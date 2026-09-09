@@ -47,3 +47,4 @@ tasks/
 # vercel
 .vercel
 graphify-out/
+.tgrep/
