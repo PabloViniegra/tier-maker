@@ -20,6 +20,7 @@ import {
   verificationOtpSchema,
   type ChangePasswordInput,
 } from '@/lib/auth-schema'
+import { cn } from '@/lib/utils'
 
 type ChangePasswordError = {
   field: 'currentPassword' | 'password' | null
@@ -52,6 +53,60 @@ function mapChangePasswordError(error: {
         message: error.message || 'Could not update your password.',
       }
   }
+}
+
+const passwordSteps = ['Request code', 'Verify code', 'Set password'] as const
+
+function PasswordProgress({
+  currentStep,
+}: {
+  currentStep: 1 | 2 | 3
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p
+        className="text-xs text-muted-foreground"
+        role="status"
+        aria-live="polite"
+      >
+        Step {currentStep} of 3
+      </p>
+      <ol
+        className="grid grid-cols-3 gap-2"
+        aria-label="Password change steps"
+      >
+        {passwordSteps.map((label, index) => {
+          const step = index + 1
+          const isCurrent = step === currentStep
+
+          return (
+            <li
+              key={label}
+              aria-current={isCurrent ? 'step' : undefined}
+              className={cn(
+                'flex min-w-0 items-center gap-1.5 text-xs',
+                step <= currentStep
+                  ? 'text-foreground'
+                  : 'text-muted-foreground'
+              )}
+            >
+              <span
+                className={cn(
+                  'flex size-5 shrink-0 items-center justify-center rounded-sm text-[0.7rem] tabular-nums',
+                  isCurrent
+                    ? 'bg-primary text-primary-foreground'
+                    : 'border border-border'
+                )}
+              >
+                {step}
+              </span>
+              <span className="min-w-0 truncate">{label}</span>
+            </li>
+          )
+        })}
+      </ol>
+    </div>
+  )
 }
 
 function PasswordField({
@@ -211,18 +266,22 @@ export function ProfilePasswordForm({ email }: { email: string }) {
   if (step === 'idle') {
     return (
       <div className="flex flex-col gap-3">
+        <PasswordProgress currentStep={1} />
         <h2 className="font-heading text-base">Password</h2>
         <p className="text-sm text-muted-foreground">
-          We will email a code to {email} before you can set a new password.
+          We’ll email a 6-digit code to{' '}
+          <span className="font-medium text-foreground">{email}</span> to
+          confirm it’s you.
         </p>
         <Button
           type="button"
           variant="outline"
           onClick={sendCode}
           disabled={sending}
+          aria-busy={sending}
         >
           {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
-          Send code
+          {sending ? 'Sending code…' : 'Send code'}
         </Button>
       </div>
     )
@@ -231,9 +290,11 @@ export function ProfilePasswordForm({ email }: { email: string }) {
   if (step === 'code') {
     return (
       <div className="flex flex-col gap-4">
+        <PasswordProgress currentStep={2} />
         <h2 className="font-heading text-base">Password</h2>
         <p className="text-sm text-muted-foreground">
-          We sent a code to {email}.
+          We sent a 6-digit code to{' '}
+          <span className="font-medium text-foreground">{email}</span>.
         </p>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="verification-code">Verification code</Label>
@@ -247,7 +308,12 @@ export function ProfilePasswordForm({ email }: { email: string }) {
             }}
             aria-label="Verification code"
             aria-invalid={otpError ? true : undefined}
-            aria-describedby={otpError ? 'otp-error' : undefined}
+            aria-describedby={[
+              'verification-code-hint',
+              otpError ? 'otp-error' : null,
+            ]
+              .filter(Boolean)
+              .join(' ')}
           >
             <InputOTPGroup>
               {Array.from({ length: 6 }, (_, i) => (
@@ -255,6 +321,13 @@ export function ProfilePasswordForm({ email }: { email: string }) {
               ))}
             </InputOTPGroup>
           </InputOTP>
+          <p
+            id="verification-code-hint"
+            className="text-xs text-muted-foreground"
+          >
+            This code expires in five minutes. If you don’t see it, check your
+            spam folder or resend the code.
+          </p>
           {otpError && (
             <p id="otp-error" className="text-xs text-destructive" role="alert">
               {otpError}
@@ -266,9 +339,10 @@ export function ProfilePasswordForm({ email }: { email: string }) {
           variant="outline"
           onClick={verifyCode}
           disabled={verifying || otp.length !== 6}
+          aria-busy={verifying}
         >
           {verifying && <Loader2 className="animate-spin" aria-hidden="true" />}
-          Verify code
+          {verifying ? 'Verifying code…' : 'Verify code'}
         </Button>
         <div className="flex gap-2">
           <Button type="button" variant="ghost" onClick={goBack}>
@@ -279,9 +353,10 @@ export function ProfilePasswordForm({ email }: { email: string }) {
             variant="ghost"
             onClick={sendCode}
             disabled={sending}
+            aria-busy={sending}
           >
             {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
-            Resend
+            {sending ? 'Sending again…' : 'Resend code'}
           </Button>
         </div>
       </div>
@@ -298,6 +373,7 @@ export function ProfilePasswordForm({ email }: { email: string }) {
       })}
       className="flex flex-col gap-4"
     >
+      <PasswordProgress currentStep={3} />
       <h2 className="font-heading text-base">Password</h2>
       <p className="text-sm text-muted-foreground">
         At least 8 characters. Other sessions will be signed out.
@@ -323,9 +399,14 @@ export function ProfilePasswordForm({ email }: { email: string }) {
         registration={register('confirmPassword')}
         error={errors.confirmPassword?.message}
       />
-      <Button type="submit" variant="outline" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        variant="outline"
+        disabled={isSubmitting}
+        aria-busy={isSubmitting}
+      >
         {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
-        Update password
+        {isSubmitting ? 'Updating password…' : 'Update password'}
       </Button>
     </form>
   )

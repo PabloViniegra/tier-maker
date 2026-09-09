@@ -103,6 +103,26 @@ describe('ProfilePasswordForm', () => {
     expect(screen.getByText(/user@example.com/)).toBeInTheDocument()
   })
 
+  it('shows progress and expiration guidance throughout the password flow', async () => {
+    const user = userEvent.setup()
+    render(<ProfilePasswordForm email="user@example.com" />)
+
+    expect(screen.getByRole('status')).toHaveTextContent(/step 1 of 3/i)
+
+    await user.click(screen.getByRole('button', { name: /send code/i }))
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/step 2 of 3/i)
+    expect(screen.getByText(/code expires in five minutes/i)).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /resend code/i })
+    ).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText(/verification code/i), '482193')
+    await user.click(screen.getByRole('button', { name: /verify code/i }))
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/step 3 of 3/i)
+  })
+
   it('shows an inline error when the code is invalid', async () => {
     asMock(authClient.emailOtp.checkVerificationOtp).mockResolvedValue({
       data: null,
