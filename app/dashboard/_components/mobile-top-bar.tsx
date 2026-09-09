@@ -27,7 +27,7 @@ export function MobileTopBar({ user }: { user: SidebarUser }) {
         <SheetTrigger
           className={cn(
             buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'h-7 w-7 p-0'
+            'size-11 p-0'
           )}
           aria-label="Open navigation"
         >

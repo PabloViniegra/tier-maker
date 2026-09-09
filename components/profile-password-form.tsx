@@ -132,7 +132,7 @@ function PasswordField({
       <div className="relative">
         <Input
           id={id}
-          className="pr-8"
+          className="h-11 pr-11 sm:h-8 sm:pr-8"
           autoComplete={autoComplete}
           {...registration}
           type={show ? 'text' : 'password'}
@@ -143,7 +143,7 @@ function PasswordField({
           type="button"
           variant="ghost"
           size="icon"
-          className="absolute inset-y-0 right-0 h-full w-8 text-muted-foreground hover:text-foreground"
+          className="absolute inset-y-0 right-0 h-full w-11 text-muted-foreground hover:text-foreground sm:w-8"
           onClick={() => setShow((visible) => !visible)}
           aria-pressed={show}
           aria-label={show ? `Hide ${name}` : `Show ${name}`}
@@ -279,6 +279,7 @@ export function ProfilePasswordForm({ email }: { email: string }) {
           onClick={sendCode}
           disabled={sending}
           aria-busy={sending}
+          className="h-11 sm:h-8"
         >
           {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
           {sending ? 'Sending code…' : 'Send code'}
@@ -340,12 +341,18 @@ export function ProfilePasswordForm({ email }: { email: string }) {
           onClick={verifyCode}
           disabled={verifying || otp.length !== 6}
           aria-busy={verifying}
+          className="h-11 sm:h-8"
         >
           {verifying && <Loader2 className="animate-spin" aria-hidden="true" />}
           {verifying ? 'Verifying code…' : 'Verify code'}
         </Button>
         <div className="flex gap-2">
-          <Button type="button" variant="ghost" onClick={goBack}>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={goBack}
+            className="h-11 sm:h-8"
+          >
             Back
           </Button>
           <Button
@@ -354,6 +361,7 @@ export function ProfilePasswordForm({ email }: { email: string }) {
             onClick={sendCode}
             disabled={sending}
             aria-busy={sending}
+            className="h-11 sm:h-8"
           >
             {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
             {sending ? 'Sending again…' : 'Resend code'}
@@ -404,6 +412,7 @@ export function ProfilePasswordForm({ email }: { email: string }) {
         variant="outline"
         disabled={isSubmitting}
         aria-busy={isSubmitting}
+        className="h-11 sm:h-8"
       >
         {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
         {isSubmitting ? 'Updating password…' : 'Update password'}

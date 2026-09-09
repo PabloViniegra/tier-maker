@@ -46,7 +46,10 @@ export function ProfileActivity({ stats }: { stats: ProfileStats }) {
         <h2 className="font-heading text-base">Your lists</h2>
         <Link
           href="/dashboard/tier-lists"
-          className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-7')}
+          className={cn(
+            buttonVariants({ variant: 'ghost', size: 'sm' }),
+            'h-11 px-2 sm:h-7'
+          )}
         >
           View all lists
         </Link>
@@ -63,7 +66,12 @@ export function ProfileActivity({ stats }: { stats: ProfileStats }) {
                 {value}
               </p>
               {series && series.some((n) => n > 0) && (
-                <Sparkline series={series} width={72} height={28} />
+                <>
+                  <Sparkline series={series} width={72} height={28} />
+                  <span className="sr-only">
+                    {describeSeries(label, series)}
+                  </span>
+                </>
               )}
             </div>
           </div>
@@ -74,4 +82,18 @@ export function ProfileActivity({ stats }: { stats: ProfileStats }) {
       </p>
     </div>
   )
+}
+
+function describeSeries(label: string, series: number[]) {
+  const total = series.reduce((sum, value) => sum + value, 0)
+  const midpoint = Math.ceil(series.length / 2)
+  const previous = series
+    .slice(0, midpoint)
+    .reduce((sum, value) => sum + value, 0)
+  const recent = series
+    .slice(midpoint)
+    .reduce((sum, value) => sum + value, 0)
+  const trend = recent === previous ? 'steady' : recent > previous ? 'up' : 'down'
+
+  return `${label} activity over the last 14 days: ${total} total, trending ${trend} in the most recent days.`
 }

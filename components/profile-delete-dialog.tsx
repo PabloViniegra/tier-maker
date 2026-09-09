@@ -76,7 +76,9 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
         This permanently deletes your account and lists. This cannot be undone.
       </p>
       <Dialog onOpenChange={onOpenChange}>
-        <DialogTrigger render={<Button variant="destructive" />}>
+        <DialogTrigger
+          render={<Button variant="destructive" className="h-11 sm:h-8" />}
+        >
           Delete account
         </DialogTrigger>
         <DialogContent>
@@ -94,11 +96,11 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                   {isConfirm ? '2 / 2' : '1 / 2'}
                 </p>
               </div>
-                <DialogDescription id="delete-account-hint">
-                  {isConfirm
-                    ? `Type ${confirmationText} to delete your account.`
-                    : 'This cannot be undone. Your account and all of your lists will be removed.'}
-                </DialogDescription>
+              <DialogDescription id="delete-account-hint">
+                {isConfirm
+                  ? `Type ${confirmationText} to delete your account.`
+                  : 'This cannot be undone. Your account and all of your lists will be removed.'}
+              </DialogDescription>
             </DialogHeader>
             {isConfirm && (
               <>
@@ -126,7 +128,7 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                     ]
                       .filter(Boolean)
                       .join(' ')}
-                    className={matches ? 'border-primary' : undefined}
+                    className={matches ? 'h-11 border-primary sm:h-8' : 'h-11 sm:h-8'}
                   />
                   {!matches && (
                     <p
@@ -155,11 +157,14 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                   variant="outline"
                   onClick={() => setStep('review')}
                   disabled={deleting}
+                  className="h-11 sm:h-8"
                 >
                   Back
                 </Button>
               ) : (
-                <DialogClose render={<Button variant="outline" />}>
+                <DialogClose
+                  render={<Button variant="outline" className="h-11 sm:h-8" />}
+                >
                   Cancel
                 </DialogClose>
               )}
@@ -168,6 +173,8 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                   type="submit"
                   variant="destructive"
                   disabled={!matches || deleting}
+                  aria-busy={deleting}
+                  className="h-11 sm:h-8"
                 >
                   {deleting && (
                     <Loader2 className="animate-spin" aria-hidden="true" />
@@ -175,7 +182,11 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                   {deleting ? 'Deleting account…' : 'Delete account'}
                 </Button>
               ) : (
-                <Button type="submit" variant="outline">
+                <Button
+                  type="submit"
+                  variant="outline"
+                  className="h-11 sm:h-8"
+                >
                   Continue
                 </Button>
               )}
