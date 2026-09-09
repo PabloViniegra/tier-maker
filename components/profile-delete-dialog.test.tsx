@@ -112,4 +112,49 @@ describe('ProfileDeleteDialog', () => {
     })
     expect(mockReplace).toHaveBeenCalledWith('/')
   })
+
+  it('keeps the dialog open and exposes a retry after deletion fails', async () => {
+    asMock(authClient.deleteUser)
+      .mockResolvedValueOnce({
+        data: null,
+        error: { message: 'Account deletion is temporarily unavailable.' },
+      })
+      .mockResolvedValue({ data: {}, error: null })
+    const user = userEvent.setup()
+    render(<ProfileDeleteDialog name="Pablo García" />)
+
+    await goToConfirmStep(user)
+    await user.type(
+      screen.getByRole('textbox', { name: /display name/i }),
+      'Pablo García'
+    )
+    await user.click(screen.getByRole('button', { name: /^delete account$/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      /temporarily unavailable/i
+    )
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /^delete account$/i }))
+
+    await waitFor(() => {
+      expect(authClient.deleteUser).toHaveBeenCalledTimes(2)
+      expect(mockReplace).toHaveBeenCalledWith('/')
+    })
+  })
+
+  it('requires an explicit DELETE token when the display name is empty', async () => {
+    const user = userEvent.setup()
+    render(<ProfileDeleteDialog name="" />)
+
+    await goToConfirmStep(user)
+
+    expect(screen.getByText(/type DELETE to delete your account/i)).toBeInTheDocument()
+    const input = screen.getByRole('textbox', { name: /confirmation/i })
+    const submit = screen.getByRole('button', { name: /^delete account$/i })
+
+    expect(submit).toBeDisabled()
+    await user.type(input, 'DELETE')
+    expect(submit).toBeEnabled()
+  })
 })

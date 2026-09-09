@@ -25,7 +25,9 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
   const [step, setStep] = useState<'review' | 'confirm'>('review')
   const [typed, setTyped] = useState('')
   const [deleting, setDeleting] = useState(false)
-  const matches = typed.trim() === name.trim()
+  const [deleteError, setDeleteError] = useState<string>()
+  const confirmationText = name.trim() || 'DELETE'
+  const matches = typed.trim() === confirmationText
   const isConfirm = step === 'confirm'
 
   const onOpenChange = (open: boolean) => {
@@ -33,23 +35,24 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
       setTyped('')
       setStep('review')
       setDeleting(false)
+      setDeleteError(undefined)
     }
   }
 
   const deleteAccount = async () => {
     if (!matches) return
     setDeleting(true)
+    setDeleteError(undefined)
     try {
       const result = await authClient.deleteUser()
       if (result.error) {
-        toast.error(
-          result.error.message || 'Could not delete your account.'
-        )
+        setDeleteError(result.error.message || 'Could not delete your account.')
         return
       }
+      toast.success('Your account has been deleted.')
       router.replace('/')
     } catch {
-      toast.error('Something went wrong. Please try again.')
+      setDeleteError('Something went wrong. Please try again.')
     } finally {
       setDeleting(false)
     }
@@ -85,34 +88,44 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                 </DialogTitle>
                 <p
                   className="text-xs text-muted-foreground tabular-nums"
-                  aria-hidden="true"
+                  role="status"
+                  aria-live="polite"
                 >
                   {isConfirm ? '2 / 2' : '1 / 2'}
                 </p>
               </div>
-              <DialogDescription id="delete-account-hint">
-                {isConfirm
-                  ? `Type ${name} to delete your account.`
-                  : 'This cannot be undone. Your account and all of your lists will be removed.'}
-              </DialogDescription>
+                <DialogDescription id="delete-account-hint">
+                  {isConfirm
+                    ? `Type ${confirmationText} to delete your account.`
+                    : 'This cannot be undone. Your account and all of your lists will be removed.'}
+                </DialogDescription>
             </DialogHeader>
             {isConfirm && (
               <>
-                <p className="font-mono text-sm text-foreground">{name}</p>
+                <p className="font-mono text-sm text-foreground">
+                  {confirmationText}
+                </p>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="delete-account-name">Display name</Label>
+                  <Label htmlFor="delete-account-name">
+                    {name.trim() ? 'Display name' : 'Confirmation'}
+                  </Label>
                   <Input
                     id="delete-account-name"
                     value={typed}
-                    onChange={(e) => setTyped(e.target.value)}
+                    onChange={(e) => {
+                      setTyped(e.target.value)
+                      if (deleteError) setDeleteError(undefined)
+                    }}
                     autoComplete="off"
                     spellCheck={false}
                     autoFocus
-                    aria-describedby={
-                      matches
-                        ? 'delete-account-hint'
-                        : 'delete-account-mismatch'
-                    }
+                    aria-describedby={[
+                      'delete-account-hint',
+                      !matches ? 'delete-account-mismatch' : null,
+                      deleteError ? 'delete-account-error' : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
                     className={matches ? 'border-primary' : undefined}
                   />
                   {!matches && (
@@ -120,10 +133,19 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                       id="delete-account-mismatch"
                       className="text-xs text-muted-foreground"
                     >
-                      Type your display name exactly.
+                      Type {confirmationText} exactly.
                     </p>
                   )}
                 </div>
+                {deleteError && (
+                  <p
+                    id="delete-account-error"
+                    className="text-sm text-destructive"
+                    role="alert"
+                  >
+                    {deleteError}
+                  </p>
+                )}
               </>
             )}
             <DialogFooter>
@@ -150,7 +172,7 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                   {deleting && (
                     <Loader2 className="animate-spin" aria-hidden="true" />
                   )}
-                  Delete account
+                  {deleting ? 'Deleting account…' : 'Delete account'}
                 </Button>
               ) : (
                 <Button type="submit" variant="outline">
