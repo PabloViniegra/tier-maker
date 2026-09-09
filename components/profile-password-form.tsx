@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
+import { AnimatePresence, motion } from 'motion/react'
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -20,6 +21,7 @@ import {
   verificationOtpSchema,
   type ChangePasswordInput,
 } from '@/lib/auth-schema'
+import { profileStepVariants } from '@/lib/motion-variants'
 import { cn } from '@/lib/utils'
 
 type ChangePasswordError = {
@@ -56,6 +58,28 @@ function mapChangePasswordError(error: {
 }
 
 const passwordSteps = ['Request code', 'Verify code', 'Set password'] as const
+
+function PasswordStepTransition({
+  step,
+  children,
+}: {
+  step: 'idle' | 'code' | 'password'
+  children: ReactNode
+}) {
+  return (
+    <AnimatePresence initial={false} mode="wait">
+      <motion.div
+        key={step}
+        variants={profileStepVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  )
+}
 
 function PasswordProgress({
   currentStep,
@@ -265,158 +289,164 @@ export function ProfilePasswordForm({ email }: { email: string }) {
 
   if (step === 'idle') {
     return (
-      <div className="flex flex-col gap-3">
-        <PasswordProgress currentStep={1} />
-        <h2 className="font-heading text-base">Password</h2>
-        <p className="text-sm text-muted-foreground">
-          We’ll email a 6-digit code to{' '}
-          <span className="font-medium text-foreground">{email}</span> to
-          confirm it’s you.
-        </p>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={sendCode}
-          disabled={sending}
-          aria-busy={sending}
-          className="h-11 sm:h-8"
-        >
-          {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
-          {sending ? 'Sending code…' : 'Send code'}
-        </Button>
-      </div>
-    )
-  }
-
-  if (step === 'code') {
-    return (
-      <div className="flex flex-col gap-4">
-        <PasswordProgress currentStep={2} />
-        <h2 className="font-heading text-base">Password</h2>
-        <p className="text-sm text-muted-foreground">
-          We sent a 6-digit code to{' '}
-          <span className="font-medium text-foreground">{email}</span>.
-        </p>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="verification-code">Verification code</Label>
-          <InputOTP
-            id="verification-code"
-            maxLength={6}
-            value={otp}
-            onChange={(value) => {
-              setOtp(value)
-              if (otpError) setOtpError(undefined)
-            }}
-            aria-label="Verification code"
-            aria-invalid={otpError ? true : undefined}
-            aria-describedby={[
-              'verification-code-hint',
-              otpError ? 'otp-error' : null,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            <InputOTPGroup>
-              {Array.from({ length: 6 }, (_, i) => (
-                <InputOTPSlot key={i} index={i} />
-              ))}
-            </InputOTPGroup>
-          </InputOTP>
-          <p
-            id="verification-code-hint"
-            className="text-xs text-muted-foreground"
-          >
-            This code expires in five minutes. If you don’t see it, check your
-            spam folder or resend the code.
+      <PasswordStepTransition step="idle">
+        <div className="flex flex-col gap-3">
+          <PasswordProgress currentStep={1} />
+          <h2 className="font-heading text-base">Password</h2>
+          <p className="text-sm text-muted-foreground">
+            We’ll email a 6-digit code to{' '}
+            <span className="font-medium text-foreground">{email}</span> to
+            confirm it’s you.
           </p>
-          {otpError && (
-            <p id="otp-error" className="text-xs text-destructive" role="alert">
-              {otpError}
-            </p>
-          )}
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={verifyCode}
-          disabled={verifying || otp.length !== 6}
-          aria-busy={verifying}
-          className="h-11 sm:h-8"
-        >
-          {verifying && <Loader2 className="animate-spin" aria-hidden="true" />}
-          {verifying ? 'Verifying code…' : 'Verify code'}
-        </Button>
-        <div className="flex gap-2">
           <Button
             type="button"
-            variant="ghost"
-            onClick={goBack}
-            className="h-11 sm:h-8"
-          >
-            Back
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
+            variant="outline"
             onClick={sendCode}
             disabled={sending}
             aria-busy={sending}
             className="h-11 sm:h-8"
           >
             {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
-            {sending ? 'Sending again…' : 'Resend code'}
+            {sending ? 'Sending code…' : 'Send code'}
           </Button>
         </div>
-      </div>
+      </PasswordStepTransition>
+    )
+  }
+
+  if (step === 'code') {
+    return (
+      <PasswordStepTransition step="code">
+        <div className="flex flex-col gap-4">
+          <PasswordProgress currentStep={2} />
+          <h2 className="font-heading text-base">Password</h2>
+          <p className="text-sm text-muted-foreground">
+            We sent a 6-digit code to{' '}
+            <span className="font-medium text-foreground">{email}</span>.
+          </p>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="verification-code">Verification code</Label>
+            <InputOTP
+              id="verification-code"
+              maxLength={6}
+              value={otp}
+              onChange={(value) => {
+                setOtp(value)
+                if (otpError) setOtpError(undefined)
+              }}
+              aria-label="Verification code"
+              aria-invalid={otpError ? true : undefined}
+              aria-describedby={[
+                'verification-code-hint',
+                otpError ? 'otp-error' : null,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              <InputOTPGroup>
+                {Array.from({ length: 6 }, (_, i) => (
+                  <InputOTPSlot key={i} index={i} />
+                ))}
+              </InputOTPGroup>
+            </InputOTP>
+            <p
+              id="verification-code-hint"
+              className="text-xs text-muted-foreground"
+            >
+              This code expires in five minutes. If you don’t see it, check your
+              spam folder or resend the code.
+            </p>
+            {otpError && (
+              <p id="otp-error" className="text-xs text-destructive" role="alert">
+                {otpError}
+              </p>
+            )}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={verifyCode}
+            disabled={verifying || otp.length !== 6}
+            aria-busy={verifying}
+            className="h-11 sm:h-8"
+          >
+            {verifying && <Loader2 className="animate-spin" aria-hidden="true" />}
+            {verifying ? 'Verifying code…' : 'Verify code'}
+          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={goBack}
+              className="h-11 sm:h-8"
+            >
+              Back
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={sendCode}
+              disabled={sending}
+              aria-busy={sending}
+              className="h-11 sm:h-8"
+            >
+              {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
+              {sending ? 'Sending again…' : 'Resend code'}
+            </Button>
+          </div>
+        </div>
+      </PasswordStepTransition>
     )
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit, (errs) => {
-        const first = (
-          ['currentPassword', 'password', 'confirmPassword'] as const
-        ).find((k) => errs[k])
-        if (first) setFocus(first)
-      })}
-      className="flex flex-col gap-4"
-    >
-      <PasswordProgress currentStep={3} />
-      <h2 className="font-heading text-base">Password</h2>
-      <p className="text-sm text-muted-foreground">
-        At least 8 characters. Other sessions will be signed out.
-      </p>
-      <PasswordField
-        id="current-password"
-        label="Current password"
-        autoComplete="current-password"
-        registration={register('currentPassword')}
-        error={errors.currentPassword?.message}
-      />
-      <PasswordField
-        id="new-password"
-        label="New password"
-        autoComplete="new-password"
-        registration={register('password')}
-        error={errors.password?.message}
-      />
-      <PasswordField
-        id="confirm-new-password"
-        label="Confirm password"
-        autoComplete="new-password"
-        registration={register('confirmPassword')}
-        error={errors.confirmPassword?.message}
-      />
-      <Button
-        type="submit"
-        variant="outline"
-        disabled={isSubmitting}
-        aria-busy={isSubmitting}
-        className="h-11 sm:h-8"
+    <PasswordStepTransition step="password">
+      <form
+        onSubmit={handleSubmit(onSubmit, (errs) => {
+          const first = (
+            ['currentPassword', 'password', 'confirmPassword'] as const
+          ).find((k) => errs[k])
+          if (first) setFocus(first)
+        })}
+        className="flex flex-col gap-4"
       >
-        {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
-        {isSubmitting ? 'Updating password…' : 'Update password'}
-      </Button>
-    </form>
+        <PasswordProgress currentStep={3} />
+        <h2 className="font-heading text-base">Password</h2>
+        <p className="text-sm text-muted-foreground">
+          At least 8 characters. Other sessions will be signed out.
+        </p>
+        <PasswordField
+          id="current-password"
+          label="Current password"
+          autoComplete="current-password"
+          registration={register('currentPassword')}
+          error={errors.currentPassword?.message}
+        />
+        <PasswordField
+          id="new-password"
+          label="New password"
+          autoComplete="new-password"
+          registration={register('password')}
+          error={errors.password?.message}
+        />
+        <PasswordField
+          id="confirm-new-password"
+          label="Confirm password"
+          autoComplete="new-password"
+          registration={register('confirmPassword')}
+          error={errors.confirmPassword?.message}
+        />
+        <Button
+          type="submit"
+          variant="outline"
+          disabled={isSubmitting}
+          aria-busy={isSubmitting}
+          className="h-11 sm:h-8"
+        >
+          {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
+          {isSubmitting ? 'Updating password…' : 'Update password'}
+        </Button>
+      </form>
+    </PasswordStepTransition>
   )
 }

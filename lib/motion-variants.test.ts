@@ -13,6 +13,7 @@ import {
   bentoIconFloat,
   cardLiftVariants,
   hoverRevealVariants,
+  profileStepVariants,
 } from './motion-variants'
 
 describe('constants', () => {
@@ -62,6 +63,34 @@ describe('fadeUpVariants', () => {
 
   it('visible factory defaults delay to 0', () => {
     expect(fadeUpVariants.visible().transition.delay).toBe(0)
+  })
+})
+
+describe('profileStepVariants', () => {
+  it('uses full transforms for entry and exit', () => {
+    expect(profileStepVariants.hidden).toMatchObject({
+      opacity: 0,
+      transform: 'translateY(6px)',
+    })
+    expect(profileStepVariants.visible).toMatchObject({
+      opacity: 1,
+      transform: 'translateY(0)',
+    })
+    expect(profileStepVariants.exit).toMatchObject({
+      opacity: 0,
+      transform: 'translateY(-4px)',
+    })
+  })
+
+  it('uses the profile transition timings', () => {
+    expect(profileStepVariants.visible.transition).toMatchObject({
+      duration: 0.24,
+      ease: EASE_SMOOTH,
+    })
+    expect(profileStepVariants.exit.transition).toMatchObject({
+      duration: 0.15,
+      ease: EASE_SMOOTH,
+    })
   })
 })
 

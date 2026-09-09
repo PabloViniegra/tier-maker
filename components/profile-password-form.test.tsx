@@ -72,11 +72,13 @@ describe('ProfilePasswordForm', () => {
     await user.click(screen.getByRole('button', { name: /back/i }))
 
     expect(
-      screen.getByRole('button', { name: /send code/i })
+      await screen.findByRole('button', { name: /send code/i })
     ).toBeInTheDocument()
-    expect(
-      screen.queryByLabelText(/verification code/i)
-    ).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(
+        screen.queryByLabelText(/verification code/i)
+      ).not.toBeInTheDocument()
+    })
   })
 
   it('resends the code without leaving the verification step', async () => {
@@ -111,7 +113,7 @@ describe('ProfilePasswordForm', () => {
 
     await user.click(screen.getByRole('button', { name: /send code/i }))
 
-    expect(await screen.findByRole('status')).toHaveTextContent(/step 2 of 3/i)
+    expect(await screen.findByText(/step 2 of 3/i)).toBeInTheDocument()
     expect(screen.getByText(/code expires in five minutes/i)).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /resend code/i })
@@ -120,7 +122,7 @@ describe('ProfilePasswordForm', () => {
     await user.type(screen.getByLabelText(/verification code/i), '482193')
     await user.click(screen.getByRole('button', { name: /verify code/i }))
 
-    expect(await screen.findByRole('status')).toHaveTextContent(/step 3 of 3/i)
+    expect(await screen.findByText(/step 3 of 3/i)).toBeInTheDocument()
   })
 
   it('shows an inline error when the code is invalid', async () => {

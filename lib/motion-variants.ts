@@ -17,6 +17,20 @@ export const fadeUpVariants = {
   }),
 } satisfies Variants
 
+export const profileStepVariants = {
+  hidden: { opacity: 0, transform: 'translateY(6px)' },
+  visible: {
+    opacity: 1,
+    transform: 'translateY(0)',
+    transition: { duration: 0.24, ease: EASE_SMOOTH },
+  },
+  exit: {
+    opacity: 0,
+    transform: 'translateY(-4px)',
+    transition: { duration: 0.15, ease: EASE_SMOOTH },
+  },
+} satisfies Variants
+
 export const staggerContainerVariants = {
   hidden: {},
   visible: {
