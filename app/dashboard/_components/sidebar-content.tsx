@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'motion/react'
-import { Compass, LayoutDashboard, List, Plus } from 'lucide-react'
+import { Compass, ChevronRight, LayoutDashboard, List, Plus, User } from 'lucide-react'
 import { TierMakerIcon } from '@/components/tier-maker-icon'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { springTransition } from '@/lib/motion-variants'
+import { hoverRevealVariants, springTransition } from '@/lib/motion-variants'
 import { SignOutButton } from './sign-out-button'
 import { ThemeToggleButton } from './theme-toggle-button'
 
@@ -72,6 +72,26 @@ export function SidebarNav({
   pathname: string
   collapsed: boolean
 }) {
+  const profileActive = pathname === '/dashboard/profile'
+  const profileClass = cn(
+    buttonVariants({ variant: 'outline', size: 'sm' }),
+    'w-full',
+    collapsed ? 'justify-center' : 'justify-start gap-2',
+    profileActive && 'bg-muted'
+  )
+  const profileLink = (
+    <Link
+      href="/dashboard/profile"
+      prefetch={true}
+      aria-label={collapsed ? 'Profile' : undefined}
+      aria-current={profileActive ? 'page' : undefined}
+      className={profileClass}
+    >
+      <User size={14} strokeWidth={1.5} />
+      {!collapsed && 'Profile'}
+    </Link>
+  )
+
   return (
     <nav
       aria-label="Primary navigation"
@@ -189,6 +209,15 @@ export function SidebarNav({
           Create Tier List
         </Link>
       )}
+
+      {collapsed ? (
+        <Tooltip>
+          <TooltipTrigger render={profileLink} />
+          <TooltipContent side="right">Profile</TooltipContent>
+        </Tooltip>
+      ) : (
+        profileLink
+      )}
     </nav>
   )
 }
@@ -202,30 +231,43 @@ export function SidebarUserProfile({
 }) {
   return (
     <div className="border-t border-border p-3">
-      <Link
-        href="/dashboard/profile"
-        aria-label="Profile"
-        className={cn(
-          'flex items-center gap-2 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          collapsed && 'justify-center'
-        )}
-      >
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-semibold text-primary">
-          {getInitials(user.name, user.email)}
-        </div>
-        {!collapsed && (
-          <div className="min-w-0 flex-1 overflow-hidden">
-            {user.name && (
-              <p className="truncate text-xs font-medium text-foreground">
-                {user.name}
-              </p>
-            )}
-            <p className="truncate text-xs text-muted-foreground">
-              {user.email}
-            </p>
+      <motion.div initial="rest" whileHover="hover" className="min-w-0">
+        <Link
+          href="/dashboard/profile"
+          aria-label={collapsed ? 'Profile' : undefined}
+          className={cn(
+            'flex items-center gap-2 rounded-lg px-1.5 py-1.5 outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
+            collapsed && 'justify-center'
+          )}
+        >
+          <div
+            className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground"
+            aria-hidden="true"
+          >
+            {getInitials(user.name, user.email)}
           </div>
-        )}
-      </Link>
+          {!collapsed && (
+            <div className="min-w-0 flex-1 overflow-hidden">
+              {user.name && (
+                <p className="truncate text-xs font-medium text-foreground">
+                  {user.name}
+                </p>
+              )}
+              <p className="truncate text-xs text-muted-foreground">
+                {user.email}
+              </p>
+            </div>
+          )}
+          {!collapsed && (
+            <motion.span
+              variants={hoverRevealVariants}
+              className="ml-auto shrink-0 text-muted-foreground"
+            >
+              <ChevronRight size={14} strokeWidth={1.5} aria-hidden="true" />
+            </motion.span>
+          )}
+        </Link>
+      </motion.div>
       <div
         className={cn('mt-2 flex items-center gap-1', collapsed && 'flex-col')}
       >

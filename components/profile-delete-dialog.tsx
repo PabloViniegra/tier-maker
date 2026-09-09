@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
@@ -12,11 +13,13 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -62,7 +65,9 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="font-heading text-base">Delete account</h2>
+      <h2 className="font-heading text-sm text-muted-foreground">
+        Delete account
+      </h2>
       <p className="text-sm text-muted-foreground">
         This permanently deletes your account and lists. This cannot be undone.
       </p>
@@ -70,13 +75,14 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
         <DialogTrigger render={<Button variant="destructive" />}>
           Delete account
         </DialogTrigger>
-        <DialogContent className="data-nested-dialog-open:after:absolute data-nested-dialog-open:after:inset-0 data-nested-dialog-open:after:bg-black/5">
+        <DialogContent className="data-nested-dialog-open:after:absolute data-nested-dialog-open:after:inset-0 data-nested-dialog-open:after:bg-black/25">
           <DialogHeader>
             <DialogTitle>Type your display name</DialogTitle>
-            <DialogDescription>
+            <DialogDescription id="delete-account-hint">
               Enter {name} to continue.
             </DialogDescription>
           </DialogHeader>
+          <p className="font-mono text-sm text-foreground">{name}</p>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="delete-account-name">Display name</Label>
             <Input
@@ -84,11 +90,27 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
               autoComplete="off"
+              aria-describedby={
+                matches ? 'delete-account-hint' : 'delete-account-mismatch'
+              }
+              className={matches ? 'border-primary' : undefined}
             />
+            {!matches && (
+              <p
+                id="delete-account-mismatch"
+                className="text-xs text-muted-foreground"
+              >
+                Type your display name exactly to continue.
+              </p>
+            )}
           </div>
           <DialogFooter>
+            <DialogClose render={<Button variant="outline" />}>
+              Cancel
+            </DialogClose>
             <Button
               type="button"
+              variant="outline"
               disabled={!matches}
               onClick={() => setConfirmOpen(true)}
             >
@@ -98,7 +120,12 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
           <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
             <AlertDialogContent showOverlay={false}>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                <AlertDialogMedia className="bg-destructive/10 text-destructive">
+                  <Trash2 aria-hidden="true" />
+                </AlertDialogMedia>
+                <AlertDialogTitle className="text-destructive">
+                  Delete {name}?
+                </AlertDialogTitle>
                 <AlertDialogDescription>
                   This cannot be undone. All of your lists will be removed.
                 </AlertDialogDescription>

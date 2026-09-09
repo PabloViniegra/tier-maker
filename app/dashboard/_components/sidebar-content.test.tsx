@@ -95,6 +95,25 @@ describe('SidebarNav', () => {
     render(<SidebarNav pathname="/dashboard" collapsed={true} />)
     expect(screen.getByTestId('create-tier-list-trigger')).toBeInTheDocument()
   })
+
+  it('renders a Profile action under Create Tier List', () => {
+    render(<SidebarNav pathname="/dashboard" collapsed={false} />)
+    const create = screen.getByRole('link', { name: /create tier list/i })
+    const profile = screen.getByRole('link', { name: /^profile$/i })
+    expect(profile).toHaveAttribute('href', '/dashboard/profile')
+    expect(
+      create.compareDocumentPosition(profile) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it('marks the Profile action current on /dashboard/profile', () => {
+    render(<SidebarNav pathname="/dashboard/profile" collapsed={false} />)
+    expect(screen.getByRole('link', { name: /^profile$/i })).toHaveAttribute(
+      'aria-current',
+      'page'
+    )
+  })
 })
 
 describe('SidebarUserProfile', () => {
@@ -117,7 +136,7 @@ describe('SidebarUserProfile', () => {
 
   it('links the user identity to the profile page', () => {
     render(<SidebarUserProfile user={mockUser} collapsed={false} />)
-    expect(screen.getByRole('link', { name: /profile/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /pablo garcía/i })).toHaveAttribute(
       'href',
       '/dashboard/profile'
     )

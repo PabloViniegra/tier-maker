@@ -26,6 +26,18 @@ describe('ProfileDeleteDialog', () => {
     expect(confirm).toBeDisabled()
   })
 
+  it('closes the name dialog from the footer cancel', async () => {
+    const user = userEvent.setup()
+    render(<ProfileDeleteDialog name="Pablo García" />)
+
+    await user.click(screen.getByRole('button', { name: /delete account/i }))
+    await user.click(screen.getByRole('button', { name: /cancel/i }))
+
+    expect(
+      screen.queryByRole('textbox', { name: /display name/i })
+    ).not.toBeInTheDocument()
+  })
+
   it('does not delete when the nested alert is cancelled', async () => {
     const user = userEvent.setup()
     render(<ProfileDeleteDialog name="Pablo García" />)

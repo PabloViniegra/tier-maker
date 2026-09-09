@@ -24,7 +24,7 @@ export default async function ProfilePage() {
   const hasCredential = providers.includes('credential')
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-8 p-6">
       <FadeUp onMount>
         <h1 className="font-heading text-[2rem] leading-tight">Profile</h1>
       </FadeUp>
@@ -41,11 +41,15 @@ export default async function ProfilePage() {
       </FadeUp>
       {hasCredential && (
         <FadeUp delay={0.18} onMount>
-          <ProfilePasswordForm email={user.email} />
+          <div className="max-w-md">
+            <ProfilePasswordForm email={user.email} />
+          </div>
         </FadeUp>
       )}
       <FadeUp delay={0.24} onMount>
-        <ProfileDeleteDialog name={user.name} />
+        <div className="max-w-md border-t border-border pt-6">
+          <ProfileDeleteDialog name={user.name} />
+        </div>
       </FadeUp>
     </div>
   )

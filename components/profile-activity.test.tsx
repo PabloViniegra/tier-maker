@@ -20,6 +20,14 @@ describe('ProfileActivity', () => {
     expect(screen.queryByText('Created')).not.toBeInTheDocument()
   })
 
+  it('offers a create link when the user has no lists', () => {
+    render(<ProfileActivity stats={emptyStats} />)
+
+    expect(
+      screen.getByRole('link', { name: /create tier list/i })
+    ).toHaveAttribute('href', '/dashboard/tier-lists/new')
+  })
+
   it('renders created, published, and likes totals', () => {
     render(
       <ProfileActivity

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
-import { useForm } from 'react-hook-form'
+import { useForm, type UseFormRegisterReturn } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -21,9 +21,94 @@ import {
   type ChangePasswordInput,
 } from '@/lib/auth-schema'
 
+type ChangePasswordError = {
+  field: 'currentPassword' | 'password' | null
+  message: string
+}
+
+function mapChangePasswordError(error: {
+  code?: string
+  message?: string
+}): ChangePasswordError {
+  switch (error.code) {
+    case 'INVALID_PASSWORD':
+      return {
+        field: 'currentPassword',
+        message: 'Current password is incorrect',
+      }
+    case 'PASSWORD_TOO_SHORT':
+      return {
+        field: 'password',
+        message: 'New password must be at least 8 characters',
+      }
+    case 'PASSWORD_TOO_LONG':
+      return {
+        field: 'password',
+        message: 'New password is too long',
+      }
+    default:
+      return {
+        field: null,
+        message: error.message || 'Could not update your password.',
+      }
+  }
+}
+
+function PasswordField({
+  id,
+  label,
+  registration,
+  error,
+  autoComplete,
+}: {
+  id: string
+  label: string
+  registration: UseFormRegisterReturn
+  error?: string
+  autoComplete: 'current-password' | 'new-password'
+}) {
+  const [show, setShow] = useState(false)
+  const errorId = `${id}-error`
+  const name = label.toLowerCase()
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="relative">
+        <Input
+          id={id}
+          className="pr-8"
+          autoComplete={autoComplete}
+          {...registration}
+          type={show ? 'text' : 'password'}
+          aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? errorId : undefined}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="absolute inset-y-0 right-0 h-full w-8 text-muted-foreground hover:text-foreground"
+          onClick={() => setShow((visible) => !visible)}
+          aria-pressed={show}
+          aria-label={show ? `Hide ${name}` : `Show ${name}`}
+        >
+          {show ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+        </Button>
+      </div>
+      {error && (
+        <p id={errorId} className="text-xs text-destructive" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
+
 export function ProfilePasswordForm({ email }: { email: string }) {
   const [step, setStep] = useState<'idle' | 'code' | 'password'>('idle')
   const [otp, setOtp] = useState('')
+  const [otpError, setOtpError] = useState<string>()
   const [sending, setSending] = useState(false)
   const [verifying, setVerifying] = useState(false)
 
@@ -31,6 +116,8 @@ export function ProfilePasswordForm({ email }: { email: string }) {
     register,
     handleSubmit,
     setFocus,
+    setError,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ChangePasswordInput>({
     resolver: standardSchemaResolver(changePasswordSchema),
@@ -38,6 +125,7 @@ export function ProfilePasswordForm({ email }: { email: string }) {
 
   const sendCode = async () => {
     setSending(true)
+    setOtpError(undefined)
     try {
       const result = await authClient.emailOtp.sendVerificationOtp({
         email,
@@ -57,15 +145,20 @@ export function ProfilePasswordForm({ email }: { email: string }) {
     }
   }
 
+  const goBack = () => {
+    setStep('idle')
+    setOtp('')
+    setOtpError(undefined)
+  }
+
   const verifyCode = async () => {
     const parsed = verificationOtpSchema.safeParse({ otp })
     if (!parsed.success) {
-      toast.error(
-        parsed.error.issues[0]?.message || 'Enter the 6-digit code'
-      )
+      setOtpError(parsed.error.issues[0]?.message || 'Enter the 6-digit code')
       return
     }
     setVerifying(true)
+    setOtpError(undefined)
     try {
       const result = await authClient.emailOtp.checkVerificationOtp({
         email,
@@ -73,14 +166,14 @@ export function ProfilePasswordForm({ email }: { email: string }) {
         type: 'email-verification',
       })
       if (result.error) {
-        toast.error(
+        setOtpError(
           result.error.message || 'That code is invalid or has expired.'
         )
         return
       }
       setStep('password')
     } catch {
-      toast.error('Something went wrong. Please try again.')
+      setOtpError('Something went wrong. Please try again.')
     } finally {
       setVerifying(false)
     }
@@ -94,12 +187,22 @@ export function ProfilePasswordForm({ email }: { email: string }) {
         revokeOtherSessions: true,
       })
       if (result.error) {
-        toast.error(
-          result.error.message || 'Could not update your password.'
-        )
+        const mapped = mapChangePasswordError(result.error)
+        if (mapped.field) {
+          setError(mapped.field, {
+            type: 'server',
+            message: mapped.message,
+          })
+          setFocus(mapped.field)
+          return
+        }
+        toast.error(mapped.message)
         return
       }
       toast.success('Your password has been updated.')
+      reset()
+      setOtp('')
+      setStep('idle')
     } catch {
       toast.error('Something went wrong. Please try again.')
     }
@@ -112,7 +215,12 @@ export function ProfilePasswordForm({ email }: { email: string }) {
         <p className="text-sm text-muted-foreground">
           We will email a code to {email} before you can set a new password.
         </p>
-        <Button type="button" onClick={sendCode} disabled={sending}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={sendCode}
+          disabled={sending}
+        >
           {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
           Send code
         </Button>
@@ -124,14 +232,22 @@ export function ProfilePasswordForm({ email }: { email: string }) {
     return (
       <div className="flex flex-col gap-4">
         <h2 className="font-heading text-base">Password</h2>
+        <p className="text-sm text-muted-foreground">
+          We sent a code to {email}.
+        </p>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="verification-code">Verification code</Label>
           <InputOTP
             id="verification-code"
             maxLength={6}
             value={otp}
-            onChange={setOtp}
+            onChange={(value) => {
+              setOtp(value)
+              if (otpError) setOtpError(undefined)
+            }}
             aria-label="Verification code"
+            aria-invalid={otpError ? true : undefined}
+            aria-describedby={otpError ? 'otp-error' : undefined}
           >
             <InputOTPGroup>
               {Array.from({ length: 6 }, (_, i) => (
@@ -139,11 +255,35 @@ export function ProfilePasswordForm({ email }: { email: string }) {
               ))}
             </InputOTPGroup>
           </InputOTP>
+          {otpError && (
+            <p id="otp-error" className="text-xs text-destructive" role="alert">
+              {otpError}
+            </p>
+          )}
         </div>
-        <Button type="button" onClick={verifyCode} disabled={verifying}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={verifyCode}
+          disabled={verifying || otp.length !== 6}
+        >
           {verifying && <Loader2 className="animate-spin" aria-hidden="true" />}
           Verify code
         </Button>
+        <div className="flex gap-2">
+          <Button type="button" variant="ghost" onClick={goBack}>
+            Back
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={sendCode}
+            disabled={sending}
+          >
+            {sending && <Loader2 className="animate-spin" aria-hidden="true" />}
+            Resend
+          </Button>
+        </div>
       </div>
     )
   }
@@ -159,52 +299,31 @@ export function ProfilePasswordForm({ email }: { email: string }) {
       className="flex flex-col gap-4"
     >
       <h2 className="font-heading text-base">Password</h2>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="current-password">Current password</Label>
-        <Input
-          id="current-password"
-          type="password"
-          autoComplete="current-password"
-          {...register('currentPassword')}
-          aria-invalid={errors.currentPassword ? 'true' : 'false'}
-        />
-        {errors.currentPassword && (
-          <p className="text-xs text-destructive" role="alert">
-            {errors.currentPassword.message}
-          </p>
-        )}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="new-password">New password</Label>
-        <Input
-          id="new-password"
-          type="password"
-          autoComplete="new-password"
-          {...register('password')}
-          aria-invalid={errors.password ? 'true' : 'false'}
-        />
-        {errors.password && (
-          <p className="text-xs text-destructive" role="alert">
-            {errors.password.message}
-          </p>
-        )}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="confirm-new-password">Confirm password</Label>
-        <Input
-          id="confirm-new-password"
-          type="password"
-          autoComplete="new-password"
-          {...register('confirmPassword')}
-          aria-invalid={errors.confirmPassword ? 'true' : 'false'}
-        />
-        {errors.confirmPassword && (
-          <p className="text-xs text-destructive" role="alert">
-            {errors.confirmPassword.message}
-          </p>
-        )}
-      </div>
-      <Button type="submit" disabled={isSubmitting}>
+      <p className="text-sm text-muted-foreground">
+        At least 8 characters. Other sessions will be signed out.
+      </p>
+      <PasswordField
+        id="current-password"
+        label="Current password"
+        autoComplete="current-password"
+        registration={register('currentPassword')}
+        error={errors.currentPassword?.message}
+      />
+      <PasswordField
+        id="new-password"
+        label="New password"
+        autoComplete="new-password"
+        registration={register('password')}
+        error={errors.password?.message}
+      />
+      <PasswordField
+        id="confirm-new-password"
+        label="Confirm password"
+        autoComplete="new-password"
+        registration={register('confirmPassword')}
+        error={errors.confirmPassword?.message}
+      />
+      <Button type="submit" variant="outline" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
         Update password
       </Button>
