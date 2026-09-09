@@ -92,7 +92,7 @@ function PasswordProgress({
             >
               <span
                 className={cn(
-                  'flex size-5 shrink-0 items-center justify-center rounded-sm text-[0.7rem] tabular-nums',
+                  'flex size-5 shrink-0 items-center justify-center rounded-sm text-xs tabular-nums',
                   isCurrent
                     ? 'bg-primary text-primary-foreground'
                     : 'border border-border'
