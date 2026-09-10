@@ -18,7 +18,6 @@ type Props = {
   isAuthenticated: boolean
   href?: string
   style?: React.CSSProperties
-  priority?: boolean
 }
 
 export function ExploreCard({
@@ -28,51 +27,82 @@ export function ExploreCard({
   isAuthenticated,
   href,
   style,
-  priority = false,
 }: Props) {
-  const {
-    id,
-    title,
-    category,
-    itemCount,
-    createdAt,
-    creatorName,
-    coverImageUrl,
-    firstItemUrl,
-    likeCount,
-  } = data
-  const imageUrl = coverImageUrl ?? firstItemUrl ?? null
+  const { id, title, category, itemCount, createdAt, creatorName, likeCount, rows } = data
+  const previewRows = rows.slice(0, 6)
+  const imageUrl = data.coverImageUrl ?? data.firstItemUrl ?? null
   const fillHref = href ?? `/explore/${data.slug}`
 
   return (
     <div
-      className="flex flex-col gap-3 overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-200 hover:border-primary/20 hover:bg-overlay"
+      className="relative flex flex-col gap-3 overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-200 outline-none hover:border-primary/20 hover:bg-overlay has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-ring"
       style={style}
     >
-      <Link href={fillHref} className="block">
+      <Link
+        href={fillHref}
+        aria-label={title}
+        className="block after:absolute after:inset-0 after:z-10"
+      >
         <ViewTransition name={`tier-cover-${id}`}>
-          <div className="relative aspect-video w-full overflow-hidden bg-muted">
-            {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt={title}
-                fill
-                priority={priority || undefined}
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-              />
-            ) : (
-              <div
-                data-testid="card-cover-placeholder"
-                className="flex h-full w-full items-center justify-center"
-                style={{ background: getCategoryGradient(category) }}
-              >
-                <span className="text-3xl font-bold text-white drop-shadow select-none">
-                  {getInitials(title)}
-                </span>
-              </div>
-            )}
-          </div>
+          {previewRows.length > 0 ? (
+            <div className="flex aspect-video w-full flex-col gap-1 bg-muted p-1.5">
+              {previewRows.map((row) => (
+                <div
+                  key={row.order}
+                  className="flex min-h-0 flex-1 items-stretch gap-1"
+                >
+                  <div
+                    className="flex w-8 shrink-0 items-center justify-center rounded-sm font-heading text-xs font-bold text-white"
+                    style={{ background: row.color }}
+                  >
+                    <span className="truncate px-0.5 select-none">
+                      {row.label}
+                    </span>
+                  </div>
+                  <div
+                    className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden rounded-sm border border-border px-1"
+                    style={{
+                      background: `color-mix(in oklch, ${row.color} 15%, transparent)`,
+                    }}
+                  >
+                    {row.firstItemUrl && (
+                      <span className="relative block h-[calc(100%-4px)] aspect-square shrink-0">
+                        <Image
+                          src={row.firstItemUrl}
+                          alt=""
+                          fill
+                          sizes="32px"
+                          className="rounded-[2px] object-cover"
+                        />
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="relative aspect-video w-full overflow-hidden bg-muted">
+              {imageUrl ? (
+                <Image
+                  src={imageUrl}
+                  alt={title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                />
+              ) : (
+                <div
+                  data-testid="card-cover-placeholder"
+                  className="flex h-full w-full items-center justify-center"
+                  style={{ background: getCategoryGradient(category) }}
+                >
+                  <span className="text-3xl font-bold text-white drop-shadow select-none">
+                    {getInitials(title)}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </ViewTransition>
       </Link>
 
@@ -80,7 +110,7 @@ export function ExploreCard({
         <div className="flex items-center justify-between gap-2">
           <Badge
             variant="secondary"
-            className="h-5 max-w-[120px] truncate text-[10px]"
+            className="h-5 max-w-[120px] truncate text-xs"
           >
             {category.length > 20 ? category.slice(0, 20) + '…' : category}
           </Badge>
@@ -90,11 +120,9 @@ export function ExploreCard({
           />
         </div>
 
-        <Link href={fillHref}>
-          <p className="line-clamp-2 text-sm leading-snug font-medium break-words text-foreground hover:underline">
-            {title}
-          </p>
-        </Link>
+        <p className="line-clamp-2 text-sm leading-snug font-medium break-words text-foreground">
+          {title}
+        </p>
 
         <Separator />
 
@@ -104,12 +132,12 @@ export function ExploreCard({
               {itemCount} {itemCount === 1 ? 'item' : 'items'}
             </span>
             {creatorName && (
-              <span className="max-w-[10rem] truncate text-[10px] text-muted-foreground/70">
+              <span className="max-w-[10rem] truncate text-xs text-muted-foreground">
                 by {creatorName}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="relative z-20 flex items-center gap-2">
             {!isOwner && (
               <LikeButton
                 templateId={id}
@@ -123,7 +151,7 @@ export function ExploreCard({
               aria-label={`Fill ${title}`}
               className={cn(
                 buttonVariants({ variant: 'ghost', size: 'sm' }),
-                'h-6 gap-1 px-2 text-xs'
+                'h-8 gap-1 px-3 text-xs sm:h-7 sm:px-2'
               )}
             >
               Fill

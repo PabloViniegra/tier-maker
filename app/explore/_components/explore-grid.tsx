@@ -58,10 +58,12 @@ export function ExploreGrid({
   const likedSet = new Set(likedIds)
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div role="list" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((item, i) => (
         <motion.div
           key={item.id}
+          role="listitem"
+          tabIndex={-1}
           variants={cardVariants}
           initial="hidden"
           animate="visible"
@@ -75,7 +77,6 @@ export function ExploreGrid({
             isOwner={currentUserId !== null && item.creatorId === currentUserId}
             isAuthenticated={isAuthenticated}
             href={fillHrefPrefix ? `${fillHrefPrefix}/${item.id}` : undefined}
-            priority={i === 0}
           />
         </motion.div>
       ))}

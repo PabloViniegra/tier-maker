@@ -5,7 +5,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select'
 import { useExploreFilters } from '../_hooks/use-explore-filters'
 import type { ExploreSort } from '@/lib/queries/tier-templates'
@@ -27,7 +26,7 @@ export function ExploreSortSelect({ value }: Props) {
   return (
     <Select value={value} onValueChange={setSort}>
       <SelectTrigger className="w-[150px]" aria-label="Sort tier lists by">
-        <SelectValue placeholder="Sort by" />
+        {OPTIONS.find((opt) => opt.value === value)?.label ?? 'Sort by'}
       </SelectTrigger>
       <SelectContent>
         {OPTIONS.map((opt) => (

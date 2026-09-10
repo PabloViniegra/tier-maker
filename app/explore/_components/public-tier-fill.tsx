@@ -131,7 +131,7 @@ export function PublicTierFill({
                 {data.title}
               </h1>
               {data.category && (
-                <span className="max-w-32 shrink-0 truncate rounded-sm bg-muted px-1.5 py-0.5 text-[0.7rem] font-medium text-muted-foreground">
+                <span className="max-w-32 shrink-0 truncate rounded-sm bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
                   {data.category}
                 </span>
               )}
@@ -151,7 +151,7 @@ export function PublicTierFill({
         </div>
         <div className="ml-auto flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:flex-nowrap">
           <span
-            className="order-first basis-full truncate text-right text-[0.7rem] text-muted-foreground sm:order-none sm:basis-auto sm:text-xs"
+            className="order-first basis-full truncate text-right text-xs text-muted-foreground sm:order-none sm:basis-auto"
             role="status"
             aria-live="polite"
             aria-atomic="true"

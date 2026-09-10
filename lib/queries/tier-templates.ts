@@ -11,6 +11,7 @@ import {
   asc,
   or,
   ilike,
+  inArray,
   sql,
   gte,
 } from 'drizzle-orm'
@@ -300,6 +301,14 @@ export type PublicTierListSummary = TierListSummary & {
   creatorName: string | null
   creatorId: string | null
   likeCount: number
+  rows: PublicTierListRowPreview[]
+}
+
+export type PublicTierListRowPreview = {
+  label: string
+  color: string
+  order: number
+  firstItemUrl: string | null
 }
 
 export type ExploreSort = 'newest' | 'oldest' | 'a-z' | 'popular'
@@ -481,6 +490,33 @@ export const getPublicTierLists = unstable_cache(
       db.select({ count: count() }).from(tierTemplates).where(conditions),
     ])
 
+    const rowPreviewMap = new Map<string, PublicTierListRowPreview[]>()
+    if (rows.length > 0) {
+      const tierRowData = await db
+        .select({
+          templateId: tierRows.templateId,
+          label: tierRows.label,
+          color: tierRows.color,
+          order: tierRows.order,
+          items: tierRows.items,
+        })
+        .from(tierRows)
+        .where(inArray(tierRows.templateId, rows.map((r) => r.id)))
+        .orderBy(asc(tierRows.order))
+
+      for (const tr of tierRowData) {
+        if (!tr.templateId) continue
+        const list = rowPreviewMap.get(tr.templateId) ?? []
+        list.push({
+          label: tr.label,
+          color: tr.color,
+          order: tr.order,
+          firstItemUrl: tr.items[0]?.url ?? null,
+        })
+        rowPreviewMap.set(tr.templateId, list)
+      }
+    }
+
     return {
       items: rows.map((r) => ({
         id: r.id,
@@ -495,6 +531,7 @@ export const getPublicTierLists = unstable_cache(
         creatorName: r.creatorName ?? null,
         creatorId: r.creatorId ?? null,
         likeCount: r.likeCount ?? 0,
+        rows: rowPreviewMap.get(r.id) ?? [],
       })),
       total: countRow?.count ?? 0,
     }

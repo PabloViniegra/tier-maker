@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getPublicTierListById } from '@/lib/queries/tier-templates'
 import { getSession } from '@/lib/session'
+import { getIsLiked } from '@/lib/queries/tier-likes'
 import { PublicTierFill } from '@/app/explore/_components/public-tier-fill'
 
 const getPublicTierList = cache(getPublicTierListById)
@@ -32,11 +33,26 @@ export default async function DashboardExploreTierFillPage({ params }: Props) {
 
   if (!data) notFound()
 
+  const userId = session?.user.id ?? null
+  const isLiked = userId ? await getIsLiked(userId, data.id) : false
+  const isOwner = userId !== null && data.creatorId === userId
+
   return (
     <PublicTierFill
       tierId={id}
-      userId={session?.user.id ?? null}
+      userId={userId}
       backHref="/dashboard/explore"
+      shareUrl={`/dashboard/explore/${id}`}
+      like={
+        isOwner
+          ? undefined
+          : {
+              templateId: data.id,
+              initialCount: data.likeCount,
+              initialIsLiked: isLiked,
+              isAuthenticated: !!session,
+            }
+      }
       data={{
         title: data.title,
         description: data.description,

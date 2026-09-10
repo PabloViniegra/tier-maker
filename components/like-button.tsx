@@ -22,10 +22,10 @@ type Props = {
 
 const likeClassName = (isLiked: boolean, iconOnly: boolean) =>
   cn(
-    'flex items-center gap-1 rounded text-xs transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+    'flex min-h-8 min-w-8 items-center justify-center gap-1 rounded px-2 text-xs transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
     isLiked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-400',
     iconOnly &&
-      'min-h-11 min-w-11 justify-center rounded-lg px-2 sm:min-h-9 sm:min-w-9'
+      'min-h-11 min-w-11 rounded-lg sm:min-h-9 sm:min-w-9'
   )
 
 export function LikeButton({
@@ -57,7 +57,9 @@ export function LikeButton({
         router.refresh()
       } catch {
         setState(previous)
-        toast.error('Could not update like. Try again.')
+        toast.error('Could not update like. Try again.', {
+          action: { label: 'Retry', onClick: () => handleClick() },
+        })
       }
     })
   }

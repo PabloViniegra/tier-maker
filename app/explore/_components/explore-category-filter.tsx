@@ -5,7 +5,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select'
 import { useExploreFilters } from '../_hooks/use-explore-filters'
 
@@ -20,7 +19,7 @@ export function ExploreCategoryFilter({ categories, value }: Props) {
   return (
     <Select value={value || 'all'} onValueChange={setCategory}>
       <SelectTrigger className="w-[160px]" aria-label="Filter by category">
-        <SelectValue placeholder="Category" />
+        {value && value !== 'all' ? value : 'All categories'}
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">All categories</SelectItem>

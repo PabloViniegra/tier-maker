@@ -16,6 +16,7 @@ const baseItem = {
   creatorId: 'creator-1',
   likeCount: 0,
   isPublic: true,
+  rows: [],
 }
 
 const gridDefaults = {

@@ -23,6 +23,29 @@ function buildPageUrl(searchParams: SearchParams, page: number): string {
   return `?${params.toString()}`
 }
 
+function pageItems(
+  total: number,
+  current: number
+): (number | 'ellipsis')[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+  const wanted = new Set(
+    [1, 2, total - 1, total, current - 1, current, current + 1].filter(
+      (p) => p >= 1 && p <= total
+    )
+  )
+  const sorted = [...wanted].sort((a, b) => a - b)
+  const out: (number | 'ellipsis')[] = []
+  let prev = 0
+  for (const p of sorted) {
+    if (p - prev > 1) out.push('ellipsis')
+    out.push(p)
+    prev = p
+  }
+  return out
+}
+
 export function ExplorePagination({
   total,
   page,
@@ -32,7 +55,6 @@ export function ExplorePagination({
   const totalPages = Math.ceil(total / pageSize)
   if (totalPages <= 1) return null
 
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
   const isFirst = page === 1
   const isLast = page === totalPages
 
@@ -58,17 +80,27 @@ export function ExplorePagination({
         </Link>
       )}
 
-      {pages.map((p) => (
-        <Link
-          key={p}
-          href={buildPageUrl(searchParams, p)}
-          aria-label={`Page ${p}`}
-          aria-current={p === page ? 'page' : undefined}
-          className={cn(linkClass, p === page && activeLinkClass)}
-        >
-          {p}
-        </Link>
-      ))}
+      {pageItems(totalPages, page).map((p, i) =>
+        p === 'ellipsis' ? (
+          <span
+            key={`ellipsis-${i}`}
+            aria-hidden="true"
+            className="flex h-8 items-center justify-center px-1 text-xs text-muted-foreground"
+          >
+            …
+          </span>
+        ) : (
+          <Link
+            key={p}
+            href={buildPageUrl(searchParams, p)}
+            aria-label={`Page ${p}`}
+            aria-current={p === page ? 'page' : undefined}
+            className={cn(linkClass, p === page && activeLinkClass)}
+          >
+            {p}
+          </Link>
+        )
+      )}
 
       {!isLast && (
         <Link

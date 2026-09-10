@@ -16,6 +16,7 @@ const baseData = {
   creatorId: 'creator-1',
   likeCount: 7,
   isPublic: true,
+  rows: [],
 }
 
 const baseProps = {
@@ -101,6 +102,49 @@ describe('ExploreCard', () => {
     expect(screen.getByRole('link', { name: /fill best anime ever/i })).toHaveAttribute(
       'href',
       '/dashboard/explore/xyz-456'
+    )
+  })
+
+  it('names the card link with the title', () => {
+    render(<ExploreCard {...baseProps} />)
+    expect(
+      screen.getByRole('link', { name: 'Best Anime Ever' })
+    ).toHaveAttribute('href', '/explore/best-anime-ever')
+  })
+
+  it('renders a tier-row preview when rows are provided', () => {
+    render(
+      <ExploreCard
+        {...baseProps}
+        data={{
+          ...baseData,
+          rows: [
+            {
+              label: 'God tier',
+              color: 'oklch(0.65 0.22 250)',
+              order: 0,
+              firstItemUrl: 'https://blob/item.png',
+            },
+          ],
+        }}
+      />
+    )
+    expect(screen.getByText('God tier')).toBeInTheDocument()
+    const thumb = document.querySelector('img[src*="item.png"]')
+    expect(thumb).not.toBeNull()
+    expect(thumb).toHaveAttribute('src', 'https://blob/item.png')
+  })
+
+  it('falls back to cover image when rows are empty', () => {
+    render(
+      <ExploreCard
+        {...baseProps}
+        data={{ ...baseData, coverImageUrl: 'https://blob/cover.png' }}
+      />
+    )
+    expect(screen.getByRole('img', { name: /best anime ever/i })).toHaveAttribute(
+      'src',
+      'https://blob/cover.png'
     )
   })
 })
