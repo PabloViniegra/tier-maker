@@ -23,7 +23,7 @@ export function PublicItemBankStrip({
           </p>
         )}
       </div>
-      <div className="flex min-h-24 items-center gap-2 overflow-x-auto overscroll-contain px-4 pt-1 pb-3">
+      <div className="flex min-h-24 max-h-44 flex-wrap content-start items-center gap-2 overflow-x-hidden overflow-y-auto overscroll-contain px-4 pt-1 pb-3 sm:max-h-52">
         {items.length === 0 && (
           <span className="shrink-0 text-xs text-muted-foreground">
             All items placed

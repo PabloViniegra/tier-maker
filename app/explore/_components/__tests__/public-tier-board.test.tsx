@@ -49,6 +49,14 @@ describe('PublicTierBoard', () => {
     expect(screen.getByAltText('Item C')).toBeInTheDocument()
   })
 
+  it('wraps bank items instead of scrolling sideways', () => {
+    render(<PublicTierBoard rows={mockRows} sidebarItems={mockSidebarItems} />)
+    const list = screen.getByText(/items to place/i).parentElement
+      ?.nextElementSibling
+    expect(list).toHaveClass('flex-wrap')
+    expect(list).not.toHaveClass('overflow-x-auto')
+  })
+
   it('shows an empty-state placeholder for empty rows', () => {
     render(<PublicTierBoard rows={mockRows} sidebarItems={mockSidebarItems} />)
     expect(screen.getByText('Empty tier')).toBeInTheDocument()

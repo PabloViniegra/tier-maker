@@ -47,7 +47,7 @@ export function ItemBankStrip({
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={cn(
-              'flex min-h-24 items-center gap-2 overflow-x-auto overscroll-contain px-4 pt-1 pb-3 transition-colors',
+              'flex min-h-24 max-h-44 flex-wrap content-start items-center gap-2 overflow-x-hidden overflow-y-auto overscroll-contain px-4 pt-1 pb-3 transition-colors sm:max-h-52',
               snapshot.isDraggingOver && 'bg-primary/5'
             )}
           >
