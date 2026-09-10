@@ -102,7 +102,7 @@ export default async function ExplorePage({ searchParams }: Props) {
               </Suspense>
             </FadeUp>
             <FadeUp delay={0.18} onMount>
-              <Suspense fallback={<Skeleton className="h-8 w-[160px]" />}>
+              <Suspense fallback={<Skeleton className="h-9 w-44" />}>
                 <ExploreCategoryFilter
                   categories={categories}
                   value={category}
@@ -110,7 +110,7 @@ export default async function ExplorePage({ searchParams }: Props) {
               </Suspense>
             </FadeUp>
             <FadeUp delay={0.24} onMount>
-              <Suspense fallback={<Skeleton className="h-8 w-[150px]" />}>
+              <Suspense fallback={<Skeleton className="h-9 w-44" />}>
                 <ExploreSortSelect value={sort} />
               </Suspense>
             </FadeUp>

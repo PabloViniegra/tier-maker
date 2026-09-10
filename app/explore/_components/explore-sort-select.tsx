@@ -1,11 +1,16 @@
 'use client'
 
+import { ArrowUpDown } from 'lucide-react'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select'
+import { DEFAULT_SORT } from '@/lib/explore-params'
 import { useExploreFilters } from '../_hooks/use-explore-filters'
 import type { ExploreSort } from '@/lib/queries/tier-templates'
 
@@ -22,18 +27,30 @@ type Props = {
 
 export function ExploreSortSelect({ value }: Props) {
   const { setSort } = useExploreFilters()
+  const isFiltered = value !== DEFAULT_SORT
 
   return (
-    <Select value={value} onValueChange={setSort}>
-      <SelectTrigger className="w-[150px]" aria-label="Sort tier lists by">
-        {OPTIONS.find((opt) => opt.value === value)?.label ?? 'Sort by'}
+    <Select items={OPTIONS} value={value} onValueChange={setSort}>
+      <SelectTrigger className="min-w-44" aria-label="Sort tier lists by">
+        <ArrowUpDown
+          aria-hidden="true"
+          className={
+            isFiltered
+              ? 'size-3.5 text-primary'
+              : 'size-3.5 text-muted-foreground'
+          }
+        />
+        <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {OPTIONS.map((opt) => (
-          <SelectItem key={opt.value} value={opt.value}>
-            {opt.label}
-          </SelectItem>
-        ))}
+        <SelectGroup>
+          <SelectLabel>Sort</SelectLabel>
+          {OPTIONS.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
       </SelectContent>
     </Select>
   )
