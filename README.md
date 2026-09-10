@@ -171,6 +171,7 @@ The application will be available at `http://localhost:3000`.
 | `pnpm typecheck`   | Run TypeScript type checking     |
 | `pnpm test`        | Run tests once                   |
 | `pnpm test:watch`  | Run tests in watch mode          |
+| `pnpm test:e2e`    | Run Playwright E2E tests         |
 | `pnpm db:generate` | Generate Drizzle migration files |
 | `pnpm db:migrate`  | Run pending migrations           |
 | `pnpm db:studio`   | Open Drizzle Studio              |
@@ -216,6 +217,7 @@ tier-maker/
 │   └── cache-tags.ts               # Next.js cache tag constants
 ├── hooks/                          # Custom React hooks
 ├── drizzle/                        # Generated migrations
+├── e2e/                            # Playwright business-flow tests and fixtures
 ├── drizzle.config.ts               # Drizzle Kit configuration
 ├── next.config.ts                  # Next.js configuration
 ├── vitest.config.ts                # Test configuration
@@ -242,7 +244,7 @@ See [DESIGN.md](./DESIGN.md) for the full specification.
 
 ## Testing
 
-Tests run with Vitest using jsdom and Testing Library:
+Unit and component tests run with Vitest using jsdom and Testing Library:
 
 ```bash
 # Run all tests
@@ -253,6 +255,20 @@ pnpm test:watch
 ```
 
 Test files are co-located with their source modules (e.g., `tier-editor.test.ts` alongside `tier-editor.ts`).
+
+Playwright E2E tests use a local production server, Chromium, and the PostgreSQL
+database configured by `DATABASE_URI`:
+
+```bash
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+The E2E setup creates temporary users and tier lists with the
+`playwright-e2e-` prefix, intercepts fixture images, and removes the data after
+the run. Apply the database migrations and configure the required application
+environment variables before running the suite. The server uses port `3001` by
+default; set `PLAYWRIGHT_PORT` to use another free port.
 
 ---
 

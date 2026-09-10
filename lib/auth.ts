@@ -92,5 +92,7 @@ export const auth = betterAuth({
     'http://localhost:3001',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
+    process.env.PLAYWRIGHT_PORT &&
+      `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT}`,
   ].filter((origin): origin is string => Boolean(origin)),
 })
