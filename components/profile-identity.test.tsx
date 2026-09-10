@@ -13,7 +13,9 @@ describe('ProfileIdentity', () => {
       />
     )
 
-    expect(screen.getByText('Pablo García')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Pablo García' })
+    ).toBeInTheDocument()
     expect(screen.getByText('pablo@example.com')).toBeInTheDocument()
     expect(screen.getByText(/january 15, 2026/i)).toBeInTheDocument()
   })
@@ -41,6 +43,9 @@ describe('ProfileIdentity', () => {
       />
     )
 
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'pablo@example.com' })
+    ).toBeInTheDocument()
     expect(screen.getByText('P')).toBeInTheDocument()
   })
 })

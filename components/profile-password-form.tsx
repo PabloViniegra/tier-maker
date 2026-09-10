@@ -21,7 +21,7 @@ import {
   verificationOtpSchema,
   type ChangePasswordInput,
 } from '@/lib/auth-schema'
-import { profileStepVariants } from '@/lib/motion-variants'
+import { iconSwapVariants, profileStepVariants } from '@/lib/motion-variants'
 import { cn } from '@/lib/utils'
 
 type ChangePasswordError = {
@@ -172,7 +172,22 @@ function PasswordField({
           aria-pressed={show}
           aria-label={show ? `Hide ${name}` : `Show ${name}`}
         >
-          {show ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+          <AnimatePresence initial={false} mode="popLayout">
+            <motion.span
+              key={show ? 'hide' : 'show'}
+              variants={iconSwapVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="flex items-center justify-center"
+            >
+              {show ? (
+                <EyeOff aria-hidden="true" />
+              ) : (
+                <Eye aria-hidden="true" />
+              )}
+            </motion.span>
+          </AnimatePresence>
         </Button>
       </div>
       {error && (
@@ -291,9 +306,8 @@ export function ProfilePasswordForm({ email }: { email: string }) {
     return (
       <PasswordStepTransition step="idle">
         <div className="flex flex-col gap-3">
-          <PasswordProgress currentStep={1} />
           <h2 className="font-heading text-base">Password</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-pretty text-muted-foreground">
             We’ll email a 6-digit code to{' '}
             <span className="font-medium text-foreground">{email}</span> to
             confirm it’s you.
@@ -325,7 +339,7 @@ export function ProfilePasswordForm({ email }: { email: string }) {
         <div className="flex flex-col gap-4">
           <PasswordProgress currentStep={2} />
           <h2 className="font-heading text-base">Password</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-pretty text-muted-foreground">
             We sent a 6-digit code to{' '}
             <span className="font-medium text-foreground">{email}</span>.
           </p>
@@ -356,7 +370,7 @@ export function ProfilePasswordForm({ email }: { email: string }) {
             </InputOTP>
             <p
               id="verification-code-hint"
-              className="text-xs text-muted-foreground"
+              className="text-xs text-pretty text-muted-foreground"
             >
               This code expires in five minutes. If you don’t see it, check your
               spam folder or resend the code.
@@ -427,7 +441,7 @@ export function ProfilePasswordForm({ email }: { email: string }) {
       >
         <PasswordProgress currentStep={3} />
         <h2 className="font-heading text-base">Password</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-pretty text-muted-foreground">
           At least 8 characters. Other sessions will be signed out.
         </p>
         <PasswordField

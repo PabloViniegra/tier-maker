@@ -7,9 +7,8 @@ describe('Profile loading state', () => {
   it('announces that the profile is loading', () => {
     render(<Loading />)
 
-    expect(screen.getByLabelText(/loading profile/i)).toHaveAttribute(
-      'aria-busy',
-      'true'
-    )
+    const status = screen.getByLabelText(/loading profile/i)
+    expect(status).toHaveAttribute('aria-busy', 'true')
+    expect(status).toHaveClass('max-w-3xl', 'p-4', 'sm:p-6')
   })
 })

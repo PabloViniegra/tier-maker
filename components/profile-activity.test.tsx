@@ -43,10 +43,12 @@ describe('ProfileActivity', () => {
 
     expect(screen.getByText('Created')).toBeInTheDocument()
     expect(screen.getByText('Published')).toBeInTheDocument()
-    expect(screen.getByText('Likes')).toBeInTheDocument()
+    expect(screen.queryByText('Likes')).not.toBeInTheDocument()
     expect(screen.getByText('4')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
-    expect(screen.getByText('9')).toBeInTheDocument()
+    expect(
+      screen.getByText((_, node) => node?.textContent === '9 likes received')
+    ).toBeInTheDocument()
     expect(
       screen.getByText(/created activity over the last 14 days/i)
     ).toBeInTheDocument()
@@ -68,6 +70,10 @@ describe('ProfileActivity', () => {
     expect(screen.getByRole('link', { name: /view all lists/i })).toHaveAttribute(
       'href',
       '/dashboard/tier-lists'
+    )
+    expect(screen.getByRole('link', { name: /view all lists/i })).toHaveClass(
+      'h-11',
+      'sm:h-8'
     )
   })
 })

@@ -74,7 +74,7 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
       <h2 className="font-heading text-sm text-muted-foreground">
         Delete account
       </h2>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-pretty text-muted-foreground">
         This permanently deletes your account and lists. This cannot be undone.
       </p>
       <Dialog onOpenChange={onOpenChange}>

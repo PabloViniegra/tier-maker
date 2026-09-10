@@ -33,11 +33,6 @@ export function ProfileActivity({ stats }: { stats: ProfileStats }) {
       value: stats.published,
       series: stats.publishedSeries,
     },
-    {
-      label: 'Likes',
-      value: stats.likesReceived,
-      series: null,
-    },
   ]
 
   return (
@@ -48,13 +43,13 @@ export function ProfileActivity({ stats }: { stats: ProfileStats }) {
           href="/dashboard/tier-lists"
           className={cn(
             buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'h-11 px-2 sm:h-7'
+            'h-11 px-2 sm:h-8'
           )}
         >
           View all lists
         </Link>
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.5fr_1fr]">
         {cards.map(({ label, value, series }) => (
           <div
             key={label}
@@ -65,7 +60,7 @@ export function ProfileActivity({ stats }: { stats: ProfileStats }) {
               <p className="font-mono text-3xl font-semibold text-foreground tabular-nums">
                 {value}
               </p>
-              {series && series.some((n) => n > 0) && (
+              {series.some((n) => n > 0) && (
                 <>
                   <Sparkline series={series} width={72} height={28} />
                   <span className="sr-only">
@@ -77,7 +72,13 @@ export function ProfileActivity({ stats }: { stats: ProfileStats }) {
           </div>
         ))}
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-sm text-pretty text-muted-foreground">
+        <span className="font-mono font-semibold text-foreground tabular-nums">
+          {stats.likesReceived}
+        </span>{' '}
+        likes received
+      </p>
+      <p className="text-xs text-pretty text-muted-foreground">
         Sparklines show the last 14 days. Totals are all-time.
       </p>
     </div>

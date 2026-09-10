@@ -28,17 +28,19 @@ export function ProfileIdentity({
       <div className="relative z-10 flex items-center gap-4">
         <div
           className="flex size-16 shrink-0 items-center justify-center rounded-full bg-background text-lg font-semibold text-foreground ring-1 ring-border"
-          aria-hidden={Boolean(name)}
+          aria-hidden="true"
         >
           {initials}
         </div>
         <div className="min-w-0">
+          <h1 className="font-heading text-[2rem] leading-tight text-balance text-foreground">
+            {name || email}
+          </h1>
           {name ? (
-            <h2 className="font-heading text-2xl leading-tight text-foreground">
-              {name}
-            </h2>
+            <p className="truncate text-sm text-pretty text-muted-foreground">
+              {email}
+            </p>
           ) : null}
-          <p className="truncate text-sm text-muted-foreground">{email}</p>
           {providers.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {providers.includes('credential') && (
@@ -53,7 +55,7 @@ export function ProfileIdentity({
               )}
             </div>
           )}
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-pretty text-muted-foreground">
             Member since {formatLongDate(createdAt)}
           </p>
         </div>

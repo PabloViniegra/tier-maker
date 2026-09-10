@@ -132,7 +132,8 @@ describe('ProfilePasswordForm', () => {
     const user = userEvent.setup()
     render(<ProfilePasswordForm email="user@example.com" />)
 
-    expect(screen.getByRole('status')).toHaveTextContent(/step 1 of 3/i)
+    expect(screen.queryByText(/step 1 of 3/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/step 2 of 3/i)).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /send code/i }))
 

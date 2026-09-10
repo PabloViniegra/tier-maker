@@ -222,3 +222,19 @@ export const fadeSwapVariants: Variants = {
     transition: { duration: 0.15, ease: EASE_SMOOTH },
   },
 }
+
+export const iconSwapVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.25, filter: 'blur(4px)' },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { type: 'spring', duration: 0.3, bounce: 0 },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.25,
+    filter: 'blur(4px)',
+    transition: { type: 'spring', duration: 0.3, bounce: 0 },
+  },
+}
