@@ -52,15 +52,15 @@ describe('TierListCard', () => {
     expect(screen.getByText('0 items')).toBeInTheDocument()
   })
 
-  it('renders an Open button', () => {
+  it('renders Open links for the cover and footer pointing to the detail route', () => {
     render(<TierListCard {...baseProps} />)
-    expect(screen.getByRole('link', { name: /open/i })).toBeInTheDocument()
-  })
-
-  it('Open button links to the tier list detail route', () => {
-    render(<TierListCard {...baseProps} />)
-    const link = screen.getByRole('link', { name: /open/i })
-    expect(link).toHaveAttribute('href', '/dashboard/tier-lists/abc-123')
+    const links = screen.getAllByRole('link', {
+      name: 'Open My Anime Rankings',
+    })
+    expect(links).toHaveLength(2)
+    for (const link of links) {
+      expect(link).toHaveAttribute('href', '/dashboard/tier-lists/abc-123')
+    }
   })
 
   it('truncates long category names in the badge', () => {
@@ -127,7 +127,7 @@ describe('TierListCard', () => {
     })
     render(<TierListCard {...baseProps} isPublic={true} />)
     await openMenu(user)
-    await user.click(screen.getByText('Copy link'))
+    await user.click(screen.getByText('Copy Link'))
     expect(writeText).toHaveBeenCalledWith(
       `${window.location.origin}/explore/my-anime-rankings`
     )
@@ -143,7 +143,7 @@ describe('TierListCard', () => {
     })
     render(<TierListCard {...baseProps} isPublic={false} />)
     await openMenu(user)
-    await user.click(screen.getByText('Copy link'))
+    await user.click(screen.getByText('Copy Link'))
     expect(writeText).toHaveBeenCalledWith(
       `${window.location.origin}/dashboard/tier-lists/abc-123/edit`
     )
@@ -161,7 +161,7 @@ describe('TierListCard', () => {
     })
     render(<TierListCard {...baseProps} isPublic={true} />)
     await openMenu(user)
-    await user.click(screen.getByText('Copy link'))
+    await user.click(screen.getByText('Copy Link'))
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
@@ -183,18 +183,18 @@ describe('TierListCard', () => {
     expect(screen.getByRole('button', { name: /options/i })).toBeInTheDocument()
   })
 
-  it('renders "Edit" link in the card menu', async () => {
+  it('renders "Edit" item as a link in the card menu', async () => {
     const user = userEvent.setup()
     render(<TierListCard {...baseProps} />)
     await openMenu(user)
-    expect(screen.getByRole('link', { name: /^edit$/i })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: /^edit$/i })).toBeInTheDocument()
   })
 
   it('"Edit" links to the edit route', async () => {
     const user = userEvent.setup()
     render(<TierListCard {...baseProps} />)
     await openMenu(user)
-    const editLink = screen.getByRole('link', { name: /^edit$/i })
+    const editLink = screen.getByRole('menuitem', { name: /^edit$/i })
     expect(editLink).toHaveAttribute(
       'href',
       '/dashboard/tier-lists/abc-123/edit'

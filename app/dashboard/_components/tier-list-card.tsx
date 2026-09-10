@@ -83,6 +83,7 @@ export function TierListCard({
     >
       <Link
         href={fillHref}
+        aria-label={`Open ${title}`}
         className="relative block aspect-video w-full overflow-hidden bg-muted"
       >
         {imageUrl ? (
@@ -136,14 +137,9 @@ export function TierListCard({
                 <MoreVertical size={12} aria-hidden="true" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[7rem]">
-                <DropdownMenuItem>
-                  <Link
-                    href={editHref}
-                    className="flex w-full items-center gap-2"
-                  >
-                    <Pencil size={13} />
-                    Edit
-                  </Link>
+                <DropdownMenuItem render={<Link href={editHref} />}>
+                  <Pencil size={13} />
+                  Edit
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={async () => {
@@ -165,7 +161,7 @@ export function TierListCard({
                   }}
                 >
                   <LinkIcon size={13} />
-                  Copy link
+                  Copy Link
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
@@ -194,6 +190,7 @@ export function TierListCard({
               <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
                 <Heart size={10} aria-hidden="true" />
                 {likeCount}
+                <span className="sr-only">likes</span>
               </span>
             )}
           </div>
@@ -219,7 +216,7 @@ export function TierListCard({
       >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Delete tier list</DialogTitle>
+            <DialogTitle>Delete Tier List</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete <strong>{title}</strong>? This
               action cannot be undone.

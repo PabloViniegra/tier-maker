@@ -12,7 +12,10 @@ export function TierRowsBackground({
   showLabels?: boolean
 }) {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden select-none">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 overflow-hidden select-none"
+    >
       {TIERS.map((tier, i) => (
         <div
           key={tier.label}

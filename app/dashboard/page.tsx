@@ -69,7 +69,7 @@ async function DashboardContent({ userId }: { userId: string }) {
                   'h-5 px-2 text-xs'
                 )}
               >
-                View all
+                View All
               </Link>
             )}
             <Link
@@ -79,7 +79,7 @@ async function DashboardContent({ userId }: { userId: string }) {
                 'ml-auto gap-1.5'
               )}
             >
-              <Plus size={14} strokeWidth={1.5} />
+              <Plus size={14} strokeWidth={1.5} aria-hidden="true" />
               New Tier List
             </Link>
           </div>
@@ -96,7 +96,10 @@ function DashboardContentSkeleton() {
       <StatsCardsSkeleton />
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <div className="font-heading text-base text-transparent select-none">
+          <div
+            aria-hidden="true"
+            className="font-heading text-base text-transparent select-none"
+          >
             Recent Tier Lists
           </div>
         </div>
