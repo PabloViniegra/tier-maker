@@ -235,8 +235,7 @@ describe('cardLiftVariants', () => {
   })
 
   it('tap state shrinks card slightly', () => {
-    expect(cardLiftVariants.tap.scale).toBeLessThan(1)
-    expect(cardLiftVariants.tap.scale).toBeGreaterThan(0.95)
+    expect(cardLiftVariants.tap.scale).toBe(0.96)
   })
 
   it('tap state resets y to 0', () => {

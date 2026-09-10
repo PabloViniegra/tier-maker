@@ -113,7 +113,7 @@ describe('ExploreGrid', () => {
         />
       )
 
-      expect(screen.getByRole('link', { name: /fill test list/i })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: 'Test List' })).toHaveAttribute(
         'href',
         '/dashboard/explore/1'
       )

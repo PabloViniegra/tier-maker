@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
-import { ExploreCard } from '../explore-card'
+import { compactRankLabel, ExploreCard } from '../explore-card'
 
 const baseData = {
   id: 'xyz-456',
@@ -89,27 +89,52 @@ describe('ExploreCard', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('links to the public slug by default', () => {
+  it('exposes the title as a heading', () => {
     render(<ExploreCard {...baseProps} />)
-    expect(screen.getByRole('link', { name: /fill best anime ever/i })).toHaveAttribute(
-      'href',
-      '/explore/best-anime-ever'
-    )
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Best Anime Ever' })
+    ).toBeInTheDocument()
   })
 
-  it('uses the provided href', () => {
-    render(<ExploreCard {...baseProps} href="/dashboard/explore/xyz-456" />)
-    expect(screen.getByRole('link', { name: /fill best anime ever/i })).toHaveAttribute(
-      'href',
-      '/dashboard/explore/xyz-456'
-    )
-  })
-
-  it('names the card link with the title', () => {
+  it('links to the public slug by default', () => {
     render(<ExploreCard {...baseProps} />)
     expect(
       screen.getByRole('link', { name: 'Best Anime Ever' })
     ).toHaveAttribute('href', '/explore/best-anime-ever')
+  })
+
+  it('uses the provided href', () => {
+    render(<ExploreCard {...baseProps} href="/dashboard/explore/xyz-456" />)
+    expect(
+      screen.getByRole('link', { name: 'Best Anime Ever' })
+    ).toHaveAttribute('href', '/dashboard/explore/xyz-456')
+  })
+
+  it('does not render a separate Fill control', () => {
+    render(<ExploreCard {...baseProps} />)
+    expect(
+      screen.queryByRole('link', { name: /fill best anime ever/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it('hides the mini-board from the accessibility tree', () => {
+    render(
+      <ExploreCard
+        {...baseProps}
+        data={{
+          ...baseData,
+          rows: [
+            {
+              label: 'S',
+              color: 'oklch(0.65 0.22 250)',
+              order: 0,
+              itemUrls: ['https://blob/item.png'],
+            },
+          ],
+        }}
+      />
+    )
+    expect(screen.getByText('S').closest('[aria-hidden="true"]')).not.toBeNull()
   })
 
   it('renders a tier-row preview when rows are provided', () => {
@@ -123,16 +148,60 @@ describe('ExploreCard', () => {
               label: 'God tier',
               color: 'oklch(0.65 0.22 250)',
               order: 0,
-              firstItemUrl: 'https://blob/item.png',
+              itemUrls: ['https://blob/item.png'],
             },
           ],
         }}
       />
     )
-    expect(screen.getByText('God tier')).toBeInTheDocument()
+    expect(screen.getByText('God')).toBeInTheDocument()
     const thumb = document.querySelector('img[src*="item.png"]')
     expect(thumb).not.toBeNull()
     expect(thumb).toHaveAttribute('src', 'https://blob/item.png')
+  })
+
+  it('renders multiple item thumbs in a row', () => {
+    render(
+      <ExploreCard
+        {...baseProps}
+        data={{
+          ...baseData,
+          rows: [
+            {
+              label: 'S',
+              color: 'oklch(0.65 0.22 250)',
+              order: 0,
+              itemUrls: [
+                'https://blob/one.png',
+                'https://blob/two.png',
+                'https://blob/three.png',
+              ],
+            },
+          ],
+        }}
+      />
+    )
+    expect(document.querySelectorAll('img[src*="blob/"]')).toHaveLength(3)
+  })
+
+  it('does not render a thumb in an empty row', () => {
+    render(
+      <ExploreCard
+        {...baseProps}
+        data={{
+          ...baseData,
+          rows: [
+            {
+              label: 'S',
+              color: 'oklch(0.65 0.22 250)',
+              order: 0,
+              itemUrls: [],
+            },
+          ],
+        }}
+      />
+    )
+    expect(document.querySelector('img')).toBeNull()
   })
 
   it('falls back to cover image when rows are empty', () => {
@@ -146,5 +215,25 @@ describe('ExploreCard', () => {
       'src',
       'https://blob/cover.png'
     )
+  })
+})
+
+describe('compactRankLabel', () => {
+  it('keeps short labels intact', () => {
+    expect(compactRankLabel('S')).toBe('S')
+    expect(compactRankLabel('GOD')).toBe('GOD')
+    expect(compactRankLabel('Tier')).toBe('Tier')
+  })
+
+  it('uses the first word when it already fits', () => {
+    expect(compactRankLabel('God tier')).toBe('God')
+    expect(compactRankLabel('Ni con tu dinero')).toBe('Ni')
+    expect(compactRankLabel('Otra fila')).toBe('Otra')
+  })
+
+  it('clips long single words without an ellipsis', () => {
+    expect(compactRankLabel('Yeppers')).toBe('Yep')
+    expect(compactRankLabel('Buenarda')).toBe('Bue')
+    expect(compactRankLabel('Mediocre')).toBe('Med')
   })
 })

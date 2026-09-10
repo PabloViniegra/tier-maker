@@ -308,7 +308,7 @@ export type PublicTierListRowPreview = {
   label: string
   color: string
   order: number
-  firstItemUrl: string | null
+  itemUrls: string[]
 }
 
 export type ExploreSort = 'newest' | 'oldest' | 'a-z' | 'popular'
@@ -511,7 +511,10 @@ export const getPublicTierLists = unstable_cache(
           label: tr.label,
           color: tr.color,
           order: tr.order,
-          firstItemUrl: tr.items[0]?.url ?? null,
+          itemUrls: tr.items
+            .map((item) => item.url)
+            .filter((url) => url.length > 0)
+            .slice(0, 4),
         })
         rowPreviewMap.set(tr.templateId, list)
       }

@@ -20,13 +20,12 @@ function ExploreCardSkeleton() {
         {/* Separator */}
         <Skeleton className="h-px w-full rounded-none" />
 
-        {/* Footer row: items count + fill button */}
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-0.5">
             <Skeleton className="h-3 w-12 rounded-sm" />
             <Skeleton className="h-2.5 w-16 rounded-sm" />
           </div>
-          <Skeleton className="h-6 w-12 rounded-md" />
+          <Skeleton className="size-8 rounded-md" />
         </div>
       </div>
     </div>

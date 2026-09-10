@@ -130,7 +130,7 @@ export function bentoIconFloat(delay = 0) {
 
 export const cardLiftVariants = {
   hover: { y: -2, transition: springTransition },
-  tap: { scale: 0.99, y: 0, transition: { duration: 0.1, ease: 'easeOut' } },
+  tap: { scale: 0.96, y: 0, transition: { duration: 0.1, ease: 'easeOut' } },
 } satisfies Variants
 
 // ── Hero Demo animation variants ──────────────────────────────────────────────
