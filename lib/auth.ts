@@ -34,7 +34,10 @@ export const auth = betterAuth({
   },
   plugins: [
     emailOTP({
-      sendVerificationOTP: async ({ email, otp }) => {
+      disableSignUp: true,
+      storeOTP: 'hashed',
+      sendVerificationOTP: async ({ email, otp, type }) => {
+        if (type !== 'email-verification') return
         waitUntil(
           sendVerificationOtpEmail({ to: email, otp }).catch(reportEmailError)
         )
@@ -75,6 +78,7 @@ export const auth = betterAuth({
       '/request-password-reset': { window: 3600, max: 5 },
       '/send-verification-email': { window: 3600, max: 5 },
       '/email-otp/send-verification-otp': { window: 3600, max: 5 },
+      '/sign-in/email-otp': { window: 3600, max: 5 },
     },
   },
   socialProviders: {

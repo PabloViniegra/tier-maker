@@ -4,6 +4,25 @@ import { waitUntil } from '@vercel/functions'
 import * as email from './email'
 import { asMock } from '@/test/as-mock'
 
+type EmailOtpOptions = {
+  disableSignUp?: boolean
+  storeOTP?: string
+  sendVerificationOTP?: (payload: {
+    email: string
+    otp: string
+    type: 'sign-in' | 'email-verification' | 'forget-password' | 'change-email'
+  }) => Promise<void>
+}
+
+// The plugin factory is the only seam Better Auth exposes for this callback.
+// eslint-disable-next-line anti-slop/no-module-mocking -- Capture plugin options without loading Better Auth's endpoint implementation.
+vi.mock('better-auth/plugins/email-otp', () => ({
+  emailOTP: vi.fn((options: EmailOtpOptions) => ({
+    id: 'email-otp',
+    options,
+  })),
+}))
+
 describe('auth — module shape', () => {
   let auth: (typeof import('./auth'))['auth']
 
@@ -107,6 +126,10 @@ describe('auth — module shape', () => {
       window: 3600,
       max: 5,
     })
+    expect(config.rateLimit?.customRules?.['/sign-in/email-otp']).toEqual({
+      window: 3600,
+      max: 5,
+    })
   })
 
   it('enables email OTP without overriding link verification', () => {
@@ -116,6 +139,47 @@ describe('auth — module shape', () => {
     )
     expect(config.emailVerification?.sendOnSignUp).toBe(true)
     expect(config.emailVerification?.sendOnSignIn).toBe(true)
+  })
+
+  it('disables email OTP sign-up and hashes stored codes', () => {
+    const config = asMock(betterAuth).mock.calls[0][0]
+    const options = config.plugins?.[0]?.options
+
+    expect(options?.disableSignUp).toBe(true)
+    expect(options?.storeOTP).toBe('hashed')
+  })
+
+  it('only schedules OTP email delivery for email verification', async () => {
+    const config = asMock(betterAuth).mock.calls[0][0]
+    const sendVerificationOTP = config.plugins?.[0]?.options?.sendVerificationOTP
+    expect(sendVerificationOTP).toEqual(expect.any(Function))
+    if (!sendVerificationOTP) return
+
+    await sendVerificationOTP({
+      email: 'user@example.com',
+      otp: '123456',
+      type: 'sign-in',
+    })
+    await sendVerificationOTP({
+      email: 'user@example.com',
+      otp: '123456',
+      type: 'forget-password',
+    })
+
+    expect(email.sendVerificationOtpEmail).not.toHaveBeenCalled()
+    expect(waitUntil).not.toHaveBeenCalled()
+
+    await sendVerificationOTP({
+      email: 'user@example.com',
+      otp: '123456',
+      type: 'email-verification',
+    })
+
+    expect(email.sendVerificationOtpEmail).toHaveBeenCalledWith({
+      to: 'user@example.com',
+      otp: '123456',
+    })
+    expect(waitUntil).toHaveBeenCalledOnce()
   })
 
   it('enables authenticated account deletion', () => {

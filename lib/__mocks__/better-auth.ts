@@ -6,6 +6,12 @@ export type AuthEmailPayload = {
   token: string
 }
 
+export type AuthOtpPayload = {
+  email: string
+  otp: string
+  type: 'sign-in' | 'email-verification' | 'forget-password' | 'change-email'
+}
+
 export type BetterAuthTestConfig = {
   emailAndPassword?: {
     enabled?: boolean
@@ -23,9 +29,17 @@ export type BetterAuthTestConfig = {
     customRules?: {
       '/request-password-reset'?: { window: number; max: number }
       '/email-otp/send-verification-otp'?: { window: number; max: number }
+      '/sign-in/email-otp'?: { window: number; max: number }
     }
   }
-  plugins?: Array<{ id?: string }>
+  plugins?: Array<{
+    id?: string
+    options?: {
+      disableSignUp?: boolean
+      storeOTP?: string
+      sendVerificationOTP?: (payload: AuthOtpPayload) => Promise<void>
+    }
+  }>
   user?: {
     deleteUser?: { enabled?: boolean }
   }
