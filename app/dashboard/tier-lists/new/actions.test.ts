@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
+import { DrizzleQueryError } from 'drizzle-orm/errors'
 import { getSession } from '@/lib/session'
 import { db } from '@/lib/db'
 import { uploadImagesAction, createTierListAction } from './actions'
@@ -178,6 +179,33 @@ describe('createTierListAction', () => {
         return cb(tx)
       }
     )
+
+    const result = await createTierListAction(validInput)
+    expect(result.id).toBe('tpl-2')
+    expect(asMock(db.transaction)).toHaveBeenCalledTimes(2)
+  })
+
+  it('retries when Drizzle wraps a PG 23505 unique_violation', async () => {
+    authedSession()
+    let call = 0
+    asMock(db.transaction).mockImplementation(async (cb) => {
+      call++
+      if (call === 1) {
+        throw new DrizzleQueryError(
+          'insert',
+          [],
+          Object.assign(new Error('duplicate key'), { code: '23505' })
+        )
+      }
+      const tx = {
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'tpl-2' }]),
+          }),
+        }),
+      }
+      return cb(tx)
+    })
 
     const result = await createTierListAction(validInput)
     expect(result.id).toBe('tpl-2')

@@ -22,8 +22,32 @@ import { slugify } from '@/lib/utils/slug'
 
 const MAX_SLUG_RETRIES = 50
 
-function isUniqueViolation(err: Error): boolean {
-  return 'code' in err && err.code === '23505'
+// Driver errors are intentionally inspected as unknown runtime values.
+// eslint-disable-next-line anti-slop/no-unknown-parameters
+function isUniqueViolation(err: unknown): boolean {
+  let current: unknown = err
+
+  for (let hop = 0; hop < 4; hop++) {
+    // A driver cause can be any JavaScript value.
+    // eslint-disable-next-line anti-slop/no-runtime-typeof
+    if (!current || typeof current !== 'object') {
+      return false
+    }
+
+    if (
+      'code' in current &&
+      // PostgreSQL's error code is supplied dynamically by the driver.
+      // eslint-disable-next-line anti-slop/no-runtime-typeof
+      typeof current.code === 'string' &&
+      current.code === '23505'
+    ) {
+      return true
+    }
+
+    current = 'cause' in current ? current.cause : undefined
+  }
+
+  return false
 }
 
 function uniquePath(userId: string, type: AllowedImageType): string {
