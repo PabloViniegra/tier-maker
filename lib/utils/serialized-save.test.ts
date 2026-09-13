@@ -25,6 +25,36 @@ describe('createSerializedSaver', () => {
     expect(saved).toEqual([1, 3])
   })
 
+  it('keeps coalesced callers pending until the latest save completes', async () => {
+    const saved: number[] = []
+    let release!: () => void
+    const first = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    let calls = 0
+
+    const enqueue = createSerializedSaver(async (value: number) => {
+      calls += 1
+      if (calls === 1) await first
+      saved.push(value)
+    })
+
+    enqueue(1)
+    const p2 = enqueue(2)
+    let p2Settled = false
+    const p2Completion = p2.then(() => {
+      p2Settled = true
+    })
+
+    await Promise.resolve()
+    expect(p2Settled).toBe(false)
+
+    release()
+    await p2Completion
+
+    expect(saved).toEqual([1, 2])
+  })
+
   it('runs a single save when calls do not overlap', async () => {
     const saved: number[] = []
     const enqueue = createSerializedSaver(async (value: number) => {

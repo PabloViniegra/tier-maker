@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { getSession } from '@/lib/session'
 import { revalidatePath } from 'next/cache'
+import { del } from '@vercel/blob'
 import { db } from '@/lib/db'
 import { updateTierListStructureAction } from './actions'
 import { asMock } from '@/test/as-mock'
@@ -29,9 +30,29 @@ function mockNotOwned() {
   })
 }
 
-function setupTransaction() {
+type StoredItem = { url: string; label: string }
+
+function setupTransaction(
+  template: {
+    coverImageUrl: string | null
+    sidebarItems: StoredItem[]
+  } = { coverImageUrl: null, sidebarItems: [] },
+  rows: { items: StoredItem[] }[] = []
+) {
   asMock(db.transaction).mockImplementation(async (cb) => {
     const tx = {
+      select: vi
+        .fn()
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([template]),
+          }),
+        })
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue(rows),
+          }),
+        }),
       update: vi.fn().mockReturnValue({
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue(undefined),
@@ -74,6 +95,15 @@ const validInput = {
   ],
 }
 
+const owned =
+  'https://store.public.blob.vercel-storage.com/tier-items/user-1/abc.png'
+const ownedSidebar =
+  'https://store.public.blob.vercel-storage.com/tier-items/user-1/sidebar.png'
+const ownedRow =
+  'https://store.public.blob.vercel-storage.com/tier-items/user-1/row.png'
+const otherUser =
+  'https://store.public.blob.vercel-storage.com/tier-items/user-2/abc.png'
+
 describe('updateTierListStructureAction', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -115,9 +145,7 @@ describe('updateTierListStructureAction', () => {
     mockOwned('tpl-1')
     setupTransaction()
     await updateTierListStructureAction('tpl-1', validInput)
-    expect(revalidatePath).toHaveBeenCalledWith(
-      '/dashboard/tier-lists/tpl-1'
-    )
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists/tpl-1')
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
   })
 
@@ -150,5 +178,61 @@ describe('updateTierListStructureAction', () => {
     await expect(
       updateTierListStructureAction('tpl-1', validInput)
     ).rejects.toThrow(/db failure/i)
+  })
+
+  it('purges removed owned cover, sidebar, and row URLs after saving', async () => {
+    authedSession()
+    mockOwned()
+    setupTransaction(
+      {
+        coverImageUrl: owned,
+        sidebarItems: [{ url: ownedSidebar, label: 'Sidebar item' }],
+      },
+      [{ items: [{ url: ownedRow, label: 'Row item' }] }]
+    )
+
+    await updateTierListStructureAction('tpl-1', validInput)
+
+    expect(del).toHaveBeenCalledWith([owned, ownedSidebar, ownedRow])
+  })
+
+  it('does not purge a URL still present in the new catalogue', async () => {
+    authedSession()
+    mockOwned()
+    setupTransaction({
+      coverImageUrl: null,
+      sidebarItems: [{ url: owned, label: 'Saved item' }],
+    })
+
+    await updateTierListStructureAction('tpl-1', {
+      ...validInput,
+      bankItems: [{ url: owned, label: 'Saved item' }],
+    })
+
+    expect(del).not.toHaveBeenCalled()
+  })
+
+  it('does not pass URLs outside the current user ownership boundary to purge', async () => {
+    authedSession()
+    mockOwned()
+    setupTransaction({ coverImageUrl: otherUser, sidebarItems: [] })
+
+    await updateTierListStructureAction('tpl-1', validInput)
+
+    expect(del).not.toHaveBeenCalled()
+  })
+
+  it('uses one transaction and keeps existing revalidation paths', async () => {
+    authedSession()
+    mockOwned()
+    setupTransaction()
+
+    await updateTierListStructureAction('tpl-1', validInput)
+
+    expect(db.transaction).toHaveBeenCalledTimes(1)
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists/tpl-1')
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
+    expect(revalidatePath).toHaveBeenCalledWith('/explore', 'layout')
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/explore', 'layout')
   })
 })

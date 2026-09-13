@@ -52,6 +52,18 @@ export function TierListCreator({
   editId,
 }: TierListCreatorProps) {
   const isEditMode = editId !== undefined
+  const committedUrls = new Set<string>()
+  if (isEditMode && initialData) {
+    if (initialData.coverImageUrl) committedUrls.add(initialData.coverImageUrl)
+    for (const item of initialData.sidebarItems) {
+      if (item.url) committedUrls.add(item.url)
+    }
+    for (const row of initialData.rows) {
+      for (const item of row.items) {
+        if (item.url) committedUrls.add(item.url)
+      }
+    }
+  }
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const { onDragEnd } = useTierDnd()
@@ -236,7 +248,7 @@ export function TierListCreator({
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[320px_minmax(0,1fr)_260px] lg:items-start">
-          <ItemBank onPickFiles={openModal} />
+          <ItemBank onPickFiles={openModal} committedUrls={committedUrls} />
           <TierBoard />
           <MetadataPanel
             categoryPresets={categoryPresets}
