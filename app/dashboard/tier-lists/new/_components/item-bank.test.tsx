@@ -56,7 +56,17 @@ describe('ItemBank', () => {
       name: /move princess mononoke to a tier/i,
     })
     trigger.focus()
-    await user.keyboard('{Enter}{ArrowDown}{Enter}')
+    await user.keyboard('{Enter}')
+
+    const firstRow = await screen.findByRole('menuitem', {
+      name: /S tier, row 1/i,
+    })
+    const secondRow = screen.getByRole('menuitem', { name: /A tier, row 2/i })
+    await waitFor(() => expect(firstRow).toHaveAttribute('data-highlighted'))
+
+    await user.keyboard('{ArrowDown}')
+    await waitFor(() => expect(secondRow).toHaveAttribute('data-highlighted'))
+    await user.keyboard('{Enter}')
 
     expect(useTierEditor.getState().rows[1].items).toEqual([
       expect.objectContaining({ id: 'item-1' }),
