@@ -33,8 +33,10 @@ function pasteShortcutLabel() {
 
 export function ItemBank({
   onPickFiles,
+  committedUrls = new Set<string>(),
 }: {
   onPickFiles: (files: File[]) => void
+  committedUrls?: ReadonlySet<string>
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const uploadButtonRef = useRef<HTMLButtonElement>(null)
@@ -235,7 +237,11 @@ export function ItemBank({
                                 ) {
                                   return
                                 }
-                                if (item.status === 'uploaded' && item.url) {
+                                if (
+                                  item.status === 'uploaded' &&
+                                  item.url &&
+                                  !committedUrls.has(item.url)
+                                ) {
                                   try {
                                     await deleteImagesAction([item.url])
                                   } catch {

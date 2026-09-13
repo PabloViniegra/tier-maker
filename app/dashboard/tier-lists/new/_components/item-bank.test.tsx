@@ -3,6 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useTierEditor } from '@/lib/stores/tier-editor'
 import { ItemBank } from './item-bank'
+import { deleteImagesAction } from '../../_actions/delete-images'
+
+// eslint-disable-next-line anti-slop/no-module-mocking
+vi.mock('../../_actions/delete-images', () => ({
+  deleteImagesAction: vi.fn().mockResolvedValue({ ok: true }),
+}))
 
 describe('ItemBank', () => {
   afterEach(() => {
@@ -10,6 +16,7 @@ describe('ItemBank', () => {
   })
 
   beforeEach(() => {
+    vi.clearAllMocks()
     useTierEditor.getState().reset()
     useTierEditor.setState({
       bankItems: [
@@ -92,6 +99,59 @@ describe('ItemBank', () => {
 
     expect(window.confirm).toHaveBeenCalled()
     expect(useTierEditor.getState().bankItems).toHaveLength(1)
+  })
+
+  it('purges a confirmed uploaded item when no committed URLs are provided', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const user = userEvent.setup()
+    render(<ItemBank onPickFiles={() => undefined} />)
+
+    await user.click(
+      screen.getByRole('button', { name: /remove princess mononoke/i })
+    )
+
+    expect(deleteImagesAction).toHaveBeenCalledWith([
+      'https://blob/mononoke.png',
+    ])
+    expect(useTierEditor.getState().bankItems).toHaveLength(0)
+  })
+
+  it('removes a confirmed item without purging a committed URL', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const user = userEvent.setup()
+    render(
+      <ItemBank
+        onPickFiles={() => undefined}
+        committedUrls={new Set(['https://blob/mononoke.png'])}
+      />
+    )
+
+    await user.click(
+      screen.getByRole('button', { name: /remove princess mononoke/i })
+    )
+
+    expect(deleteImagesAction).not.toHaveBeenCalled()
+    expect(useTierEditor.getState().bankItems).toHaveLength(0)
+  })
+
+  it('purges a confirmed uploaded URL not committed in edit mode', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const user = userEvent.setup()
+    render(
+      <ItemBank
+        onPickFiles={() => undefined}
+        committedUrls={new Set(['https://blob/other.png'])}
+      />
+    )
+
+    await user.click(
+      screen.getByRole('button', { name: /remove princess mononoke/i })
+    )
+
+    expect(deleteImagesAction).toHaveBeenCalledWith([
+      'https://blob/mononoke.png',
+    ])
+    expect(useTierEditor.getState().bankItems).toHaveLength(0)
   })
 })
 
