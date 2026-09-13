@@ -56,6 +56,7 @@ export function TierListEditor({ id, data }: Props) {
       if (debounceTimer) clearTimeout(debounceTimer)
       setSaveState('saving')
       debounceTimer = setTimeout(async () => {
+        debounceTimer = null
         const state = useTierEditor.getState()
         if (hasPendingUploads(state)) return
         try {
@@ -80,7 +81,13 @@ export function TierListEditor({ id, data }: Props) {
 
     return () => {
       cancelAnimationFrame(raf)
-      if (debounceTimer) clearTimeout(debounceTimer)
+      if (debounceTimer) {
+        clearTimeout(debounceTimer)
+        const state = useTierEditor.getState()
+        if (!hasPendingUploads(state)) {
+          void saver(buildUpdatePayload(state)).catch(() => undefined)
+        }
+      }
       if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
       unsubscribe()
       useTierEditor.getState().reset()
