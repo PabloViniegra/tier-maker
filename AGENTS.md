@@ -175,22 +175,13 @@ Skills in this repo are markdown-first: each lives at `skills/<kebab-case-name>/
 For the full format, naming conventions, frontmatter rules, supporting-file thresholds, and writing principles, see [docs/skill-anatomy.md](docs/skill-anatomy.md), the single source of truth for skill structure. Do not restate that guidance here, link to it.
 
 <!-- graphify:start -->
-## Graphify Knowledge Graph
+## Graphify
 
-This project keeps a queryable knowledge graph of the source in `graphify-out/`
-(git-ignored, rebuilt after each commit). Use it to navigate the code instead of
-broad file searches.
-
-Before grepping or reading many files, query the graph:
-
-    python -m graphify query "where is the project store defined?"
-    python -m graphify path "ModuleA" "ModuleB"
-    python -m graphify explain "concept-name"
-
-Read `graphify-out/GRAPH_REPORT.md` for a high-level map.
-Missing graph? Build once: pip install graphifyy && python -m graphify .
-
-> Windows: always use `python -m graphify`, never `graphify` (may not be on PATH).
+- Global agent instructions take precedence over this generated guidance.
+- Use Graphify for cross-file relationship or impact questions when an existing graph is available. Direct reads are appropriate for known files and small scoped edits.
+- From the repository root, use `python -m graphify query "<question>" --budget 800`, `path`, `explain`, or `affected` as appropriate.
+- If the graph is missing, stale, or unhelpful, use direct search. Do not repeat an unavailable-graph check within the same task.
+- Build, update, or install Graphify only when requested or when graph maintenance is part of the task.
 <!-- graphify:end -->
 
 <!-- BEGIN:nextjs-agent-rules -->
