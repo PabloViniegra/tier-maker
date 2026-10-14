@@ -46,6 +46,7 @@ opencode.json
 .playwright-mcp/*
 specs/
 tasks/
+.impeccable/
 
 # vercel
 .vercel

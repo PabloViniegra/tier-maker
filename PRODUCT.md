@@ -23,15 +23,16 @@ Ad-free, minimalist tier-list creation with buttery drag & drop (Zustand local s
 - Individual creation sessions: upload images (click, drag-drop, or clipboard paste), arrange into rows, label, export.
 - Community surface: browse/search/filter/sort public tier lists, like and bookmark.
 - Account surface: dashboard with stats, recent lists, and list management.
-- Unsaved work persists locally in IndexedDB for recovery.
+- Filling in a public list on Explore needs no account; that fill persists locally in IndexedDB, only after cookie consent. The owner's editor does not keep local drafts.
 
 ## Capabilities and Constraints
 
 - Tier list editor: customizable rows (S/A/B/C/D/F default), editable labels, per-row color pickers.
 - Image upload: JPG, PNG, WEBP, GIF; max 5 MB per file; max 30 items per list; optional text labels per image.
 - 15 built-in category presets plus user-saved custom presets.
-- Export: client-side HTML→PNG rendering, high resolution, editing chrome omitted.
-- Auth: email/password via Better Auth (Google OAuth was in the original PRD; only credentials flow is confirmed in the current implementation).
+- Language: the UI is in English; the built-in category presets are in Spanish on purpose.
+- Export: client-side HTML→PNG rendering at 2× pixel ratio, editing chrome omitted.
+- Auth: email/password and Google OAuth via Better Auth.
 - Storage: Vercel Blob for images; Neon PostgreSQL via Drizzle ORM.
 - Notifications: toast alerts (Sonner).
 - Drag & drop must stay smooth — target stable 60 FPS transitions.
@@ -52,3 +53,7 @@ Ad-free, minimalist tier-list creation with buttery drag & drop (Zustand local s
 2. Clean beats cluttered: the anti-ad, anti-cruft stance is the product's reason to exist — never add monetization UI or promotional surfaces.
 3. Local-first interactivity: editing feels instant because state lives client-side; the server is for persistence and sharing, not the editing loop.
 4. Share-worthy output: the exported image is the product's public face — it must look good without any editing chrome.
+
+## Accessibility & Inclusion
+
+WCAG 2.2 AA is the required standard for all surfaces.
