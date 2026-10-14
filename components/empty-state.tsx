@@ -39,10 +39,8 @@ export function EmptyState({
         className
       )}
     >
-      {/* Decorative tier-rows motif */}
       <TierRowsBackground />
 
-      {/* Content — raised above the background motif */}
       <div className="relative z-10 flex flex-col items-center gap-4">
         <Icon
           size={32}

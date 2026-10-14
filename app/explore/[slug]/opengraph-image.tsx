@@ -64,7 +64,6 @@ export default async function OgImage({
         padding: 64,
       }}
     >
-      {/* Category badge */}
       <div
         style={{
           display: 'flex',
@@ -76,7 +75,6 @@ export default async function OgImage({
         {data.category}
       </div>
 
-      {/* Title */}
       <div
         style={{
           display: 'flex',
@@ -90,7 +88,6 @@ export default async function OgImage({
         {data.title}
       </div>
 
-      {/* Mini tier preview */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {firstThreeRows.map((row) => (
           <div
@@ -101,7 +98,6 @@ export default async function OgImage({
               gap: 12,
             }}
           >
-            {/* Tier label chip */}
             <div
               style={{
                 display: 'flex',
@@ -119,7 +115,6 @@ export default async function OgImage({
             >
               {row.label}
             </div>
-            {/* Tier items preview */}
             <div style={{ display: 'flex', gap: 8, flex: 1 }}>
               {row.items.slice(0, 5).map((item) => (
                 <div
@@ -164,7 +159,6 @@ export default async function OgImage({
         ))}
       </div>
 
-      {/* More tiers indicator */}
       {tierCount > 3 && (
         <div
           style={{
@@ -178,7 +172,6 @@ export default async function OgImage({
         </div>
       )}
 
-      {/* Footer */}
       <div
         style={{
           display: 'flex',

@@ -90,7 +90,6 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
             custom={i * STAGGER_DELAY}
             className="rounded-lg border border-border bg-surface p-4"
           >
-            {/* Header row: label + icon */}
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">{label}</p>
               <Icon
@@ -101,7 +100,6 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
               />
             </div>
 
-            {/* Value + sparkline row */}
             <div className="mt-1 flex items-end justify-between gap-2">
               <p className="font-mono text-2xl font-semibold text-foreground tabular-nums">
                 {key === 'lastActivity' ? (
@@ -115,7 +113,6 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
               )}
             </div>
 
-            {/* Footer row: sublabel + delta */}
             <div className="mt-0.5 flex items-center gap-2">
               {sublabel && (
                 <p className="text-xs text-muted-foreground">{sublabel}</p>

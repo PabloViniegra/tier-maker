@@ -26,14 +26,14 @@ export const metadata: Metadata = {
     title: 'Explore Tier Lists — Tier Maker',
     description:
       'Browse and fill community-created tier lists. No account required.',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Tier Maker' }],
+    images: ['/opengraph-image'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Explore Tier Lists — Tier Maker',
     description:
       'Browse and fill community-created tier lists. No account required.',
-    images: ['/og.png'],
+    images: ['/opengraph-image'],
   },
 }
 
@@ -72,15 +72,8 @@ export default async function ExplorePage({ searchParams }: Props) {
     <div className="flex min-h-screen flex-col bg-background">
       <ExploreHeader isLoggedIn={!!session} />
 
-      {/* Hero band — title, subtitle, and filter bar in a single surface strip */}
-      <div className="relative overflow-hidden border-b border-border bg-surface">
-        {/* Subtle radial blue accent — same family as auth layout, lower opacity */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_60%_0%,oklch(0.62_0.22_250/0.08)_0%,transparent_60%)]"
-        />
-
-        <div className="relative mx-auto w-full max-w-6xl px-4 py-6">
+      <div className="border-b border-border bg-surface">
+        <div className="mx-auto w-full max-w-6xl px-4 py-6">
           <FadeUp delay={0} onMount>
             <h1 className="font-heading text-2xl font-semibold text-balance text-foreground">
               Explore Tier Lists
@@ -118,7 +111,6 @@ export default async function ExplorePage({ searchParams }: Props) {
         </div>
       </div>
 
-      {/* Grid section */}
       <main
         id="main-content"
         tabIndex={-1}

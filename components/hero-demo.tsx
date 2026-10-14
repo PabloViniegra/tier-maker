@@ -18,7 +18,6 @@ const TIERS = [
   { label: 'C', color: 'oklch(0.65 0.20 45)' },
 ]
 
-// Staging-bank items that drift into tiers one by one
 const SEQUENCE: { tierIndex: number; label: string }[] = [
   { tierIndex: 0, label: 'Interstellar' },
   { tierIndex: 0, label: 'Parasite' },
@@ -28,7 +27,6 @@ const SEQUENCE: { tierIndex: number; label: string }[] = [
   { tierIndex: 3, label: 'The Menu' },
 ]
 
-// All bank labels (shown dimmed before they drift)
 const BANK_LABELS = SEQUENCE.map((s) => s.label)
 
 interface PlacedChip {
@@ -69,7 +67,6 @@ export function HeroDemo() {
       if (cancelledRef.current) return
 
       if (currentStep >= SEQUENCE.length) {
-        // All chips placed — pause, then reset
         frameRef.current = setTimeout(() => {
           if (cancelledRef.current) return
           setPlaced([])
@@ -123,7 +120,6 @@ export function HeroDemo() {
       aria-hidden="true"
       role="presentation"
     >
-      {/* Tier rows */}
       {TIERS.map((tier, tierIndex) => {
         const chips = chipsPlaced.filter((c) => c.tierIndex === tierIndex)
         return (
@@ -135,7 +131,6 @@ export function HeroDemo() {
             animate="visible"
             custom={tierIndex * 0.06}
           >
-            {/* Tier label badge */}
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded font-heading text-xs font-bold text-white"
               style={{ background: tier.color }}
@@ -143,7 +138,6 @@ export function HeroDemo() {
               {tier.label}
             </div>
 
-            {/* Chips area */}
             <div className="flex min-h-8 flex-1 flex-wrap items-center gap-1 rounded border border-border bg-background px-1.5">
               <AnimatePresence initial={false} mode="popLayout">
                 {chips.map((chip) => (
@@ -164,7 +158,6 @@ export function HeroDemo() {
         )
       })}
 
-      {/* Staging bank */}
       <div className="mt-1 flex flex-wrap gap-1">
         {BANK_LABELS.map((label, i) => {
           const alreadyPlaced = chipsPlaced.some((c) => c.label === label)

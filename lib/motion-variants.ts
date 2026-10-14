@@ -105,35 +105,10 @@ export const sidebarLabelVariants: Variants = {
   collapsed: { opacity: 0, transition: { duration: 0.1, ease: EASE_SMOOTH } },
 }
 
-export const bentoIconFloatVariants = {
-  y: [0, -3, 0],
-  transition: { repeat: Infinity, duration: 4, ease: 'easeInOut' as const },
-}
-
-export const bentoSpotlightVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 0 },
-  hovered: { opacity: 1, transition: { duration: 0.5, ease: EASE_SMOOTH } },
-} satisfies Variants
-
-export function bentoIconFloat(delay = 0) {
-  return {
-    y: [0, -3, 0],
-    transition: {
-      repeat: Infinity,
-      duration: 4,
-      ease: 'easeInOut' as const,
-      delay,
-    },
-  }
-}
-
 export const cardLiftVariants = {
   hover: { y: -2, transition: springTransition },
   tap: { scale: 0.96, y: 0, transition: { duration: 0.1, ease: 'easeOut' } },
 } satisfies Variants
-
-// ── Hero Demo animation variants ──────────────────────────────────────────────
 
 /** Duration for a chip drifting from the bank into a tier row */
 export const HERO_DEMO_DRIFT_DURATION = 0.55

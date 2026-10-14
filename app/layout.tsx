@@ -31,21 +31,19 @@ export const metadata: Metadata = {
   metadataBase,
   title: { default: 'Tier Maker', template: '%s | Tier Maker' },
   description:
-    'Build and share tier lists for anything. Movies, games, albums — drag, rank, and share with one link.',
+    'Make tier lists from your own images, export them as PNG, and fill in lists other people have published.',
   openGraph: {
     type: 'website',
     siteName: 'Tier Maker',
     title: 'Tier Maker',
     description:
-      'Build and share tier lists for anything. Movies, games, albums — drag, rank, and share with one link.',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Tier Maker' }],
+      'Make tier lists from your own images, export them as PNG, and fill in lists other people have published.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Tier Maker',
     description:
-      'Build and share tier lists for anything. Movies, games, albums — drag, rank, and share with one link.',
-    images: ['/og.png'],
+      'Make tier lists from your own images, export them as PNG, and fill in lists other people have published.',
   },
 }
 

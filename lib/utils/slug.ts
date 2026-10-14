@@ -14,16 +14,12 @@ export function slugify(title: string, maxLength = DEFAULT_MAX_LENGTH): string {
   let slug = title
     .toLowerCase()
     .trim()
-    // Replace spaces and underscores with hyphens
     .replace(/[\s_]+/g, '-')
     // Remove accents by stripping non-ASCII letters — keep only a-z after normalization
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    // Remove any character that isn't a-z, 0-9, or hyphen
     .replace(/[^a-z0-9-]+/g, '-')
-    // Collapse consecutive hyphens
     .replace(/-{2,}/g, '-')
-    // Strip leading/trailing hyphens
     .replace(/^-+/, '')
     .replace(/-+$/, '')
 
@@ -55,7 +51,6 @@ export function generateSlug(
     return base
   }
 
-  // Try -2, -3, ... until we find an available slug
   let counter = 2
   let candidate: string
   do {

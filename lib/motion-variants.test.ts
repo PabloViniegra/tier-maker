@@ -7,10 +7,7 @@ import {
   staggerContainerVariants,
   pageTransitionVariants,
   dragActiveVariants,
-  bentoIconFloatVariants,
-  bentoSpotlightVariants,
   EASE_SMOOTH,
-  bentoIconFloat,
   cardLiftVariants,
   hoverRevealVariants,
   profileDialogStepVariants,
@@ -169,38 +166,6 @@ describe('hoverRevealVariants', () => {
   })
 })
 
-describe('bentoIconFloatVariants', () => {
-  it('y keyframes oscillate from 0 to -3 and back', () => {
-    expect(bentoIconFloatVariants.y).toEqual([0, -3, 0])
-  })
-
-  it('animation repeats infinitely', () => {
-    expect(bentoIconFloatVariants.transition.repeat).toBe(Infinity)
-  })
-
-  it('duration is within design spec (≥ 3s, ≤ 6s)', () => {
-    expect(bentoIconFloatVariants.transition.duration).toBeGreaterThanOrEqual(3)
-    expect(bentoIconFloatVariants.transition.duration).toBeLessThanOrEqual(6)
-  })
-})
-
-describe('bentoSpotlightVariants', () => {
-  it('non-hovered states (hidden, visible) are fully transparent', () => {
-    expect(bentoSpotlightVariants.hidden.opacity).toBe(0)
-    expect(bentoSpotlightVariants.visible.opacity).toBe(0)
-  })
-
-  it('hovered state is fully opaque', () => {
-    expect(bentoSpotlightVariants.hovered.opacity).toBe(1)
-  })
-
-  it('hovered transition duration is within design spec (≤ 0.6s)', () => {
-    const { duration } = bentoSpotlightVariants.hovered.transition
-    expect(duration).toBeLessThanOrEqual(0.6)
-    expect(duration).toBeGreaterThan(0)
-  })
-})
-
 describe('EASE_SMOOTH', () => {
   it('is a 4-element bezier array', () => {
     expect(EASE_SMOOTH).toHaveLength(4)
@@ -208,24 +173,6 @@ describe('EASE_SMOOTH', () => {
 
   it('matches the project canonical smooth decelerate curve', () => {
     expect(EASE_SMOOTH).toEqual([0.16, 1, 0.3, 1])
-  })
-})
-
-describe('bentoIconFloat', () => {
-  it('returns y keyframes oscillating 0 → -3 → 0', () => {
-    expect(bentoIconFloat(0).y).toEqual([0, -3, 0])
-  })
-
-  it('threads delay into transition', () => {
-    expect(bentoIconFloat(0.5).transition.delay).toBe(0.5)
-  })
-
-  it('defaults delay to 0', () => {
-    expect(bentoIconFloat().transition.delay).toBe(0)
-  })
-
-  it('repeats infinitely', () => {
-    expect(bentoIconFloat(0).transition.repeat).toBe(Infinity)
   })
 })
 

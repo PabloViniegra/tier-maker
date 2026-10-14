@@ -19,14 +19,13 @@ export function SiteFooter() {
             </span>
           </div>
           <p className="mt-3 max-w-xs text-xs leading-relaxed text-muted-foreground">
-            Build, rank, and share tier lists for anything. Movies, games,
-            albums&mdash;drag, drop, and share with one link.
+            A tier list maker with no ads.
           </p>
         </div>
 
         <nav aria-label="Footer">
-          <p className="font-heading text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-            Navigate
+          <p className="font-heading text-sm font-semibold text-foreground">
+            Pages
           </p>
           <ul className="mt-3 space-y-2 text-sm">
             <li>
@@ -57,7 +56,7 @@ export function SiteFooter() {
         </nav>
 
         <div>
-          <p className="font-heading text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+          <p className="font-heading text-sm font-semibold text-foreground">
             Legal
           </p>
           <ul className="mt-3 space-y-2 text-sm">
@@ -83,8 +82,7 @@ export function SiteFooter() {
 
       <div className="border-t border-border/60">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-2 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:px-6">
-          <p>&copy; {year} Tier Maker. All rights reserved.</p>
-          <p>Made for ranking things you love.</p>
+          <p>&copy; {year} Tier Maker</p>
         </div>
       </div>
     </footer>

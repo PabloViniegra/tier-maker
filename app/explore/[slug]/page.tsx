@@ -37,13 +37,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       title: `${data.title} — Tier Maker`,
       description,
-      images: [{ url: '/og.png', width: 1200, height: 630, alt: data.title }],
+      images: ['/opengraph-image'],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${data.title} — Tier Maker`,
       description,
-      images: ['/og.png'],
+      images: ['/opengraph-image'],
     },
   }
 }
