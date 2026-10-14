@@ -45,7 +45,12 @@ export default async function ProfilePage() {
       )}
       <FadeUp delay={0.18} onMount>
         <div className="max-w-xl border-t border-border pt-6">
-          <ProfileDeleteDialog name={user.name} />
+          <ProfileDeleteDialog
+            name={user.name}
+            created={stats.created}
+            published={stats.published}
+            likesReceived={stats.likesReceived}
+          />
         </div>
       </FadeUp>
     </div>
