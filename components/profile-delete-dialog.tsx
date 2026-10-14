@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -22,7 +23,23 @@ import { Label } from '@/components/ui/label'
 import { authClient } from '@/lib/auth-client'
 import { profileDialogStepVariants } from '@/lib/motion-variants'
 
-export function ProfileDeleteDialog({ name }: { name: string }) {
+interface ProfileDeleteDialogProps {
+  name: string
+  created: number
+  published: number
+  likesReceived: number
+}
+
+function plural(count: number, one: string, many: string) {
+  return `${count} ${count === 1 ? one : many}`
+}
+
+export function ProfileDeleteDialog({
+  name,
+  created,
+  published,
+  likesReceived,
+}: ProfileDeleteDialogProps) {
   const router = useRouter()
   const [step, setStep] = useState<'review' | 'confirm'>('review')
   const [typed, setTyped] = useState('')
@@ -75,7 +92,8 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
         Delete account
       </h2>
       <p className="text-sm text-pretty text-muted-foreground">
-        This permanently deletes your account and lists. This cannot be undone.
+        Permanently deletes your account, lists, and saved presets. This can&apos;t
+        be undone.
       </p>
       <Dialog onOpenChange={onOpenChange}>
         <DialogTrigger
@@ -108,16 +126,53 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                     </p>
                   </div>
                   <DialogDescription id="delete-account-hint">
-                    {isConfirm
-                      ? `Type ${confirmationText} to delete your account.`
-                      : 'This cannot be undone. Your account and all of your lists will be removed.'}
+                    {isConfirm ? (
+                      <>
+                        Type{' '}
+                        <span className="font-mono text-foreground">
+                          {confirmationText}
+                        </span>{' '}
+                        to permanently delete your account.
+                      </>
+                    ) : (
+                      "This can't be undone. Everything below is permanently deleted."
+                    )}
                   </DialogDescription>
                 </DialogHeader>
+                {!isConfirm && (
+                  <>
+                    <ul className="flex list-disc flex-col gap-1.5 pl-4 text-sm text-foreground marker:text-muted-foreground">
+                      {created > 0 && (
+                        <li>
+                          {plural(created, 'list', 'lists')}
+                          {published > 0 &&
+                            `, including ${plural(published, 'public list', 'public lists')} that will disappear from Explore`}
+                        </li>
+                      )}
+                      {likesReceived > 0 && (
+                        <li>
+                          {plural(likesReceived, 'like', 'likes')} your lists
+                          received
+                        </li>
+                      )}
+                      <li>Your saved presets and the likes you&apos;ve given</li>
+                    </ul>
+                    {created > 0 && (
+                      <p className="text-sm text-pretty text-muted-foreground">
+                        Want to keep a list as an image? Open it and use Export
+                        first.{' '}
+                        <Link
+                          href="/dashboard/tier-lists"
+                          className="text-foreground underline underline-offset-4 hover:text-primary"
+                        >
+                          Go to your lists
+                        </Link>
+                      </p>
+                    )}
+                  </>
+                )}
                 {isConfirm && (
                   <>
-                    <p className="font-mono text-sm text-foreground">
-                      {confirmationText}
-                    </p>
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="delete-account-name">
                         {name.trim() ? 'Display name' : 'Confirmation'}
@@ -131,25 +186,15 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                         }}
                         autoComplete="off"
                         spellCheck={false}
-                        aria-describedby={[
-                          'delete-account-hint',
-                          !matches ? 'delete-account-mismatch' : null,
-                          deleteError ? 'delete-account-error' : null,
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
+                        aria-describedby={
+                          deleteError
+                            ? 'delete-account-hint delete-account-error'
+                            : 'delete-account-hint'
+                        }
                         className={
                           matches ? 'h-11 border-primary sm:h-8' : 'h-11 sm:h-8'
                         }
                       />
-                      {!matches && (
-                        <p
-                          id="delete-account-mismatch"
-                          className="text-xs text-muted-foreground"
-                        >
-                          Type {confirmationText} exactly.
-                        </p>
-                      )}
                     </div>
                     {deleteError && (
                       <p
@@ -196,7 +241,7 @@ export function ProfileDeleteDialog({ name }: { name: string }) {
                       aria-hidden="true"
                     />
                   )}
-                  {deleting ? 'Deleting account…' : 'Delete account'}
+                  {deleting ? 'Deleting account…' : 'Delete my account'}
                 </Button>
               ) : (
                 <Button type="submit" variant="outline" className="h-11 sm:h-8">
