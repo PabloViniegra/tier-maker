@@ -110,46 +110,87 @@ export const cardLiftVariants = {
   tap: { scale: 0.96, y: 0, transition: { duration: 0.1, ease: 'easeOut' } },
 } satisfies Variants
 
-/** Duration for a chip drifting from the bank into a tier row */
-export const HERO_DEMO_DRIFT_DURATION = 0.55
-
 /** Pause between sequential chip placements (seconds) */
 export const HERO_DEMO_STEP_INTERVAL = 0.9
 
-/** Full loop pause before resetting (seconds) */
-export const HERO_DEMO_RESET_PAUSE = 2.2
+/** How long an autoplayed chip hangs lifted before it travels (seconds) */
+export const HERO_DEMO_LIFT_PAUSE = 0.28
 
-/**
- * Chip that is seated inside a tier row — appears with a short fade-up.
- * Used with AnimatePresence so chips exit on reset.
- */
+/** Spring that carries a chip between rows; slight overshoot reads as a snap */
+export const heroDemoLayoutTransition = {
+  type: 'spring' as const,
+  stiffness: 520,
+  damping: 32,
+  mass: 0.7,
+}
+
 export const heroDemoChipVariants: Variants = {
-  hidden: { opacity: 0, y: 6, scale: 0.92 },
-  visible: {
-    opacity: 1,
-    y: 0,
+  rest: {
     scale: 1,
-    transition: { duration: HERO_DEMO_DRIFT_DURATION, ease: EASE_SMOOTH },
+    rotate: 0,
+    boxShadow: '0 0px 0px oklch(0 0 0 / 0%)',
+    transition: { duration: 0.2, ease: EASE_SMOOTH },
   },
-  exit: {
-    opacity: 0,
-    y: -4,
-    scale: 0.94,
-    transition: { duration: 0.22, ease: EASE_SMOOTH },
+  lifted: {
+    scale: 1.08,
+    rotate: -2,
+    boxShadow: '0 8px 24px oklch(0 0 0 / 40%)',
+    transition: { duration: 0.16, ease: EASE_SMOOTH },
   },
 }
 
-/**
- * Chip that is sitting in the staging bank, waiting to be placed.
- * Fades out when it is about to drift.
- */
-export const heroDemoBankChipVariants: Variants = {
-  idle: { opacity: 1, scale: 1 },
-  placing: {
+/** Tier-colored wash on the row a dragged chip will land in */
+export const heroDemoRowTargetVariants: Variants = {
+  idle: { opacity: 0, transition: { duration: 0.2, ease: EASE_SMOOTH } },
+  active: { opacity: 0.18, transition: { duration: 0.12, ease: EASE_SMOOTH } },
+}
+
+export const heroDemoTierLabelVariants: Variants = {
+  idle: { scale: 1, transition: springTransition },
+  active: { scale: 1.12, transition: springTransition },
+}
+
+export const heroDemoCollapseVariants: Variants = {
+  hidden: {
     opacity: 0,
-    scale: 0.88,
-    transition: { duration: 0.18, ease: EASE_SMOOTH },
+    height: 0,
+    transition: { duration: 0.28, ease: EASE_SMOOTH },
   },
+  visible: {
+    opacity: 1,
+    height: 'auto',
+    transition: { duration: 0.28, ease: EASE_SMOOTH },
+  },
+}
+
+/** Board settling into its exported-PNG frame */
+export const heroDemoBoardVariants: Variants = {
+  edit: {
+    scale: 1,
+    boxShadow: '0 0px 0px oklch(0 0 0 / 0%)',
+    transition: { duration: 0.3, ease: EASE_SMOOTH },
+  },
+  export: {
+    scale: [0.97, 1],
+    boxShadow: '0 8px 24px oklch(0 0 0 / 40%)',
+    transition: { duration: 0.45, ease: EASE_SMOOTH, delay: 0.12 },
+  },
+}
+
+export const heroDemoBackdropVariants: Variants = {
+  edit: { opacity: 0, transition: { duration: 0.2, ease: EASE_SMOOTH } },
+  export: { opacity: 1, transition: { duration: 0.3, ease: EASE_SMOOTH } },
+}
+
+/** Light sweep across the board when the export preview develops */
+export const heroDemoSheenVariants: Variants = {
+  hidden: { x: '-110%', opacity: 0 },
+  visible: {
+    x: '110%',
+    opacity: [0, 1, 0],
+    transition: { duration: 0.7, ease: EASE_SMOOTH, delay: 0.18 },
+  },
+  exit: { opacity: 0, transition: { duration: 0.15, ease: EASE_SMOOTH } },
 }
 
 /**
