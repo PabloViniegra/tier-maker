@@ -231,6 +231,7 @@ describe('getPublicCreatorProfile', () => {
     asMock(db.select)
       .mockReturnValueOnce(makeDbChain([]))
       .mockReturnValueOnce(makeDbChain([{ listCount: 0, likeCount: 0 }]))
+      .mockReturnValueOnce(makeDbChain([]))
     expect(await getPublicCreatorProfile('missing')).toBeNull()
   })
 
@@ -238,18 +239,23 @@ describe('getPublicCreatorProfile', () => {
     asMock(db.select)
       .mockReturnValueOnce(makeDbChain([{ id: 'uid', name: 'Alice' }]))
       .mockReturnValueOnce(makeDbChain([{ listCount: 0, likeCount: 0 }]))
+      .mockReturnValueOnce(makeDbChain([]))
     expect(await getPublicCreatorProfile('uid')).toBeNull()
   })
 
-  it('returns the profile with its public counts', async () => {
+  it('returns the profile with its public counts and top categories', async () => {
     asMock(db.select)
       .mockReturnValueOnce(makeDbChain([{ id: 'uid', name: 'Alice' }]))
       .mockReturnValueOnce(makeDbChain([{ listCount: 3, likeCount: 12 }]))
+      .mockReturnValueOnce(
+        makeDbChain([{ category: 'Anime' }, { category: 'Videojuegos' }])
+      )
     expect(await getPublicCreatorProfile('uid')).toEqual({
       id: 'uid',
       name: 'Alice',
       listCount: 3,
       likeCount: 12,
+      topCategories: ['Anime', 'Videojuegos'],
     })
   })
 })

@@ -50,6 +50,11 @@ describe('ExploreCard', () => {
     )
   })
 
+  it('omits the creator when hideCreator is set', () => {
+    render(<ExploreCard {...baseProps} hideCreator />)
+    expect(screen.queryByText('by pablo')).toBeNull()
+  })
+
   it('renders the creator name as plain text without a creator id', () => {
     render(
       <ExploreCard {...baseProps} data={{ ...baseData, creatorId: null }} />

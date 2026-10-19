@@ -18,12 +18,20 @@ export function compactRankLabel(label: string): string {
   return firstWord.slice(0, 3)
 }
 
+// Tier colors are user-chosen: flip to black text above OKLCH lightness 0.56,
+// where black and white reach equal contrast. Browsers without relative color
+// syntax drop the declaration and keep text-white.
+function rankLabelTextColor(color: string): string {
+  return `oklch(from ${color} clamp(0, (0.56 - l) * 1000, 1) 0 0)`
+}
+
 type Props = {
   data: PublicTierListSummary
   isLiked: boolean
   isOwner: boolean
   isAuthenticated: boolean
   href?: string
+  hideCreator?: boolean
   style?: React.CSSProperties
 }
 
@@ -36,6 +44,7 @@ export function ExploreCard({
   isOwner,
   isAuthenticated,
   href,
+  hideCreator = false,
   style,
 }: Props) {
   const { id, title, category, itemCount, createdAt, creatorName, creatorId, likeCount, rows } = data
@@ -65,8 +74,11 @@ export function ExploreCard({
                   className="flex min-h-0 flex-1 items-stretch gap-1"
                 >
                   <div
-                    className="flex w-8 shrink-0 items-center justify-center rounded-sm font-heading text-[10px] leading-none font-bold text-white"
-                    style={{ background: row.color }}
+                    className="flex w-9 shrink-0 items-center justify-center rounded-sm font-heading text-xs leading-none font-bold text-white"
+                    style={{
+                      background: row.color,
+                      color: rankLabelTextColor(row.color),
+                    }}
                   >
                     <span className="px-0.5 text-center select-none">
                       {compactRankLabel(row.label)}
@@ -148,6 +160,7 @@ export function ExploreCard({
               {itemCount} {itemCount === 1 ? 'item' : 'items'}
             </span>
             {creatorName &&
+              !hideCreator &&
               (creatorId ? (
                 <Link
                   href={`/u/${creatorId}`}
