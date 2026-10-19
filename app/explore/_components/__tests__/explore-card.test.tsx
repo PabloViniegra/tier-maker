@@ -42,6 +42,22 @@ describe('ExploreCard', () => {
     expect(screen.getByText(/pablo/i)).toBeInTheDocument()
   })
 
+  it('links the creator name to their public profile', () => {
+    render(<ExploreCard {...baseProps} />)
+    expect(screen.getByRole('link', { name: 'by pablo' })).toHaveAttribute(
+      'href',
+      '/u/creator-1'
+    )
+  })
+
+  it('renders the creator name as plain text without a creator id', () => {
+    render(
+      <ExploreCard {...baseProps} data={{ ...baseData, creatorId: null }} />
+    )
+    expect(screen.getByText('by pablo')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'by pablo' })).toBeNull()
+  })
+
   it('renders cover image when coverImageUrl is provided', () => {
     render(
       <ExploreCard

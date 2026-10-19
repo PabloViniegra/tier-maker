@@ -29,6 +29,7 @@ type Props = {
   tierId: string
   data: TierListDetailSeed
   backHref?: string
+  creatorHref?: string
   shareUrl?: string
   userId?: string | null
   like?: {
@@ -76,6 +77,7 @@ export function PublicTierFill({
   tierId,
   data,
   backHref = '/explore',
+  creatorHref,
   shareUrl,
   userId = null,
   like,
@@ -139,7 +141,17 @@ export function PublicTierFill({
             </div>
             {(data.creatorName || data.description) && (
               <div className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
-                {data.creatorName && <span>By {data.creatorName}</span>}
+                {data.creatorName &&
+                  (creatorHref ? (
+                    <Link
+                      href={creatorHref}
+                      className="shrink-0 transition-colors hover:text-foreground hover:underline"
+                    >
+                      By {data.creatorName}
+                    </Link>
+                  ) : (
+                    <span>By {data.creatorName}</span>
+                  ))}
                 {data.creatorName && data.description && (
                   <span aria-hidden="true">·</span>
                 )}
