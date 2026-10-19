@@ -23,6 +23,7 @@ type Props = ExploreFilters & {
   isAuthenticated: boolean
   fillHrefPrefix?: string
   clearFiltersHref?: string
+  hideCreator?: boolean
 }
 
 export function ExploreGrid({
@@ -35,6 +36,7 @@ export function ExploreGrid({
   isAuthenticated,
   fillHrefPrefix,
   clearFiltersHref = '/explore',
+  hideCreator,
 }: Props) {
   if (items.length === 0) {
     const filtersActive = hasActiveFilters({ q, category, sort })
@@ -77,6 +79,7 @@ export function ExploreGrid({
             isOwner={currentUserId !== null && item.creatorId === currentUserId}
             isAuthenticated={isAuthenticated}
             href={fillHrefPrefix ? `${fillHrefPrefix}/${item.id}` : undefined}
+            hideCreator={hideCreator}
           />
         </motion.div>
       ))}

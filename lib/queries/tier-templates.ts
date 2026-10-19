@@ -617,12 +617,15 @@ export type PublicCreatorProfile = {
   name: string
   listCount: number
   likeCount: number
+  topCategories: string[]
 }
+
+const PROFILE_TOP_CATEGORIES = 3
 
 // cache() shares the lookup between generateMetadata and the page render.
 export const getPublicCreatorProfile = cache(
   async (userId: string): Promise<PublicCreatorProfile | null> => {
-    const [[creator], [counts]] = await Promise.all([
+    const [[creator], [counts], categoryRows] = await Promise.all([
       db
         .select({ id: user.id, name: user.name })
         .from(user)
@@ -641,10 +644,26 @@ export const getPublicCreatorProfile = cache(
             eq(tierTemplates.isPublic, true)
           )
         ),
+      db
+        .select({ category: tierTemplates.category })
+        .from(tierTemplates)
+        .where(
+          and(
+            eq(tierTemplates.creatorId, userId),
+            eq(tierTemplates.isPublic, true)
+          )
+        )
+        .groupBy(tierTemplates.category)
+        .orderBy(desc(count()), asc(tierTemplates.category))
+        .limit(PROFILE_TOP_CATEGORIES),
     ])
 
     // Users without public lists stay invisible, as their profile would expose only a name.
     if (!creator || !counts?.listCount) return null
-    return { ...creator, ...counts }
+    return {
+      ...creator,
+      ...counts,
+      topCategories: categoryRows.map((r) => r.category),
+    }
   }
 )
