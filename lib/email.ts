@@ -8,6 +8,7 @@ import {
   VerificationEmail,
   VerificationOtpEmail,
 } from '@/emails/auth-email'
+import { ReportEmail } from '@/emails/report-email'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const from = 'Tier Maker <auth@send.pabloviniegra.dev>'
@@ -128,5 +129,37 @@ export async function sendPasswordResetEmail({
     subject: 'Reset your Tier Maker password',
     react: PasswordResetEmail({ url: safeUrl }),
     idempotencyKey: emailKey('password-reset', token),
+  })
+}
+
+export async function sendReportNotificationEmail({
+  to,
+  reportId,
+  reason,
+  details,
+  tierListTitle,
+  tierListSlug,
+}: {
+  to: string
+  reportId: string
+  reason: string
+  details: string | null
+  tierListTitle: string
+  tierListSlug: string
+}) {
+  const origin =
+    process.env.NEXT_PUBLIC_APP_URL ?? 'https://tiermaker.pabloviniegra.dev'
+
+  return sendEmail({
+    to,
+    subject: `Tier list reported: ${tierListTitle}`,
+    react: ReportEmail({
+      reportId,
+      reason,
+      details,
+      tierListTitle,
+      url: new URL(`/explore/${tierListSlug}`, origin).toString(),
+    }),
+    idempotencyKey: `content-report/${reportId}`,
   })
 }

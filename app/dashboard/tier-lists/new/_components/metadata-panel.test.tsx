@@ -24,3 +24,20 @@ describe('MetadataPanel — collapsible description', () => {
     ).toBeInTheDocument()
   })
 })
+
+describe('MetadataPanel — visibility', () => {
+  beforeEach(() => {
+    useTierEditor.getState().reset()
+  })
+
+  it('is public by default', () => {
+    render(<MetadataPanel categoryPresets={[]} userPresets={[]} />)
+    expect(screen.getByRole('radio', { name: /public/i })).toBeChecked()
+  })
+
+  it('marks the tier list private when Private is selected', () => {
+    render(<MetadataPanel categoryPresets={[]} userPresets={[]} />)
+    fireEvent.click(screen.getByRole('radio', { name: /private/i }))
+    expect(useTierEditor.getState().metadata.isPublic).toBe(false)
+  })
+})

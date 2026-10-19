@@ -6,8 +6,10 @@ import {
   Check,
   ChevronDown,
   ChevronsUpDown,
+  Globe,
   ImagePlus,
   Loader2,
+  Lock,
   X,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -46,6 +48,11 @@ import {
 import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
 
 const ACCEPT = ALLOWED_IMAGE_TYPES.join(',')
+
+const VISIBILITY_OPTIONS = [
+  { value: true, label: 'Public', Icon: Globe },
+  { value: false, label: 'Private', Icon: Lock },
+] as const
 
 export function MetadataPanel({
   categoryPresets,
@@ -391,6 +398,35 @@ export function MetadataPanel({
             )}
           </AnimatePresence>
         </div>
+
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2 text-xs font-medium text-muted-foreground">
+            Visibility
+          </legend>
+          <div className="grid grid-cols-2 gap-1 rounded-md border border-border p-1">
+            {VISIBILITY_OPTIONS.map(({ value, label, Icon }) => (
+              <label
+                key={label}
+                className="flex cursor-pointer items-center justify-center gap-1.5 rounded px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground has-checked:bg-accent has-checked:text-accent-foreground has-focus-visible:ring-2 has-focus-visible:ring-ring"
+              >
+                <input
+                  type="radio"
+                  name="visibility"
+                  className="sr-only"
+                  checked={metadata.isPublic === value}
+                  onChange={() => setMetadata({ isPublic: value })}
+                />
+                <Icon size={13} aria-hidden="true" />
+                {label}
+              </label>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {metadata.isPublic
+              ? 'Anyone can find it on Explore.'
+              : 'Only you can see it.'}
+          </p>
+        </fieldset>
       </div>
 
       <Collapsible>

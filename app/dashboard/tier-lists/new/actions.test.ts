@@ -9,8 +9,17 @@ import { getCategoryPresets } from '@/lib/queries/category-presets'
 import { defaultTierRows } from '@/lib/validators/tier-list'
 import { asMock } from '@/test/as-mock'
 
-function makeFile(name: string, type: string, size: number): File {
-  return new File([new Uint8Array(size)], name, { type })
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
+
+function makeFile(
+  name: string,
+  type: string,
+  size: number,
+  header = PNG_SIGNATURE
+): File {
+  const bytes = new Uint8Array(size)
+  bytes.set(header.slice(0, size))
+  return new File([bytes], name, { type })
 }
 
 function authedSession(userId = 'user-1') {
@@ -65,6 +74,28 @@ describe('uploadImagesAction', () => {
     const fd = new FormData()
     fd.append('file', makeFile('big.png', 'image/png', 5 * 1024 * 1024 + 1))
     await expect(uploadImagesAction(fd)).rejects.toThrow(/5 ?mb/i)
+  })
+
+  it('rejects files whose content is not an allowed image', async () => {
+    authedSession()
+    const fd = new FormData()
+    const pdfHeader = Array.from('%PDF-1.7', (c) => c.charCodeAt(0))
+    fd.append('file', makeFile('fake.png', 'image/png', 1024, pdfHeader))
+    await expect(uploadImagesAction(fd)).rejects.toThrow(/image/i)
+    expect(asMock(put)).not.toHaveBeenCalled()
+  })
+
+  it('stores the file under the type detected from its content', async () => {
+    authedSession()
+    asMock(put).mockResolvedValue({ url: 'https://x/y.jpg', pathname: 'y.jpg' })
+    const fd = new FormData()
+    fd.append('file', makeFile('photo.png', 'image/png', 1024, [0xff, 0xd8, 0xff]))
+    await uploadImagesAction(fd)
+    expect(asMock(put)).toHaveBeenCalledWith(
+      expect.stringMatching(/\.jpg$/),
+      expect.any(File),
+      expect.objectContaining({ contentType: 'image/jpeg' })
+    )
   })
 
   it('uploads the file and returns its public url', async () => {
@@ -151,6 +182,26 @@ describe('createTierListAction', () => {
     expect(asMock(db.transaction)).toHaveBeenCalledTimes(1)
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard')
   })
+
+  it.each([
+    [undefined, true],
+    [false, false],
+  ])(
+    'persists isPublic=%s as %s',
+    async (isPublic, expected) => {
+      authedSession()
+      const values = vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([{ id: 'tpl-1' }]),
+      })
+      asMock(db.transaction).mockImplementation(async (cb) =>
+        cb({ insert: vi.fn().mockReturnValue({ values }) })
+      )
+
+      await createTierListAction({ ...validInput, isPublic })
+
+      expect(values.mock.calls[0][0]).toMatchObject({ isPublic: expected })
+    }
+  )
 
   it('propagates transaction errors without orphaned data', async () => {
     authedSession()

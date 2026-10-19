@@ -83,3 +83,23 @@ export const tierLikes = pgTable(
     index('tier_likes_template_id_idx').on(t.templateId),
   ]
 )
+
+export const tierReports = pgTable(
+  'tier_reports',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    templateId: uuid('template_id')
+      .notNull()
+      .references(() => tierTemplates.id, { onDelete: 'cascade' }),
+    reporterId: text('reporter_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    reason: text('reason').notNull(),
+    details: text('details'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => [
+    unique().on(t.reporterId, t.templateId),
+    index('tier_reports_template_id_idx').on(t.templateId),
+  ]
+)

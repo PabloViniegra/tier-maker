@@ -391,6 +391,14 @@ describe('useTierEditor — selectors', () => {
     expect(payload.coverImageUrl).toBe('https://blob/cover.png')
   })
 
+  it('buildSavePayload is public by default and carries isPublic', () => {
+    useTierEditor.getState().setMetadata({ title: 'T', category: 'C' })
+    expect(buildSavePayload(useTierEditor.getState()).isPublic).toBe(true)
+
+    useTierEditor.getState().setMetadata({ isPublic: false })
+    expect(buildSavePayload(useTierEditor.getState()).isPublic).toBe(false)
+  })
+
   it('buildUpdatePayload omits title/description/category and maps bank + rows', () => {
     useTierEditor.getState().setMetadata({
       title: 'Should not appear',
@@ -454,6 +462,14 @@ describe('useTierEditor — initFromDb', () => {
       description: 'My picks',
       category: 'anime',
     })
+  })
+
+  it('seeds visibility from the DB payload, defaulting to public', () => {
+    useTierEditor.getState().initFromDb(seed)
+    expect(snapshot().metadata.isPublic).toBe(true)
+
+    useTierEditor.getState().initFromDb({ ...seed, isPublic: false })
+    expect(snapshot().metadata.isPublic).toBe(false)
   })
 
   it('seeds rows with correct labels, colors, and placed items with labels', () => {

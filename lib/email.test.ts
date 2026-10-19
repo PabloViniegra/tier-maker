@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { Resend } from 'resend'
 import {
   sendPasswordResetEmail,
+  sendReportNotificationEmail,
   sendVerificationEmail,
   sendVerificationOtpEmail,
 } from './email'
@@ -129,5 +130,30 @@ describe('authentication email delivery', () => {
     ).rejects.toThrow('Invalid authentication email URL')
 
     expect(send).not.toHaveBeenCalled()
+  })
+})
+
+describe('report notification email', () => {
+  beforeEach(() => {
+    asMock(send).mockReset()
+    asMock(send).mockResolvedValue({ data: { id: 'email-id' }, error: null })
+  })
+
+  it('links the reported tier list and is idempotent per report', async () => {
+    await sendReportNotificationEmail({
+      to: 'mod@example.com',
+      reportId: 'report-1',
+      reason: 'spam',
+      details: 'Bot account',
+      tierListTitle: 'Best <b>games</b>',
+      tierListSlug: 'best-games',
+    })
+
+    const [payload, options] = asMock(send).mock.calls[0]
+    expect(payload.to).toBe('mod@example.com')
+    expect(payload.html).toContain('/explore/best-games')
+    expect(payload.html).toContain('Bot account')
+    expect(payload.html).not.toContain('<b>games</b>')
+    expect(options).toEqual({ idempotencyKey: 'content-report/report-1' })
   })
 })

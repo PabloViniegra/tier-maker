@@ -36,6 +36,7 @@ export default async function EditTierListPage({ params }: Props) {
             description: data.description,
             category: data.category,
             coverImageUrl: data.coverImageUrl,
+            isPublic: data.isPublic,
             sidebarItems: data.sidebarItems,
             rows: data.rows,
           }}

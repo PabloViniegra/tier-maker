@@ -135,6 +135,12 @@ RESEND_API_KEY=your-resend-api-key
 
 # App URL
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Moderation: inbox notified when a tier list is reported (optional)
+REPORTS_EMAIL=moderation@example.com
+
+# Vercel Cron: authorizes the daily orphan-image cleanup
+CRON_SECRET=your-cron-secret
 ```
 
 > **⚠️ Security Notice:** Never commit `.env.local` to version control. It is already listed in `.gitignore`. Keep your secrets private.
@@ -256,19 +262,27 @@ pnpm test:watch
 
 Test files are co-located with their source modules (e.g., `tier-editor.test.ts` alongside `tier-editor.ts`).
 
-Playwright E2E tests use a local production server, Chromium, and the PostgreSQL
-database configured by `DATABASE_URI`:
+Playwright E2E tests use a local production server, Chromium, and a throwaway
+PostgreSQL started with Docker (`compose.e2e.yaml`). The app talks to it through
+a Neon WebSocket proxy, enabled by `NEON_WS_PROXY`:
 
 ```bash
+docker compose -f compose.e2e.yaml up -d --wait
+e2e/migrate.sh
 pnpm exec playwright install chromium
+DATABASE_URI=postgres://postgres:postgres@localhost:5432/tier_maker_e2e \
+NEON_WS_PROXY='127.0.0.1:5433/v1?address=postgres:5432' \
 pnpm test:e2e
 ```
 
 The E2E setup creates temporary users and tier lists with the
 `playwright-e2e-` prefix, intercepts fixture images, and removes the data after
-the run. Apply the database migrations and configure the required application
-environment variables before running the suite. The server uses port `3001` by
-default; set `PLAYWRIGHT_PORT` to use another free port.
+the run. The remaining application environment variables (auth, Google, Resend)
+come from `.env.local`. The server uses port `3001` by default; set
+`PLAYWRIGHT_PORT` to use another free port.
+
+CI runs the same steps in the `e2e` job of `.github/workflows/test.yml`; it needs
+no secrets.
 
 ---
 

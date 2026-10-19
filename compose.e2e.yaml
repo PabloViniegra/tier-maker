@@ -1,0 +1,24 @@
+# Throwaway database for Playwright E2E. See README ("End-to-end tests").
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tier_maker_e2e
+    ports:
+      - '127.0.0.1:5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d tier_maker_e2e']
+      interval: 2s
+      retries: 30
+
+  wsproxy:
+    image: ghcr.io/neondatabase/wsproxy:latest
+    environment:
+      APPNAME: tier-maker-e2e
+      ALLOW_ADDR_REGEX: '.*'
+    ports:
+      - '127.0.0.1:5433:80'
+    depends_on:
+      postgres:
+        condition: service_healthy

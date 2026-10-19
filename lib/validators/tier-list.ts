@@ -83,6 +83,7 @@ export const createTierListSchema = z
     description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
     category: z.string().min(1).max(MAX_CATEGORY_LENGTH),
     coverImageUrl: imageUrlSchema.optional(),
+    isPublic: z.boolean().optional(),
     rows: z.array(tierRowSchema).min(MIN_ROW_COUNT).max(MAX_ROW_COUNT),
     bankItems: z.array(imageItemSchema).max(MAX_ITEM_COUNT),
   })
