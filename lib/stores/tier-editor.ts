@@ -25,6 +25,7 @@ export type EditorMetadata = {
   description: string
   category: string
   coverImageUrl?: string
+  isPublic: boolean
 }
 
 export type TierListDetailSeed = {
@@ -33,6 +34,7 @@ export type TierListDetailSeed = {
   category: string
   creatorName?: string | null
   coverImageUrl?: string | null
+  isPublic?: boolean
   sidebarItems: ImageItem[]
   rows: {
     id: string
@@ -93,7 +95,7 @@ export const initialState: State = (() => {
     items: [],
   }))
   return {
-    metadata: { title: '', description: '', category: '' },
+    metadata: { title: '', description: '', category: '', isPublic: true },
     rows,
     bankItems: [],
   }
@@ -226,6 +228,7 @@ export const useTierEditor = create<State & Actions>()((set) => ({
         description: data.description ?? '',
         category: data.category,
         coverImageUrl: data.coverImageUrl ?? undefined,
+        isPublic: data.isPublic ?? true,
       },
       bankItems: data.sidebarItems.map((item) => ({
         id: newId(),
@@ -256,6 +259,7 @@ export function editorSnapshotFromSeed(
       description: data.description ?? '',
       category: data.category,
       coverImageUrl: data.coverImageUrl ?? undefined,
+      isPublic: data.isPublic ?? true,
     },
     bankItems: data.sidebarItems.map((item) => ({
       id: '',
@@ -325,6 +329,7 @@ export type SavePayload = {
   description?: string
   category: string
   coverImageUrl?: string
+  isPublic: boolean
   rows: { id: string; label: string; color: string; items: ImageItem[] }[]
   bankItems: ImageItem[]
 }
@@ -335,6 +340,7 @@ export function buildSavePayload(state: State): SavePayload {
     description: state.metadata.description.trim() || undefined,
     category: state.metadata.category.trim(),
     coverImageUrl: state.metadata.coverImageUrl || undefined,
+    isPublic: state.metadata.isPublic,
     rows: state.rows.map((r) => ({
       id: r.id,
       label: r.label,

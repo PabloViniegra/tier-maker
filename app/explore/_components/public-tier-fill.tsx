@@ -12,6 +12,7 @@ import { ExportButton } from '@/app/dashboard/tier-lists/[id]/_components/export
 import { ActionTooltip } from '@/components/action-tooltip'
 import { LikeButton } from '@/components/like-button'
 import { ShareButton } from '@/components/share-button'
+import { ReportButton } from '@/components/report-button'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
@@ -172,6 +173,12 @@ export function PublicTierFill({
                   url={shareUrl}
                   iconOnly
                   showTooltip
+                />
+              )}
+              {like && (
+                <ReportButton
+                  templateId={like.templateId}
+                  isAuthenticated={like.isAuthenticated}
                 />
               )}
               <ActionTooltip label="Undo last move">

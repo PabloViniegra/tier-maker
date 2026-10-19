@@ -37,7 +37,10 @@ function setupTransaction(
     coverImageUrl: string | null
     sidebarItems: StoredItem[]
   } = { coverImageUrl: null, sidebarItems: [] },
-  rows: { items: StoredItem[] }[] = []
+  rows: { items: StoredItem[] }[] = [],
+  set = vi.fn().mockReturnValue({
+    where: vi.fn().mockResolvedValue(undefined),
+  })
 ) {
   asMock(db.transaction).mockImplementation(async (cb) => {
     const tx = {
@@ -53,11 +56,7 @@ function setupTransaction(
             where: vi.fn().mockResolvedValue(rows),
           }),
         }),
-      update: vi.fn().mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-      }),
+      update: vi.fn().mockReturnValue({ set }),
       delete: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue(undefined),
       }),
@@ -169,6 +168,35 @@ describe('updateTierListStructureAction', () => {
         coverImageUrl: undefined,
       })
     ).resolves.toEqual({ ok: true })
+  })
+
+  it('updates visibility when isPublic is provided', async () => {
+    authedSession()
+    mockOwned()
+    const set = vi.fn().mockReturnValue({
+      where: vi.fn().mockResolvedValue(undefined),
+    })
+    setupTransaction(undefined, [], set)
+
+    await updateTierListStructureAction('tpl-1', {
+      ...validInput,
+      isPublic: false,
+    })
+
+    expect(set.mock.calls[0][0]).toMatchObject({ isPublic: false })
+  })
+
+  it('keeps the current visibility when isPublic is omitted', async () => {
+    authedSession()
+    mockOwned()
+    const set = vi.fn().mockReturnValue({
+      where: vi.fn().mockResolvedValue(undefined),
+    })
+    setupTransaction(undefined, [], set)
+
+    await updateTierListStructureAction('tpl-1', validInput)
+
+    expect(set.mock.calls[0][0]).not.toHaveProperty('isPublic')
   })
 
   it('propagates transaction errors', async () => {

@@ -4,6 +4,7 @@ import { neonConfig, Pool } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-serverless'
 import { sql } from 'drizzle-orm'
 import { hashPassword } from 'better-auth/crypto'
+import { configureLocalNeonProxy } from '../lib/neon-local-proxy'
 import {
   E2E_CLIENT_IP,
   E2E_IMAGE_URL,
@@ -30,6 +31,7 @@ export async function withDatabase<T>(
 ) {
   loadEnvironment()
   neonConfig.webSocketConstructor = ws
+  configureLocalNeonProxy()
   const pool = new Pool({ connectionString: process.env.DATABASE_URI! })
   const database = drizzle(pool)
 

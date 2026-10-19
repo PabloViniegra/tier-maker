@@ -284,6 +284,7 @@ export type TierListDetail = {
   category: string
   creatorName?: string | null
   coverImageUrl: string | null
+  isPublic?: boolean
   sidebarItems: ImageItem[]
   createdAt: Date
   creatorId: string | null
@@ -570,6 +571,7 @@ export async function getTierListById(
     description: tpl.description,
     category: tpl.category,
     coverImageUrl: tpl.coverImageUrl ?? null,
+    isPublic: tpl.isPublic,
     sidebarItems: tpl.sidebarItems,
     createdAt: tpl.createdAt,
     creatorId: tpl.creatorId ?? null,

@@ -27,8 +27,15 @@ export async function updateTierListStructureAction(
 
   await assertOwned(id, session.user.id)
 
-  const { title, description, category, coverImageUrl, bankItems, rows } =
-    parsed.data
+  const {
+    title,
+    description,
+    category,
+    coverImageUrl,
+    isPublic,
+    bankItems,
+    rows,
+  } = parsed.data
 
   const toPurge = await db.transaction(async (tx) => {
     const [[currentTemplate], currentRows] = await Promise.all([
@@ -68,6 +75,7 @@ export async function updateTierListStructureAction(
         category,
         coverImageUrl: coverImageUrl ?? null,
         sidebarItems: buildCatalogue(bankItems, rows),
+        ...(isPublic !== undefined && { isPublic }),
       })
       .where(eq(tierTemplates.id, id))
 

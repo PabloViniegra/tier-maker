@@ -5,5 +5,6 @@ export const db = {
   insert: vi.fn(),
   update: vi.fn(),
   delete: vi.fn(),
+  execute: vi.fn(),
   transaction: vi.fn(),
 }

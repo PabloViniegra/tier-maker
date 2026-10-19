@@ -7,6 +7,7 @@ import { db } from '@/lib/db'
 import { tierRows, tierTemplates, userCategoryPresets } from '@/lib/db/schema'
 import { getSession } from '@/lib/session'
 import { blobObjectPath } from '@/lib/blob-url'
+import { detectImageType, IMAGE_SIGNATURE_LENGTH } from '@/lib/image-signature'
 import { revalidateExplore } from '@/lib/revalidate-explore'
 import {
   buildCatalogue,
@@ -77,9 +78,18 @@ export async function uploadImagesAction(
     throw new Error(parsed.error.issues[0]?.message ?? 'Invalid image')
   }
 
+  const header = new Uint8Array(
+    await file.slice(0, IMAGE_SIGNATURE_LENGTH).arrayBuffer()
+  )
+  const type = detectImageType(header)
+  if (!type) {
+    throw new Error('Image must be JPG, PNG, WEBP or GIF')
+  }
+
   try {
-    const blob = await put(uniquePath(session.user.id, parsed.data.type), file, {
+    const blob = await put(uniquePath(session.user.id, type), file, {
       access: 'public',
+      contentType: type,
     })
     return { url: blob.url }
   } catch (err) {
@@ -125,6 +135,7 @@ export async function createTierListAction(
             category: data.category,
             creatorId: session.user.id,
             coverImageUrl: data.coverImageUrl ?? null,
+            isPublic: data.isPublic ?? true,
             sidebarItems,
           })
           .returning({ id: tierTemplates.id })
