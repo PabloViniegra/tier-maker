@@ -5,6 +5,7 @@ import {
   getDistinctPublicCategories,
   getPublicTierLists,
   getAllPublicTierListIds,
+  getPublicCreatorProfile,
 } from '../tier-templates'
 import { asMock } from '@/test/as-mock'
 
@@ -218,5 +219,37 @@ describe('getAllPublicTierListIds', () => {
     expect(Object.keys(result[0])).toEqual(
       expect.arrayContaining(['id', 'createdAt'])
     )
+  })
+})
+
+// ─── getPublicCreatorProfile ───────────────────────────────────────────────
+
+describe('getPublicCreatorProfile', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns null when the user does not exist', async () => {
+    asMock(db.select)
+      .mockReturnValueOnce(makeDbChain([]))
+      .mockReturnValueOnce(makeDbChain([{ listCount: 0, likeCount: 0 }]))
+    expect(await getPublicCreatorProfile('missing')).toBeNull()
+  })
+
+  it('returns null when the user has no public tier lists', async () => {
+    asMock(db.select)
+      .mockReturnValueOnce(makeDbChain([{ id: 'uid', name: 'Alice' }]))
+      .mockReturnValueOnce(makeDbChain([{ listCount: 0, likeCount: 0 }]))
+    expect(await getPublicCreatorProfile('uid')).toBeNull()
+  })
+
+  it('returns the profile with its public counts', async () => {
+    asMock(db.select)
+      .mockReturnValueOnce(makeDbChain([{ id: 'uid', name: 'Alice' }]))
+      .mockReturnValueOnce(makeDbChain([{ listCount: 3, likeCount: 12 }]))
+    expect(await getPublicCreatorProfile('uid')).toEqual({
+      id: 'uid',
+      name: 'Alice',
+      listCount: 3,
+      likeCount: 12,
+    })
   })
 })

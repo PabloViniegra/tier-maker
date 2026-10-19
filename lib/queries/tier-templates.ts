@@ -317,6 +317,7 @@ export type ExploreSort = 'newest' | 'oldest' | 'a-z' | 'popular'
 export type PublicTierListsParams = {
   q?: string
   category?: string
+  creatorId?: string
   sort?: ExploreSort
   page: number
   pageSize: number
@@ -445,7 +446,7 @@ export const getPublicTierLists = unstable_cache(
   async (
     params: PublicTierListsParams
   ): Promise<{ items: PublicTierListSummary[]; total: number }> => {
-    const { q, category, sort = 'newest', page, pageSize } = params
+    const { q, category, creatorId, sort = 'newest', page, pageSize } = params
 
     const conditions = and(
       eq(tierTemplates.isPublic, true),
@@ -455,7 +456,8 @@ export const getPublicTierLists = unstable_cache(
             ilike(tierTemplates.description, `%${q}%`)
           )
         : undefined,
-      category ? eq(tierTemplates.category, category) : undefined
+      category ? eq(tierTemplates.category, category) : undefined,
+      creatorId ? eq(tierTemplates.creatorId, creatorId) : undefined
     )
 
     const orderCol =
@@ -609,3 +611,40 @@ export async function getTemplateCreatorId(
     .limit(1)
   return row?.creatorId ?? null
 }
+
+export type PublicCreatorProfile = {
+  id: string
+  name: string
+  listCount: number
+  likeCount: number
+}
+
+// cache() shares the lookup between generateMetadata and the page render.
+export const getPublicCreatorProfile = cache(
+  async (userId: string): Promise<PublicCreatorProfile | null> => {
+    const [[creator], [counts]] = await Promise.all([
+      db
+        .select({ id: user.id, name: user.name })
+        .from(user)
+        .where(eq(user.id, userId))
+        .limit(1),
+      db
+        .select({
+          listCount: countDistinct(tierTemplates.id),
+          likeCount: count(tierLikes.userId),
+        })
+        .from(tierTemplates)
+        .leftJoin(tierLikes, eq(tierLikes.templateId, tierTemplates.id))
+        .where(
+          and(
+            eq(tierTemplates.creatorId, userId),
+            eq(tierTemplates.isPublic, true)
+          )
+        ),
+    ])
+
+    // Users without public lists stay invisible, as their profile would expose only a name.
+    if (!creator || !counts?.listCount) return null
+    return { ...creator, ...counts }
+  }
+)

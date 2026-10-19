@@ -38,7 +38,7 @@ export function ExploreCard({
   href,
   style,
 }: Props) {
-  const { id, title, category, itemCount, createdAt, creatorName, likeCount, rows } = data
+  const { id, title, category, itemCount, createdAt, creatorName, creatorId, likeCount, rows } = data
   const previewRows = rows.slice(0, 6)
   const imageUrl = data.coverImageUrl ?? data.firstItemUrl ?? null
   const fillHref = href ?? `/explore/${data.slug}`
@@ -147,11 +147,19 @@ export function ExploreCard({
             <span className="text-xs text-muted-foreground">
               {itemCount} {itemCount === 1 ? 'item' : 'items'}
             </span>
-            {creatorName && (
-              <span className="max-w-[10rem] truncate text-xs text-muted-foreground">
-                by {creatorName}
-              </span>
-            )}
+            {creatorName &&
+              (creatorId ? (
+                <Link
+                  href={`/u/${creatorId}`}
+                  className="relative z-20 max-w-[10rem] truncate text-xs text-muted-foreground transition-colors hover:text-foreground hover:underline"
+                >
+                  by {creatorName}
+                </Link>
+              ) : (
+                <span className="max-w-[10rem] truncate text-xs text-muted-foreground">
+                  by {creatorName}
+                </span>
+              ))}
           </div>
           {!isOwner && (
             <div className="relative z-20">

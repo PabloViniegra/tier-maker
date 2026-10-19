@@ -69,6 +69,15 @@ describe('PublicTierFill', () => {
     expect(screen.getByText(/drag an item into a tier/i)).toBeInTheDocument()
   })
 
+  it('links the creator name to their profile when given a creator href', async () => {
+    render(
+      <PublicTierFill tierId="test-id" data={mockData} creatorHref="/u/uid" />
+    )
+    expect(
+      await screen.findByRole('link', { name: 'By Test Creator' })
+    ).toHaveAttribute('href', '/u/uid')
+  })
+
   it('renders the Explore back link', async () => {
     await renderPublicTierFill()
     expect(screen.getByText('Explore')).toBeInTheDocument()

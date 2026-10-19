@@ -85,6 +85,7 @@ export default async function PublicTierFillPage({ params }: Props) {
             tierId={data.id}
             userId={userId}
             shareUrl={`/explore/${slug}`}
+            creatorHref={data.creatorId ? `/u/${data.creatorId}` : undefined}
             like={
               isOwner
                 ? undefined
