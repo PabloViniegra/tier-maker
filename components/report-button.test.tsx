@@ -58,7 +58,7 @@ describe('ReportButton', () => {
     expect(toast.success).toHaveBeenCalled()
   })
 
-  it('shows an error toast when the report fails', async () => {
+  it('shows an inline error and keeps the dialog open when the report fails', async () => {
     asMock(reportTierList).mockRejectedValue(new Error('boom'))
     renderButton()
 
@@ -66,6 +66,9 @@ describe('ReportButton', () => {
     fireEvent.click(screen.getByRole('radio', { name: /copyright/i }))
     fireEvent.click(screen.getByRole('button', { name: /send report/i }))
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalled())
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      /could not send the report/i
+    )
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 })

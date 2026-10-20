@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Heart,
   Link as LinkIcon,
+  Loader2,
   MoreVertical,
   Pencil,
   Trash2,
@@ -16,14 +17,14 @@ import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,6 +72,7 @@ export function TierListCard({
   const editHref = `/dashboard/tier-lists/${id}/edit`
 
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [deleteError, setDeleteError] = useState<string>()
   const [isPending, startTransition] = useTransition()
 
   return (
@@ -208,46 +210,65 @@ export function TierListCard({
         </div>
       </div>
 
-      <Dialog
+      <AlertDialog
         open={dialogOpen}
         onOpenChange={(open) => {
-          if (!isPending) setDialogOpen(open)
+          if (isPending) return
+          setDialogOpen(open)
+          if (!open) setDeleteError(undefined)
         }}
       >
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>Delete Tier List</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete <strong>{title}</strong>? This
-              action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose
-              render={<Button variant="outline" disabled={isPending} />}
-            >
-              Cancel
-            </DialogClose>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete tier list?</AlertDialogTitle>
+            <AlertDialogDescription className="break-words">
+              <strong className="font-medium text-foreground">{title}</strong>{' '}
+              {isPublic
+                ? 'will be removed from Explore and permanently deleted'
+                : 'will be permanently deleted'}
+              {likeCount
+                ? `, along with its ${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`
+                : ''}
+              . This can&apos;t be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {deleteError && (
+            <p className="text-sm text-destructive" role="alert">
+              {deleteError}
+            </p>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
             <Button
               variant="destructive"
               disabled={isPending}
+              aria-busy={isPending}
               onClick={() => {
+                setDeleteError(undefined)
                 startTransition(async () => {
                   try {
                     await deleteTierList(id)
                     toast.success('Tier list deleted')
                     setDialogOpen(false)
                   } catch {
-                    toast.error('Failed to delete tier list')
+                    setDeleteError(
+                      "Couldn't delete this tier list. Check your connection and try again."
+                    )
                   }
                 })
               }}
             >
+              {isPending && (
+                <Loader2
+                  className="animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+              )}
               {isPending ? 'Deleting…' : 'Delete'}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

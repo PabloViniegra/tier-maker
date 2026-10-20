@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -20,10 +21,15 @@ import {
 
 export function MobileTopBar({ user }: { user: SidebarUser }) {
   const pathname = usePathname()
+  // Remembering where the sheet was opened closes it when a link changes the route.
+  const [openedAt, setOpenedAt] = useState<string | null>(null)
 
   return (
     <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-border bg-surface px-4 md:hidden">
-      <Sheet>
+      <Sheet
+        open={openedAt === pathname}
+        onOpenChange={(open) => setOpenedAt(open ? pathname : null)}
+      >
         <SheetTrigger
           className={cn(
             buttonVariants({ variant: 'ghost', size: 'sm' }),
@@ -39,7 +45,10 @@ export function MobileTopBar({ user }: { user: SidebarUser }) {
         >
           <SheetHeader className="flex h-12 flex-row items-center gap-2 space-y-0 border-b border-border px-4">
             <SheetTitle className="flex items-center gap-0">
-              <SidebarLogo showWordmark />
+              <span className="sr-only">Navigation</span>
+              <span aria-hidden="true">
+                <SidebarLogo showWordmark />
+              </span>
             </SheetTitle>
           </SheetHeader>
           <SidebarNav pathname={pathname} collapsed={false} />

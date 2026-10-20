@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { Flag } from 'lucide-react'
+import { Flag, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ActionTooltip } from '@/components/action-tooltip'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -46,6 +46,7 @@ export function ReportButton({ templateId, isAuthenticated }: Props) {
   const [open, setOpen] = useState(false)
   const [reason, setReason] = useState<ReportReason | null>(null)
   const [details, setDetails] = useState('')
+  const [error, setError] = useState<string>()
   const [isPending, startTransition] = useTransition()
 
   if (!isAuthenticated) {
@@ -70,12 +71,14 @@ export function ReportButton({ templateId, isAuthenticated }: Props) {
     if (!next) {
       setReason(null)
       setDetails('')
+      setError(undefined)
     }
   }
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!reason) return
+    setError(undefined)
     startTransition(async () => {
       try {
         const { status } = await reportTierList({
@@ -90,7 +93,9 @@ export function ReportButton({ templateId, isAuthenticated }: Props) {
         )
         onOpenChange(false)
       } catch {
-        toast.error('Could not send the report. Try again.')
+        setError(
+          'Could not send the report. Check your connection and try again.'
+        )
       }
     })
   }
@@ -141,7 +146,7 @@ export function ReportButton({ templateId, isAuthenticated }: Props) {
           <div className="flex flex-col gap-1.5">
             <div className="flex items-baseline justify-between">
               <Label htmlFor="report-details">Details (optional)</Label>
-              <span className="text-[11px] text-muted-foreground tabular-nums">
+              <span className="text-xs text-muted-foreground tabular-nums">
                 {details.length}/{MAX_REPORT_DETAILS_LENGTH}
               </span>
             </div>
@@ -154,11 +159,26 @@ export function ReportButton({ templateId, isAuthenticated }: Props) {
               className="resize-none"
             />
           </div>
+          {error && (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          )}
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" />}>
               Cancel
             </DialogClose>
-            <Button type="submit" disabled={!reason || isPending}>
+            <Button
+              type="submit"
+              disabled={!reason || isPending}
+              aria-busy={isPending}
+            >
+              {isPending && (
+                <Loader2
+                  className="animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+              )}
               {isPending ? 'Sending…' : 'Send report'}
             </Button>
           </DialogFooter>

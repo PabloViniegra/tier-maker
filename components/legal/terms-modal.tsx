@@ -18,14 +18,16 @@ export function TermsModal() {
       <DialogTrigger className="text-foreground/80 transition-colors hover:text-foreground">
         Terms of Service
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto overscroll-contain sm:max-w-2xl">
+      <DialogContent className="flex max-h-[85dvh] flex-col overflow-hidden sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Terms of Service</DialogTitle>
           <DialogDescription>
             Last updated {formatLongDate(LEGAL_UPDATED_AT)}.
           </DialogDescription>
         </DialogHeader>
-        <LegalSections sections={termsSections} />
+        <div className="-mx-4 min-h-0 overflow-y-auto overscroll-contain px-4">
+          <LegalSections sections={termsSections} />
+        </div>
       </DialogContent>
     </Dialog>
   )

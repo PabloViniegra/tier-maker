@@ -49,7 +49,7 @@ describe('ProfileDeleteDialog', () => {
       screen.queryByRole('textbox', { name: /display name/i })
     ).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /continue/i })).toBeEnabled()
-    expect(screen.getByRole('dialog')).toHaveClass(
+    expect(screen.getByRole('alertdialog')).toHaveClass(
       'duration-200',
       'ease-[cubic-bezier(0.16,1,0.3,1)]'
     )
@@ -61,7 +61,7 @@ describe('ProfileDeleteDialog', () => {
 
     await openDialog(user)
 
-    const dialog = screen.getByRole('dialog')
+    const dialog = screen.getByRole('alertdialog')
     expect(dialog).toHaveTextContent(
       '3 lists, including 1 public list that will disappear from Explore'
     )
@@ -78,7 +78,7 @@ describe('ProfileDeleteDialog', () => {
 
     await openDialog(user)
 
-    const dialog = screen.getByRole('dialog')
+    const dialog = screen.getByRole('alertdialog')
     expect(dialog).toHaveTextContent(/1 list(?!s)/)
     expect(dialog).not.toHaveTextContent('public list')
     expect(dialog).not.toHaveTextContent('likes your lists received')
@@ -93,11 +93,11 @@ describe('ProfileDeleteDialog', () => {
 
     await openDialog(user)
 
-    expect(screen.getByRole('dialog')).toHaveTextContent('Your saved presets')
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('Your saved presets')
     expect(
       screen.queryByRole('link', { name: /go to your lists/i })
     ).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog')).not.toHaveTextContent(/\d+ lists?/)
+    expect(screen.getByRole('alertdialog')).not.toHaveTextContent(/\d+ lists?/)
   })
 
   it('closes from the review cancel', async () => {
@@ -204,7 +204,7 @@ describe('ProfileDeleteDialog', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       /temporarily unavailable/i
     )
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument()
 
     await user.click(
       screen.getByRole('button', { name: /^delete my account$/i })
@@ -223,7 +223,7 @@ describe('ProfileDeleteDialog', () => {
     await goToConfirmStep(user)
 
     await screen.findByRole('textbox', { name: /confirmation/i })
-    expect(screen.getByRole('dialog')).toHaveTextContent(
+    expect(screen.getByRole('alertdialog')).toHaveTextContent(
       /type DELETE to permanently delete your account/i
     )
     const input = await screen.findByRole('textbox', { name: /confirmation/i })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useCallback, useRef, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
@@ -9,15 +9,15 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { authClient } from '@/lib/auth-client'
@@ -41,6 +41,7 @@ export function ProfileDeleteDialog({
   likesReceived,
 }: ProfileDeleteDialogProps) {
   const router = useRouter()
+  const [open, setOpen] = useState(false)
   const [step, setStep] = useState<'review' | 'confirm'>('review')
   const [typed, setTyped] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -49,8 +50,11 @@ export function ProfileDeleteDialog({
   const matches = typed.trim() === confirmationText
   const isConfirm = step === 'confirm'
 
-  const onOpenChange = (open: boolean) => {
-    if (!open) {
+  const onOpenChange = (next: boolean) => {
+    // The request keeps running if the dialog closes mid-delete, so hold it open.
+    if (deleting) return
+    setOpen(next)
+    if (!next) {
       setTyped('')
       setStep('review')
       setDeleting(false)
@@ -77,6 +81,19 @@ export function ProfileDeleteDialog({
     }
   }
 
+  const continueRef = useRef<HTMLButtonElement | null>(null)
+
+  // Swapping steps unmounts the focused button; recover focus only when it was lost.
+  const continueButtonRef = useCallback((el: HTMLButtonElement | null) => {
+    continueRef.current = el
+    if (
+      el &&
+      (!document.activeElement || document.activeElement === document.body)
+    ) {
+      el.focus()
+    }
+  }, [])
+
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (step === 'review') {
@@ -92,17 +109,20 @@ export function ProfileDeleteDialog({
         Delete account
       </h2>
       <p className="text-sm text-pretty text-muted-foreground">
-        Permanently deletes your account, lists, and saved presets. This can&apos;t
-        be undone.
+        Permanently deletes your account, lists, and saved presets. This
+        can&apos;t be undone.
       </p>
-      <Dialog onOpenChange={onOpenChange}>
-        <DialogTrigger
+      <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialogTrigger
           render={<Button variant="destructive" className="h-11 sm:h-8" />}
         >
           Delete account
-        </DialogTrigger>
-        <DialogContent>
+        </AlertDialogTrigger>
+        <AlertDialogContent initialFocus={continueRef}>
           <form onSubmit={onSubmit} className="contents">
+            <p className="sr-only" role="status" aria-live="polite">
+              {isConfirm ? 'Step 2 of 2: confirm deletion' : 'Step 1 of 2'}
+            </p>
             <AnimatePresence initial={false} mode="wait">
               <motion.div
                 key={step}
@@ -112,20 +132,19 @@ export function ProfileDeleteDialog({
                 exit="exit"
                 className="flex flex-col gap-4"
               >
-                <DialogHeader>
+                <AlertDialogHeader>
                   <div className="flex items-baseline justify-between gap-3">
-                    <DialogTitle>
+                    <AlertDialogTitle>
                       {isConfirm ? 'Confirm deletion' : 'Delete account'}
-                    </DialogTitle>
+                    </AlertDialogTitle>
                     <p
                       className="text-xs text-muted-foreground tabular-nums"
-                      role="status"
-                      aria-live="polite"
+                      aria-hidden="true"
                     >
                       {isConfirm ? '2 / 2' : '1 / 2'}
                     </p>
                   </div>
-                  <DialogDescription id="delete-account-hint">
+                  <AlertDialogDescription id="delete-account-hint">
                     {isConfirm ? (
                       <>
                         Type{' '}
@@ -137,8 +156,8 @@ export function ProfileDeleteDialog({
                     ) : (
                       "This can't be undone. Everything below is permanently deleted."
                     )}
-                  </DialogDescription>
-                </DialogHeader>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
                 {!isConfirm && (
                   <>
                     <ul className="flex list-disc flex-col gap-1.5 pl-4 text-sm text-foreground marker:text-muted-foreground">
@@ -155,7 +174,9 @@ export function ProfileDeleteDialog({
                           received
                         </li>
                       )}
-                      <li>Your saved presets and the likes you&apos;ve given</li>
+                      <li>
+                        Your saved presets and the likes you&apos;ve given
+                      </li>
                     </ul>
                     {created > 0 && (
                       <p className="text-sm text-pretty text-muted-foreground">
@@ -178,6 +199,7 @@ export function ProfileDeleteDialog({
                         {name.trim() ? 'Display name' : 'Confirmation'}
                       </Label>
                       <Input
+                        autoFocus
                         id="delete-account-name"
                         value={typed}
                         onChange={(e) => {
@@ -209,9 +231,10 @@ export function ProfileDeleteDialog({
                 )}
               </motion.div>
             </AnimatePresence>
-            <DialogFooter>
+            <AlertDialogFooter>
               {isConfirm ? (
                 <Button
+                  key="back"
                   type="button"
                   variant="outline"
                   onClick={() => setStep('review')}
@@ -221,14 +244,13 @@ export function ProfileDeleteDialog({
                   Back
                 </Button>
               ) : (
-                <DialogClose
-                  render={<Button variant="outline" className="h-11 sm:h-8" />}
-                >
+                <AlertDialogCancel key="cancel" className="h-11 sm:h-8">
                   Cancel
-                </DialogClose>
+                </AlertDialogCancel>
               )}
               {isConfirm ? (
                 <Button
+                  key="delete"
                   type="submit"
                   variant="destructive"
                   disabled={!matches || deleting}
@@ -244,14 +266,20 @@ export function ProfileDeleteDialog({
                   {deleting ? 'Deleting account…' : 'Delete my account'}
                 </Button>
               ) : (
-                <Button type="submit" variant="outline" className="h-11 sm:h-8">
+                <Button
+                  key="continue"
+                  ref={continueButtonRef}
+                  type="submit"
+                  variant="outline"
+                  className="h-11 sm:h-8"
+                >
                   Continue
                 </Button>
               )}
-            </DialogFooter>
+            </AlertDialogFooter>
           </form>
-        </DialogContent>
-      </Dialog>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
