@@ -541,6 +541,12 @@ describe('getPublicTierListBySlug', () => {
         }),
       }),
     })
+    // Slug subquery used to resolve the rows in parallel with the template
+    asMock(db.select).mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({}),
+      }),
+    })
   }
 
   const baseTpl = {
@@ -584,6 +590,7 @@ describe('getPublicTierListBySlug', () => {
 
   it('returns null when slug does not exist', async () => {
     mockNoTemplate()
+    mockRows([])
 
     const result = await getPublicTierListBySlug('nonexistent')
 
@@ -592,6 +599,7 @@ describe('getPublicTierListBySlug', () => {
 
   it('returns null when the tier list is not public (even if slug exists)', async () => {
     mockNoTemplate()
+    mockRows([])
 
     const result = await getPublicTierListBySlug('private-list')
 
@@ -600,6 +608,7 @@ describe('getPublicTierListBySlug', () => {
 
   it('returns null when slug exists but template has been deleted', async () => {
     mockNoTemplate()
+    mockRows([])
 
     const result = await getPublicTierListBySlug('deleted-list')
 

@@ -378,32 +378,46 @@ export async function getPublicTierListById(
 export async function getPublicTierListBySlug(
   slug: string
 ): Promise<TierListDetail | null> {
-  const [tpl] = await db
-    .select({
-      id: tierTemplates.id,
-      slug: tierTemplates.slug,
-      title: tierTemplates.title,
-      description: tierTemplates.description,
-      category: tierTemplates.category,
-      creatorName: user.name,
-      coverImageUrl: tierTemplates.coverImageUrl,
-      sidebarItems: tierTemplates.sidebarItems,
-      createdAt: tierTemplates.createdAt,
-      creatorId: tierTemplates.creatorId,
-      likeCount: likeCountExpr,
-    })
-    .from(tierTemplates)
-    .leftJoin(user, eq(tierTemplates.creatorId, user.id))
-    .where(and(eq(tierTemplates.slug, slug), eq(tierTemplates.isPublic, true)))
-    .limit(1)
+  const isPublicSlug = and(
+    eq(tierTemplates.slug, slug),
+    eq(tierTemplates.isPublic, true)
+  )
+  // Rows are resolved through a slug subquery so both queries run in parallel.
+  const [[tpl], rows] = await Promise.all([
+    db
+      .select({
+        id: tierTemplates.id,
+        slug: tierTemplates.slug,
+        title: tierTemplates.title,
+        description: tierTemplates.description,
+        category: tierTemplates.category,
+        creatorName: user.name,
+        coverImageUrl: tierTemplates.coverImageUrl,
+        sidebarItems: tierTemplates.sidebarItems,
+        createdAt: tierTemplates.createdAt,
+        creatorId: tierTemplates.creatorId,
+        likeCount: likeCountExpr,
+      })
+      .from(tierTemplates)
+      .leftJoin(user, eq(tierTemplates.creatorId, user.id))
+      .where(isPublicSlug)
+      .limit(1),
+    db
+      .select()
+      .from(tierRows)
+      .where(
+        inArray(
+          tierRows.templateId,
+          db
+            .select({ id: tierTemplates.id })
+            .from(tierTemplates)
+            .where(isPublicSlug)
+        )
+      )
+      .orderBy(asc(tierRows.order)),
+  ])
 
   if (!tpl) return null
-
-  const rows = await db
-    .select()
-    .from(tierRows)
-    .where(eq(tierRows.templateId, tpl.id))
-    .orderBy(asc(tierRows.order))
 
   return {
     id: tpl.id,
@@ -426,6 +440,14 @@ export async function getPublicTierListBySlug(
     })),
   }
 }
+
+// Shared by the public page and its OG image; toggle-like and list mutations
+// revalidate the publicTierLists tag, so like counts and edits stay fresh.
+export const getCachedPublicTierListBySlug = unstable_cache(
+  getPublicTierListBySlug,
+  ['public-tier-list-by-slug'],
+  { revalidate: 60, tags: [CACHE_TAGS.publicTierLists] }
+)
 
 export const getDistinctPublicCategories = unstable_cache(
   async (): Promise<string[]> => {

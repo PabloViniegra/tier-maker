@@ -49,9 +49,12 @@ export const metadata: Metadata = {
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 
+// Mono only styles secondary figures and hints, so it shouldn't compete with
+// the critical fonts for preload bandwidth.
 const fontMono = Geist_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
+  preload: false,
 })
 
 const calSans = localFont({

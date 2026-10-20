@@ -19,6 +19,8 @@ const nextConfig: NextConfig = {
     ]
   },
   images: {
+    // Blob uploads get a unique path each time, so optimized variants never go stale.
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       {
         protocol: 'https',

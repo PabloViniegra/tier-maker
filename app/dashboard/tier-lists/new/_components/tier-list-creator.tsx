@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { DragDropContext } from '@hello-pangea/dnd'
 import { Plus } from 'lucide-react'
@@ -20,12 +21,18 @@ import { MetadataPanel } from './metadata-panel'
 import { ItemBank } from './item-bank'
 import { TierBoard } from './tier-board'
 import { SaveBar } from './save-bar'
-import { ImageLabelModal, type LabeledFile } from './image-label-modal'
+import type { LabeledFile } from './image-label-modal'
 import { uploadImagesAction, createTierListAction } from '../actions'
 import { updateTierListStructureAction } from '../../[id]/edit/actions'
 import { PageHeader } from '@/components/page-header'
 import type { UserCategoryPreset } from '@/lib/queries/user-category-presets'
 import { useUnsavedChangesGuard } from '@/lib/hooks/use-unsaved-changes-guard'
+
+// Only needed once files are picked, pasted or dropped.
+const ImageLabelModal = dynamic(
+  () => import('./image-label-modal').then((m) => m.ImageLabelModal),
+  { ssr: false }
+)
 
 type TierListCreatorProps = {
   categoryPresets: string[]
@@ -74,8 +81,10 @@ export function TierListCreator({
       initialData ? editorSnapshotFromSeed(initialData) : initialState
     )
   )
-  const editorState = useTierEditor()
-  const isDirty = serializeEditorState(editorState) !== savedSnapshot
+  // Subscribe to the derived flag so edits don't re-render the whole editor.
+  const isDirty = useTierEditor(
+    (s) => serializeEditorState(s) !== savedSnapshot
+  )
   const confirmNavigation = useUnsavedChangesGuard(isDirty)
 
   useEffect(() => {

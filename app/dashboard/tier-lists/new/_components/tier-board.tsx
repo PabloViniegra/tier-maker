@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { Droppable, Draggable } from '@hello-pangea/dnd'
 import { motion } from 'motion/react'
 import { X, Loader2, Plus, Palette } from 'lucide-react'
@@ -22,19 +23,16 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import {
-  ColorPicker,
-  ColorPickerAlpha,
-  ColorPickerEyeDropper,
-  ColorPickerFormat,
-  ColorPickerHue,
-  ColorPickerOutput,
-  ColorPickerSelection,
-} from '@/components/ui/color-picker'
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+
+// Loaded on first popover open; keeps the color library out of read-only boards.
+const TierColorPicker = dynamic(
+  () => import('./tier-color-picker').then((m) => m.TierColorPicker),
+  { ssr: false, loading: () => <div className="h-64" /> }
+)
 
 type TierRowChipProps = {
   label: string
@@ -151,20 +149,7 @@ function TierRowChip({
           className="w-64 p-3"
           initialFocus={false}
         >
-          <ColorPicker value={color} onChange={onColorChange}>
-            <ColorPickerSelection />
-            <div className="flex items-center gap-2">
-              <ColorPickerEyeDropper />
-              <div className="flex w-full flex-col gap-2">
-                <ColorPickerHue />
-                <ColorPickerAlpha />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <ColorPickerOutput />
-              <ColorPickerFormat />
-            </div>
-          </ColorPicker>
+          <TierColorPicker value={color} onChange={onColorChange} />
         </PopoverContent>
       </Popover>
 

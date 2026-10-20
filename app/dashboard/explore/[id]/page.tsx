@@ -26,15 +26,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DashboardExploreTierFillPage({ params }: Props) {
   const { id } = await params
-  const [data, session] = await Promise.all([
+  const sessionPromise = getSession()
+  const [data, session, isLiked] = await Promise.all([
     getPublicTierList(id),
-    getSession(),
+    sessionPromise,
+    sessionPromise.then((s) => (s ? getIsLiked(s.user.id, id) : false)),
   ])
 
   if (!data) notFound()
 
   const userId = session?.user.id ?? null
-  const isLiked = userId ? await getIsLiked(userId, data.id) : false
   const isOwner = userId !== null && data.creatorId === userId
 
   return (

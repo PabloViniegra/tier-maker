@@ -33,8 +33,10 @@ export function TierListEditor({ id, data }: Props) {
   const [savedSnapshot, setSavedSnapshot] = useState(() =>
     serializeEditorState(editorSnapshotFromSeed(data))
   )
-  const editorState = useTierEditor()
-  const isDirty = serializeEditorState(editorState) !== savedSnapshot
+  // Subscribe to the derived flag so edits don't re-render the whole editor.
+  const isDirty = useTierEditor(
+    (s) => serializeEditorState(s) !== savedSnapshot
+  )
   const confirmNavigation = useUnsavedChangesGuard(isDirty)
 
   useEffect(() => {

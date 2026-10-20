@@ -3,7 +3,7 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getSession } from '@/lib/session'
 import {
-  getPublicTierListBySlug,
+  getCachedPublicTierListBySlug,
   getPublicTierListById,
 } from '@/lib/queries/tier-templates'
 import { getIsLiked } from '@/lib/queries/tier-likes'
@@ -11,7 +11,7 @@ import { ExploreHeader } from '../_components/explore-header'
 import { AnonymousCTABanner } from '../_components/anonymous-cta-banner'
 import { PublicTierFill } from '../_components/public-tier-fill'
 
-const getPublicTierList = cache(getPublicTierListBySlug)
+const getPublicTierList = cache(getCachedPublicTierListBySlug)
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

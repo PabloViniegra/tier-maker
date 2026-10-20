@@ -10,6 +10,7 @@ import {
   unique,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 import { user } from './auth'
 import type { ImageItem } from '@/lib/validators/tier-list'
 
@@ -30,12 +31,24 @@ export const tierTemplates = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (t) => [
-    index('tier_templates_creator_id_idx').on(t.creatorId),
+    // Serves the per-creator filter and its createdAt ordering without a sort.
+    index('tier_templates_creator_id_created_at_idx').on(
+      t.creatorId,
+      t.createdAt
+    ),
     index('tier_templates_is_public_created_at_idx').on(
       t.isPublic,
       t.createdAt
     ),
-    index('tier_templates_slug_idx').on(t.slug),
+    // Trigram indexes let the explore search's `ILIKE '%q%'` avoid a full scan.
+    index('tier_templates_title_trgm_idx').using(
+      'gin',
+      sql`${t.title} gin_trgm_ops`
+    ),
+    index('tier_templates_description_trgm_idx').using(
+      'gin',
+      sql`${t.description} gin_trgm_ops`
+    ),
   ]
 )
 

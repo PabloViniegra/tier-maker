@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og'
-import { getPublicTierListBySlug } from '@/lib/queries/tier-templates'
+import { getCachedPublicTierListBySlug } from '@/lib/queries/tier-templates'
 
 export const size = {
   width: 1200,
@@ -24,7 +24,7 @@ export default async function OgImage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const data = await getPublicTierListBySlug(slug)
+  const data = await getCachedPublicTierListBySlug(slug)
 
   if (!data) {
     return new ImageResponse(
