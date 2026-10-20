@@ -1,6 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { betterAuth } from 'better-auth'
 import { waitUntil } from '@vercel/functions'
+import { revalidateTag } from 'next/cache'
 import * as email from './email'
 import { asMock } from '@/test/as-mock'
 
@@ -185,6 +186,17 @@ describe('auth — module shape', () => {
   it('enables authenticated account deletion', () => {
     const config = asMock(betterAuth).mock.calls[0][0]
     expect(config.user?.deleteUser?.enabled).toBe(true)
+  })
+
+  it('expires public tier list caches after account deletion', async () => {
+    const config = asMock(betterAuth).mock.calls[0][0]
+    asMock(revalidateTag).mockClear()
+
+    await config.user?.deleteUser?.afterDelete?.({ id: 'user-1' })
+
+    expect(revalidateTag).toHaveBeenCalledWith('public-tier-lists', {
+      expire: 0,
+    })
   })
 
   it('betterAuth was called with a database adapter', () => {

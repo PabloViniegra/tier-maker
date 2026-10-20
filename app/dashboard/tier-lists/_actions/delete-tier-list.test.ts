@@ -94,7 +94,9 @@ describe('deleteTierList', () => {
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard')
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/tier-lists')
     expect(revalidatePath).toHaveBeenCalledWith('/explore', 'layout')
-    expect(revalidateTag).toHaveBeenCalledWith('public-tier-lists', {})
+    expect(revalidateTag).toHaveBeenCalledWith('public-tier-lists', {
+      expire: 0,
+    })
     expect(revalidateTag).toHaveBeenCalledWith('public-categories', {})
   })
 

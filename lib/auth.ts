@@ -5,6 +5,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from './db'
 import * as schema from './db/schema'
 import { emailOTP } from 'better-auth/plugins/email-otp'
+import { revalidateExplore } from './revalidate-explore'
 import {
   sendPasswordResetEmail,
   sendVerificationEmail,
@@ -30,6 +31,9 @@ export const auth = betterAuth({
   user: {
     deleteUser: {
       enabled: true,
+      // The user's tier lists cascade-delete with the account; drop the cached
+      // public copies so they stop being served.
+      afterDelete: async () => revalidateExplore(),
     },
   },
   plugins: [
