@@ -213,7 +213,7 @@ describe('TierListCard', () => {
     render(<TierListCard {...baseProps} />)
     await openMenu(user)
     await user.click(screen.getByText('Delete'))
-    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+    expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
   })
 
   it('confirmation dialog displays the tier list title', async () => {
@@ -221,7 +221,7 @@ describe('TierListCard', () => {
     render(<TierListCard {...baseProps} />)
     await openMenu(user)
     await user.click(screen.getByText('Delete'))
-    const dialog = await screen.findByRole('dialog')
+    const dialog = await screen.findByRole('alertdialog')
     expect(within(dialog).getByText('My Anime Rankings')).toBeInTheDocument()
   })
 
@@ -230,10 +230,10 @@ describe('TierListCard', () => {
     render(<TierListCard {...baseProps} />)
     await openMenu(user)
     await user.click(screen.getByText('Delete'))
-    const dialog = await screen.findByRole('dialog')
+    const dialog = await screen.findByRole('alertdialog')
     await user.click(within(dialog).getByText('Cancel'))
     await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     })
   })
 
@@ -242,11 +242,11 @@ describe('TierListCard', () => {
     render(<TierListCard {...baseProps} />)
     await openMenu(user)
     await user.click(screen.getByText('Delete'))
-    const dialog = await screen.findByRole('dialog')
+    const dialog = await screen.findByRole('alertdialog')
     await user.click(within(dialog).getByRole('button', { name: /^delete$/i }))
     await waitFor(() => {
       expect(deleteAction.deleteTierList).toHaveBeenCalledWith('abc-123')
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     })
   })
 
@@ -261,7 +261,7 @@ describe('TierListCard', () => {
     render(<TierListCard {...baseProps} />)
     await openMenu(user)
     await user.click(screen.getByText('Delete'))
-    const dialog = await screen.findByRole('dialog')
+    const dialog = await screen.findByRole('alertdialog')
     const confirmDeleteButton = within(dialog).getByRole('button', {
       name: /^delete$/i,
     })
@@ -274,7 +274,7 @@ describe('TierListCard', () => {
 
     resolveDelete({ ok: true })
     await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     })
   })
 
@@ -283,7 +283,7 @@ describe('TierListCard', () => {
     render(<TierListCard {...baseProps} />)
     await openMenu(user)
     await user.click(screen.getByText('Delete'))
-    const dialog = await screen.findByRole('dialog')
+    const dialog = await screen.findByRole('alertdialog')
     await user.click(within(dialog).getByRole('button', { name: /^delete$/i }))
 
     await waitFor(() => {
@@ -292,7 +292,7 @@ describe('TierListCard', () => {
     expect(toast.error).not.toHaveBeenCalled()
   })
 
-  it('shows an error toast and keeps dialog open on deletion failure', async () => {
+  it('shows an inline error and keeps dialog open on deletion failure', async () => {
     asMock(deleteAction.deleteTierList).mockRejectedValue(
       new Error('Database error')
     )
@@ -300,13 +300,13 @@ describe('TierListCard', () => {
     render(<TierListCard {...baseProps} />)
     await openMenu(user)
     await user.click(screen.getByText('Delete'))
-    const dialog = await screen.findByRole('dialog')
+    const dialog = await screen.findByRole('alertdialog')
     await user.click(within(dialog).getByRole('button', { name: /^delete$/i }))
 
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Failed to delete tier list')
-    })
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+      /couldn't delete this tier list/i
+    )
     expect(toast.success).not.toHaveBeenCalled()
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument()
   })
 })

@@ -162,7 +162,7 @@ export function MetadataPanel({
           >
             Title
           </Label>
-          <span className="text-[11px] text-muted-foreground tabular-nums">
+          <span className="text-xs text-muted-foreground tabular-nums">
             {metadata.title.length}/80
           </span>
         </div>
@@ -421,7 +421,7 @@ export function MetadataPanel({
               </label>
             ))}
           </div>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {metadata.isPublic
               ? 'Anyone can find it on Explore.'
               : 'Only you can see it.'}
@@ -454,7 +454,7 @@ export function MetadataPanel({
               >
                 Description
               </Label>
-              <span className="text-[11px] text-muted-foreground tabular-nums">
+              <span className="text-xs text-muted-foreground tabular-nums">
                 {metadata.description.length}/500
               </span>
             </div>

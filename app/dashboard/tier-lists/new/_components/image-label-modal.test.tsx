@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeAll } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ImageLabelModal } from './image-label-modal'
 
@@ -7,6 +7,11 @@ function makeFile(name = 'cake.png'): File {
 }
 
 describe('ImageLabelModal', () => {
+  beforeAll(() => {
+    URL.createObjectURL = vi.fn(() => 'blob:preview')
+    URL.revokeObjectURL = vi.fn()
+  })
+
   it('renders one input per file', () => {
     const files = [makeFile('a.png'), makeFile('b.png')]
     render(
@@ -15,7 +20,7 @@ describe('ImageLabelModal', () => {
     expect(screen.getAllByRole('textbox')).toHaveLength(2)
   })
 
-  it('shows the file name as input placeholder', () => {
+  it('prefills each label from its file name', () => {
     render(
       <ImageLabelModal
         files={[makeFile('strawberry-cake.png')]}
@@ -23,31 +28,52 @@ describe('ImageLabelModal', () => {
         onCancel={vi.fn()}
       />
     )
+    expect(screen.getByRole('textbox')).toHaveValue('strawberry cake')
+    expect(screen.getByRole('button', { name: /add image/i })).toBeEnabled()
+  })
+
+  it('falls back to the file name when a label is cleared', () => {
+    const onConfirm = vi.fn()
+    const files = [makeFile('a.png'), makeFile('b.png')]
+    render(
+      <ImageLabelModal files={files} onConfirm={onConfirm} onCancel={vi.fn()} />
+    )
+    const inputs = screen.getAllByRole('textbox')
+    fireEvent.change(inputs[0], { target: { value: 'A cake' } })
+    fireEvent.change(inputs[1], { target: { value: '  ' } })
+    fireEvent.click(screen.getByRole('button', { name: /add 2 images/i }))
+    expect(onConfirm).toHaveBeenCalledWith([
+      { file: files[0], label: 'A cake' },
+      { file: files[1], label: 'b' },
+    ])
+  })
+
+  it('submits with Enter from a label input', () => {
+    const onConfirm = vi.fn()
+    render(
+      <ImageLabelModal
+        files={[makeFile('pie.png')]}
+        onConfirm={onConfirm}
+        onCancel={vi.fn()}
+      />
+    )
+    fireEvent.submit(screen.getByRole('textbox').closest('form')!)
+    expect(onConfirm).toHaveBeenCalledWith([
+      { file: expect.any(File), label: 'pie' },
+    ])
+  })
+
+  it('names each input after its file', () => {
+    render(
+      <ImageLabelModal
+        files={[makeFile('tart.png')]}
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    )
     expect(
-      screen.getByPlaceholderText('strawberry-cake.png')
+      screen.getByRole('textbox', { name: 'Label for tart.png' })
     ).toBeInTheDocument()
-  })
-
-  it('confirm button is disabled when any label is empty', () => {
-    const files = [makeFile('a.png'), makeFile('b.png')]
-    render(
-      <ImageLabelModal files={files} onConfirm={vi.fn()} onCancel={vi.fn()} />
-    )
-    const inputs = screen.getAllByRole('textbox')
-    fireEvent.change(inputs[0], { target: { value: 'A cake' } })
-    // second input still empty
-    expect(screen.getByRole('button', { name: /upload/i })).toBeDisabled()
-  })
-
-  it('confirm button is enabled when all labels are filled', () => {
-    const files = [makeFile('a.png'), makeFile('b.png')]
-    render(
-      <ImageLabelModal files={files} onConfirm={vi.fn()} onCancel={vi.fn()} />
-    )
-    const inputs = screen.getAllByRole('textbox')
-    fireEvent.change(inputs[0], { target: { value: 'A cake' } })
-    fireEvent.change(inputs[1], { target: { value: 'B cake' } })
-    expect(screen.getByRole('button', { name: /upload/i })).not.toBeDisabled()
   })
 
   it('calls onConfirm with {file, label}[] pairs when confirmed', () => {
@@ -59,7 +85,7 @@ describe('ImageLabelModal', () => {
     const inputs = screen.getAllByRole('textbox')
     fireEvent.change(inputs[0], { target: { value: 'Lemon tart' } })
     fireEvent.change(inputs[1], { target: { value: 'Apple pie' } })
-    fireEvent.click(screen.getByRole('button', { name: /upload/i }))
+    fireEvent.click(screen.getByRole('button', { name: /add 2 images/i }))
     expect(onConfirm).toHaveBeenCalledOnce()
     expect(onConfirm).toHaveBeenCalledWith([
       { file: files[0], label: 'Lemon tart' },

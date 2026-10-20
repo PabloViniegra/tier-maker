@@ -18,14 +18,16 @@ export function PrivacyModal() {
       <DialogTrigger className="text-foreground/80 transition-colors hover:text-foreground">
         Privacy Policy
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto overscroll-contain sm:max-w-2xl">
+      <DialogContent className="flex max-h-[85dvh] flex-col overflow-hidden sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Privacy Policy</DialogTitle>
           <DialogDescription>
             Last updated {formatLongDate(LEGAL_UPDATED_AT)}.
           </DialogDescription>
         </DialogHeader>
-        <LegalSections sections={privacySections} />
+        <div className="-mx-4 min-h-0 overflow-y-auto overscroll-contain px-4">
+          <LegalSections sections={privacySections} />
+        </div>
       </DialogContent>
     </Dialog>
   )
