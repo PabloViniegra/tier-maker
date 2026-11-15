@@ -45,10 +45,14 @@ export function GoogleButton({
   const handleGoogleSignIn = async () => {
     setPending(true)
     try {
-      await authClient.signIn.social({
+      const result = await authClient.signIn.social({
         provider: 'google',
         callbackURL: '/dashboard',
       })
+      if (result.error) {
+        setPending(false)
+        toast.error('Something went wrong. Please try again.')
+      }
     } catch {
       setPending(false)
       toast.error('Something went wrong. Please try again.')

@@ -43,6 +43,26 @@ describe('LikeButton', () => {
     await waitFor(() => expect(screen.getByText('6')).toBeInTheDocument())
   })
 
+  it('prevents overlapping toggles while the first request is pending', async () => {
+    let resolveLike!: (value: { liked: boolean }) => void
+    asMock(toggleLikeAction.toggleLike).mockReturnValue(
+      new Promise((resolve) => {
+        resolveLike = resolve
+      })
+    )
+    render(<LikeButton {...baseProps} />)
+    const button = screen.getByRole('button')
+
+    fireEvent.click(button)
+    expect(button).toBeDisabled()
+    fireEvent.click(button)
+    expect(toggleLikeAction.toggleLike).toHaveBeenCalledTimes(1)
+
+    resolveLike({ liked: true })
+    await waitFor(() => expect(button).toBeEnabled())
+    expect(screen.getByText('6')).toBeInTheDocument()
+  })
+
   it('links to sign-in when unauthenticated', () => {
     render(<LikeButton {...baseProps} isAuthenticated={false} />)
 

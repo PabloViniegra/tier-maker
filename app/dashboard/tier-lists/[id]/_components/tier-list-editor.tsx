@@ -56,6 +56,10 @@ export function TierListEditor({ id, data }: Props) {
     const unsubscribe = useTierEditor.subscribe(() => {
       if (!seeded) return
       if (debounceTimer) clearTimeout(debounceTimer)
+      if (savedTimerRef.current) {
+        clearTimeout(savedTimerRef.current)
+        savedTimerRef.current = null
+      }
       setSaveState('saving')
       debounceTimer = setTimeout(async () => {
         debounceTimer = null

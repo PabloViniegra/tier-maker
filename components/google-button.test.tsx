@@ -48,4 +48,49 @@ describe('GoogleButton', () => {
     )
     expect(button).not.toBeDisabled()
   })
+
+  it('allows retry when Google returns an error response', async () => {
+    const user = userEvent.setup()
+    const { authClient } = await import('@/lib/auth-client')
+    const { toast } = await import('sonner')
+    asMock(toast.error).mockClear()
+    asMock(authClient.signIn.social).mockResolvedValueOnce({
+      data: null,
+      error: { message: 'Provider unavailable', status: 503 },
+    })
+    render(<GoogleButton />)
+    const button = screen.getByRole('button', { name: /continue with google/i })
+
+    await user.click(button)
+
+    expect(toast.error).toHaveBeenCalledWith(
+      'Something went wrong. Please try again.'
+    )
+    expect(button).toBeEnabled()
+    expect(button).toHaveAttribute('aria-busy', 'false')
+
+    asMock(authClient.signIn.social).mockReturnValueOnce(new Promise(() => {}))
+    await user.click(button)
+    expect(button).toBeDisabled()
+    expect(button).toHaveAttribute('aria-busy', 'true')
+  })
+
+  it('stays busy while a successful response redirects to Google', async () => {
+    const user = userEvent.setup()
+    const { authClient } = await import('@/lib/auth-client')
+    const { toast } = await import('sonner')
+    asMock(toast.error).mockClear()
+    asMock(authClient.signIn.social).mockResolvedValueOnce({
+      data: { url: 'https://accounts.google.com', redirect: true },
+      error: null,
+    })
+    render(<GoogleButton />)
+    const button = screen.getByRole('button', { name: /continue with google/i })
+
+    await user.click(button)
+
+    expect(button).toBeDisabled()
+    expect(button).toHaveAttribute('aria-busy', 'true')
+    expect(toast.error).not.toHaveBeenCalled()
+  })
 })

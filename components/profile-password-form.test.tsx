@@ -104,6 +104,32 @@ describe('ProfilePasswordForm', () => {
     })
   })
 
+  it('does not allow leaving the code step while verification is pending', async () => {
+    let resolveVerification!: (value: {
+      data: { success: boolean }
+      error: null
+    }) => void
+    asMock(authClient.emailOtp.checkVerificationOtp).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveVerification = resolve
+        })
+    )
+    const user = userEvent.setup()
+    render(<ProfilePasswordForm email="user@example.com" />)
+    await user.click(screen.getByRole('button', { name: /send code/i }))
+    await user.type(
+      await screen.findByLabelText(/verification code/i),
+      '482193'
+    )
+    const verify = screen.getByRole('button', { name: /verify code/i })
+    await user.click(verify)
+    expect(screen.getByRole('button', { name: /back/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /resend code/i })).toBeDisabled()
+    resolveVerification({ data: { success: true }, error: null })
+    expect(await screen.findByText(/step 3 of 3/i)).toBeInTheDocument()
+  })
+
   it('resends the code without leaving the verification step', async () => {
     const user = userEvent.setup()
     render(<ProfilePasswordForm email="user@example.com" />)

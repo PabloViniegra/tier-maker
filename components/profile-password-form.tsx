@@ -402,6 +402,7 @@ export function ProfilePasswordForm({ email }: { email: string }) {
               type="button"
               variant="ghost"
               onClick={goBack}
+              disabled={verifying || sending}
               className="h-11 sm:h-8"
             >
               Back
@@ -410,7 +411,7 @@ export function ProfilePasswordForm({ email }: { email: string }) {
               type="button"
               variant="ghost"
               onClick={sendCode}
-              disabled={sending}
+              disabled={sending || verifying}
               aria-busy={sending}
               className="h-11 sm:h-8"
             >

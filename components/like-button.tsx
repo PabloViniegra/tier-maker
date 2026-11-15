@@ -37,7 +37,7 @@ export function LikeButton({
   showTooltip = false,
 }: Props) {
   const router = useRouter()
-  const [, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition()
   const [state, setState] = useState({
     count: initialCount,
     isLiked: initialIsLiked,
@@ -94,6 +94,7 @@ export function LikeButton({
     <button
       type="button"
       onClick={handleClick}
+      disabled={isPending}
       aria-label={accessibleLabel}
       className={likeClassName(state.isLiked, iconOnly)}
     >
