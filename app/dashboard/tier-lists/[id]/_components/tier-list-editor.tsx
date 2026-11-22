@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, ViewTransition } from 'react'
 import { DragDropContext } from '@hello-pangea/dnd'
 import { toast } from 'sonner'
 import {
@@ -13,6 +13,7 @@ import {
 import { useTierDnd } from '@/lib/hooks/use-tier-dnd'
 import { createSerializedSaver } from '@/lib/utils/serialized-save'
 import { TierBoard } from '@/app/dashboard/tier-lists/new/_components/tier-board'
+import { tierBoardTransitionName } from '@/lib/utils/view-transitions'
 import { updateTierListAction } from '../actions'
 import { ItemBankStrip } from './item-bank-strip'
 import { SaveIndicator, type SaveState } from './save-indicator'
@@ -117,7 +118,13 @@ export function TierListEditor({ id, data }: Props) {
       <DragDropContext onDragEnd={onDragEnd}>
         {/* Board — scrollable */}
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <TierBoard rowMinHeight="24" boardRef={boardRef} mode="fill" />
+          <ViewTransition
+            name={tierBoardTransitionName(id)}
+            share="board-morph"
+            default="none"
+          >
+            <TierBoard rowMinHeight="24" boardRef={boardRef} mode="fill" />
+          </ViewTransition>
         </div>
 
         {/* Item bank — pinned at bottom */}

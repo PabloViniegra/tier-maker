@@ -42,9 +42,9 @@ const statDefs: StatsCardDef[] = [
 
 export function StatsCardsSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.5fr_1fr_1fr]">
+    <div className="grid grid-cols-1 divide-y divide-border rounded-xl border border-border bg-surface sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:grid-cols-1 lg:divide-x-0 lg:divide-y">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="rounded-lg border border-border bg-surface p-4">
+        <div key={i} className="p-4">
           <Skeleton className="mb-2 h-3 w-16" />
           <Skeleton className="mb-1.5 h-7 w-12" />
           <Skeleton className="h-3 w-20" />
@@ -70,7 +70,7 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
 
   return (
     <motion.div
-      className="grid grid-cols-1 gap-3 sm:grid-cols-[1.5fr_1fr_1fr]"
+      className="grid grid-cols-1 divide-y divide-border rounded-xl border border-border bg-surface sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:grid-cols-1 lg:divide-x-0 lg:divide-y"
       initial="hidden"
       animate="visible"
     >
@@ -88,7 +88,7 @@ export function StatsCards({ stats }: { stats: TierListStats }) {
             key={key}
             variants={fadeUpVariants}
             custom={i * STAGGER_DELAY}
-            className="rounded-lg border border-border bg-surface p-4"
+            className="p-4"
           >
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">{label}</p>

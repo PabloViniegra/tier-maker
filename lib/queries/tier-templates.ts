@@ -241,6 +241,79 @@ export async function getRecentTierLists(
   }))
 }
 
+export type TierRowPreview = {
+  id: string
+  label: string
+  color: string
+  items: ImageItem[]
+  itemCount: number
+}
+
+export type TierBoardPreview = {
+  templateId: string
+  rows: TierRowPreview[]
+  bank: ImageItem[]
+  bankCount: number
+}
+
+export async function getLatestTierBoardPreview(
+  userId: string,
+  itemsPerRow = 8
+): Promise<TierBoardPreview | null> {
+  const joined = await db
+    .select({
+      templateId: tierTemplates.id,
+      sidebarItems: tierTemplates.sidebarItems,
+      rowId: tierRows.id,
+      label: tierRows.label,
+      color: tierRows.color,
+      items: tierRows.items,
+    })
+    .from(tierTemplates)
+    .leftJoin(tierRows, eq(tierRows.templateId, tierTemplates.id))
+    .where(
+      and(
+        eq(tierTemplates.creatorId, userId),
+        eq(
+          tierTemplates.createdAt,
+          sql`(SELECT max(${tierTemplates.createdAt}) FROM ${tierTemplates} WHERE ${tierTemplates.creatorId} = ${userId})`
+        )
+      )
+    )
+    .orderBy(asc(tierRows.order))
+
+  const first = joined[0]
+  if (!first) return null
+  // Equal createdAt timestamps can match two templates; keep one.
+  const own = joined.filter((r) => r.templateId === first.templateId)
+
+  const rows = own.flatMap((r) =>
+    r.rowId
+      ? [
+          {
+            id: r.rowId,
+            label: r.label ?? '',
+            color: r.color ?? '',
+            items: r.items ?? [],
+          },
+        ]
+      : []
+  )
+  const ranked = new Set(rows.flatMap((r) => r.items.map((i) => i.url)))
+  const bank = (first.sidebarItems ?? []).filter((i) => !ranked.has(i.url))
+
+  return {
+    templateId: first.templateId,
+    rows: rows.map((r) => ({
+      ...r,
+      items: r.items.slice(0, itemsPerRow),
+      itemCount: r.items.length,
+    })),
+    bank: bank.slice(0, itemsPerRow * 2),
+    bankCount: bank.length,
+  }
+}
+
 export async function getAllUserTierLists(
   userId: string
 ): Promise<(TierListSummary & { likeCount: number })[]> {

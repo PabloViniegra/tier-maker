@@ -163,7 +163,7 @@
 }
 
 /* View Transitions — circular mask theme switch */
-::view-transition-new(root) {
+html.theme-transition::view-transition-new(root) {
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='white'/%3E%3C/svg%3E");
   mask-position: center;
   mask-size: 0px;
@@ -171,7 +171,7 @@
   animation: theme-reveal 1s both;
 }
 
-::view-transition-old(root) {
+html.theme-transition::view-transition-old(root) {
   animation: none;
   z-index: -1;
 }
@@ -204,5 +204,21 @@
     --tw-enter-scale: 1;
     --tw-exit-scale: 1;
     --tw-duration: 150ms;
+  }
+}
+
+/* Dashboard board → editor morph */
+::view-transition-group(.board-morph) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-image-pair(.board-morph) {
+  animation-name: board-morph-blur;
+}
+
+@keyframes board-morph-blur {
+  35% {
+    filter: blur(3px);
   }
 }

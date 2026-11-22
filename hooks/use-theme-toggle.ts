@@ -1,10 +1,11 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { useTheme } from 'next-themes'
 
 export function useThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
+  const activeTransition = useRef<ViewTransition | null>(null)
 
   const toggleTheme = useCallback(() => {
     const next = resolvedTheme === 'dark' ? 'light' : 'dark'
@@ -15,7 +16,15 @@ export function useThemeToggle() {
     }
 
     if (document.startViewTransition) {
-      document.startViewTransition(apply)
+      const root = document.documentElement
+      root.classList.add('theme-transition')
+      const transition = document.startViewTransition(apply)
+      activeTransition.current = transition
+      transition.finished.finally(() => {
+        if (activeTransition.current !== transition) return
+        activeTransition.current = null
+        root.classList.remove('theme-transition')
+      })
     } else {
       apply()
     }

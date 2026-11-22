@@ -249,3 +249,46 @@ export const iconSwapVariants: Variants = {
     transition: { type: 'spring', duration: 0.3, bounce: 0 },
   },
 }
+
+export const TIER_ITEM_STAGGER = 0.035
+export const TIER_ITEM_MAX_STAGGER = 8
+
+export function tierItemDelay(rowIndex: number, itemIndex: number): number {
+  return (
+    staggerIndex(rowIndex) * STAGGER_DELAY +
+    Math.min(itemIndex, TIER_ITEM_MAX_STAGGER) * TIER_ITEM_STAGGER
+  )
+}
+
+export const tierItemDropVariants = {
+  hidden: { opacity: 0, y: -12, scale: 0.8, filter: 'blur(4px)' },
+  visible: (delay: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: {
+      ...heroDemoLayoutTransition,
+      delay,
+      opacity: { duration: 0.16, ease: EASE_SMOOTH, delay },
+      filter: { duration: 0.2, ease: EASE_SMOOTH, delay },
+    },
+  }),
+} satisfies Variants
+
+export const tierChipStampVariants = {
+  hidden: { opacity: 0, scale: 0.6 },
+  visible: (delay: number = 0) => ({
+    opacity: 1,
+    scale: 1,
+    transition: { ...springTransition, delay },
+  }),
+} satisfies Variants
+
+export const tierDistributionVariants = {
+  hidden: { scaleX: 0 },
+  visible: (delay: number = 0) => ({
+    scaleX: 1,
+    transition: { duration: 0.6, ease: EASE_SMOOTH, delay },
+  }),
+} satisfies Variants

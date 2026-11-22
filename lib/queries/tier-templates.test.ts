@@ -6,6 +6,7 @@ import {
   getTierListById,
   getPublicTierListBySlug,
   getProfileStats,
+  getLatestTierBoardPreview,
 } from './tier-templates'
 import { db } from '@/lib/db'
 import { asMock } from '@/test/as-mock'
@@ -718,5 +719,128 @@ describe('getProfileStats', () => {
 
     expect(result.created).toBe(50)
     expect(result.published).toBe(10)
+  })
+})
+
+describe('getLatestTierBoardPreview', () => {
+  const item = (n: number) => ({ url: `https://blob/${n}.png`, label: `${n}` })
+
+  function mockJoined(rows: unknown[]) {
+    asMock(db.select).mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        leftJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue(rows),
+          }),
+        }),
+      }),
+    })
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns null when the user has no tier lists', async () => {
+    mockJoined([])
+
+    expect(await getLatestTierBoardPreview('user-1')).toBeNull()
+  })
+
+  it('treats catalogue items not placed in any row as the bank', async () => {
+    const catalogue = [item(1), item(2), item(3)]
+    mockJoined([
+      {
+        templateId: 't1',
+        sidebarItems: catalogue,
+        rowId: 'r1',
+        label: 'S',
+        color: '#f00',
+        items: [item(1)],
+      },
+      {
+        templateId: 't1',
+        sidebarItems: catalogue,
+        rowId: 'r2',
+        label: 'A',
+        color: '#0f0',
+        items: [],
+      },
+    ])
+
+    const result = await getLatestTierBoardPreview('user-1')
+
+    expect(result?.templateId).toBe('t1')
+    expect(result?.rows.map((r) => [r.label, r.itemCount])).toEqual([
+      ['S', 1],
+      ['A', 0],
+    ])
+    expect(result?.bank).toEqual([item(2), item(3)])
+    expect(result?.bankCount).toBe(2)
+  })
+
+  it('caps preview items but keeps the full counts', async () => {
+    const ranked = Array.from({ length: 20 }, (_, i) => item(i))
+    const waiting = Array.from({ length: 20 }, (_, i) => item(100 + i))
+    mockJoined([
+      {
+        templateId: 't1',
+        sidebarItems: [...ranked, ...waiting],
+        rowId: 'r1',
+        label: 'S',
+        color: '#f00',
+        items: ranked,
+      },
+    ])
+
+    const result = await getLatestTierBoardPreview('user-1', 8)
+
+    expect(result?.rows[0].items).toHaveLength(8)
+    expect(result?.rows[0].itemCount).toBe(20)
+    expect(result?.bank).toHaveLength(16)
+    expect(result?.bankCount).toBe(20)
+  })
+
+  it('returns no rows for a list without tiers', async () => {
+    mockJoined([
+      {
+        templateId: 't1',
+        sidebarItems: [item(1)],
+        rowId: null,
+        label: null,
+        color: null,
+        items: null,
+      },
+    ])
+
+    const result = await getLatestTierBoardPreview('user-1')
+
+    expect(result?.rows).toEqual([])
+    expect(result?.bankCount).toBe(1)
+  })
+
+  it('keeps a single template when two share the latest timestamp', async () => {
+    mockJoined([
+      {
+        templateId: 't1',
+        sidebarItems: [],
+        rowId: 'r1',
+        label: 'S',
+        color: '#f00',
+        items: [],
+      },
+      {
+        templateId: 't2',
+        sidebarItems: [],
+        rowId: 'r2',
+        label: 'S',
+        color: '#f00',
+        items: [],
+      },
+    ])
+
+    const result = await getLatestTierBoardPreview('user-1')
+
+    expect(result?.rows.map((r) => r.id)).toEqual(['r1'])
   })
 })
