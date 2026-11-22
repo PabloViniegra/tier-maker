@@ -56,7 +56,7 @@ export default async function PublicProfilePage({
   const rawPage = parseInt(sp.page ?? '1', 10)
   const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1
 
-  const [session, profile, { items }] = await Promise.all([
+  const [session, profile, { items, total }] = await Promise.all([
     getSession(),
     getPublicCreatorProfile(id),
     getPublicTierLists({
@@ -112,8 +112,8 @@ export default async function PublicProfilePage({
             <FadeUp delay={0.12} onMount>
               <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                 <p className="text-sm text-muted-foreground tabular-nums">
-                  {profile.listCount} public tier list
-                  {profile.listCount === 1 ? '' : 's'} · {profile.likeCount}{' '}
+                  {total} public tier list
+                  {total === 1 ? '' : 's'} · {profile.likeCount}{' '}
                   {profile.likeCount === 1 ? 'like' : 'likes'}
                 </p>
                 {profile.topCategories.length > 0 && (
@@ -157,7 +157,7 @@ export default async function PublicProfilePage({
           />
 
           <ExplorePagination
-            total={profile.listCount}
+            total={total}
             page={page}
             pageSize={PAGE_SIZE}
             searchParams={{}}

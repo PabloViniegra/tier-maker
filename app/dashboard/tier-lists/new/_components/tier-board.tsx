@@ -6,7 +6,7 @@ import { Droppable, Draggable } from '@hello-pangea/dnd'
 import { motion } from 'motion/react'
 import { X, Loader2, Plus, Palette } from 'lucide-react'
 import { useTierEditor } from '@/lib/stores/tier-editor'
-import { droppableIdForRow } from './constants'
+import { droppableIdForRow } from '@/lib/hooks/tier-dnd-constants'
 import { cn } from '@/lib/utils'
 import {
   dragActiveVariants,

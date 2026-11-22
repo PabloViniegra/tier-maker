@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { useTierEditor } from '@/lib/stores/tier-editor'
-import { BANK_DROPPABLE } from './constants'
+import { BANK_DROPPABLE } from '@/lib/hooks/tier-dnd-constants'
 import { ALLOWED_IMAGE_TYPES, MAX_ITEM_COUNT } from '@/lib/validators/tier-list'
 import { deleteImagesAction } from '../../_actions/delete-images'
 import { cn } from '@/lib/utils'

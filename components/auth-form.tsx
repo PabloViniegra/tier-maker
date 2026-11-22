@@ -135,6 +135,8 @@ export function LoginForm() {
         return
       }
 
+      // A full navigation guarantees the just-set session cookie reaches the dashboard layout; router.push raced it.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.assign('/dashboard')
     } catch {
       setFormError('Something went wrong. Please try again.')

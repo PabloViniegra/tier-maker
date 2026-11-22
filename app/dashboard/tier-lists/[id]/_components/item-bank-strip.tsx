@@ -4,7 +4,7 @@ import { Droppable, Draggable } from '@hello-pangea/dnd'
 import { motion } from 'motion/react'
 import { X, Loader2 } from 'lucide-react'
 import { useTierEditor } from '@/lib/stores/tier-editor'
-import { BANK_DROPPABLE } from '@/app/dashboard/tier-lists/new/_components/constants'
+import { BANK_DROPPABLE } from '@/lib/hooks/tier-dnd-constants'
 import { dragActiveVariants, hoverRevealVariants } from '@/lib/motion-variants'
 import { cn } from '@/lib/utils'
 import {

@@ -47,7 +47,7 @@ export const termsSections: LegalSection[] = [
   },
   {
     title: '8. Contact',
-    content: 'Questions about these terms can be sent to legal@tier-maker.app.',
+    content: 'Questions about these terms can be sent to legal@tiermaker.pabloviniegra.dev.',
   },
 ]
 
@@ -89,6 +89,6 @@ export const privacySections: LegalSection[] = [
   },
   {
     title: '8. Contact',
-    content: 'Privacy questions can be sent to privacy@tier-maker.app.',
+    content: 'Privacy questions can be sent to privacy@tiermaker.pabloviniegra.dev.',
   },
 ]

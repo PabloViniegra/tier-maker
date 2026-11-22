@@ -1,12 +1,11 @@
 import { configDefaults, defineConfig } from 'vitest/config'
-import tsconfigPaths from 'vite-tsconfig-paths'
 import { resolve } from 'path'
 
 const mock = (file: string) => resolve(__dirname, 'lib/__mocks__', file)
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
   resolve: {
+    tsconfigPaths: true,
     alias: [
       { find: 'server-only', replacement: mock('server-only.ts') },
       { find: /^@\/lib\/db$/, replacement: mock('db.ts') },

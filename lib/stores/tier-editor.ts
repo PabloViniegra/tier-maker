@@ -292,19 +292,6 @@ export function serializeEditorState(state: TierEditorSnapshot): string {
   })
 }
 
-export function collectSavedItemUrls(state: State): string[] {
-  const urls: string[] = []
-  for (const i of state.bankItems) {
-    if (i.status === 'uploaded' && i.url) urls.push(i.url)
-  }
-  for (const r of state.rows) {
-    for (const i of r.items) {
-      if (i.status === 'uploaded' && i.url) urls.push(i.url)
-    }
-  }
-  return urls
-}
-
 export function hasPendingUploads(state: State): boolean {
   return (
     state.bankItems.some((i) => i.status === 'uploading') ||

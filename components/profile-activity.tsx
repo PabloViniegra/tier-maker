@@ -76,11 +76,13 @@ export function ProfileActivity({ stats }: { stats: ProfileStats }) {
         <span className="font-mono font-semibold text-foreground tabular-nums">
           {stats.likesReceived}
         </span>{' '}
-        likes received
+        {stats.likesReceived === 1 ? 'like' : 'likes'} received
       </p>
-      <p className="text-xs text-pretty text-muted-foreground">
-        Sparklines show the last 14 days. Totals are all-time.
-      </p>
+      {cards.some(({ series }) => series.some((n) => n > 0)) && (
+        <p className="text-xs text-pretty text-muted-foreground">
+          Sparklines show the last 14 days. Totals are all-time.
+        </p>
+      )}
     </div>
   )
 }

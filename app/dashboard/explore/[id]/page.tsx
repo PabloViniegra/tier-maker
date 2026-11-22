@@ -43,7 +43,7 @@ export default async function DashboardExploreTierFillPage({ params }: Props) {
       tierId={id}
       userId={userId}
       backHref="/dashboard/explore"
-      shareUrl={`/dashboard/explore/${id}`}
+      shareUrl={`/explore/${data.slug}`}
       creatorHref={data.creatorId ? `/u/${data.creatorId}` : undefined}
       like={
         isOwner

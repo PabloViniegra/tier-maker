@@ -20,7 +20,7 @@ const FEATURES = [
     body: 'JPG, PNG, WEBP or GIF, picked from disk, dropped in, or pasted from the clipboard. Up to 30 items per list.',
   },
   {
-    title: 'Rows start at S to F',
+    title: 'New lists start with S to F',
     body: 'Add or remove rows, rename them, and pick any color for each one.',
   },
   {

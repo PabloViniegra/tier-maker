@@ -110,6 +110,11 @@ describe('ExploreCard', () => {
     ).not.toBeInTheDocument()
   })
 
+  it('still shows the like count to the owner', () => {
+    render(<ExploreCard {...baseProps} isOwner />)
+    expect(screen.getByText('7')).toBeInTheDocument()
+  })
+
   it('exposes the title as a heading', () => {
     render(<ExploreCard {...baseProps} />)
     expect(

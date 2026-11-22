@@ -1,6 +1,7 @@
 import { ViewTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Heart } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { LikeButton } from '@/components/like-button'
@@ -174,7 +175,13 @@ export function ExploreCard({
                 </span>
               ))}
           </div>
-          {!isOwner && (
+          {isOwner ? (
+            <span className="flex items-center gap-0.5 text-xs text-muted-foreground tabular-nums">
+              <Heart size={12} aria-hidden="true" />
+              {likeCount}
+              <span className="sr-only">likes</span>
+            </span>
+          ) : (
             <div className="relative z-20">
               <LikeButton
                 templateId={id}

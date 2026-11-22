@@ -54,6 +54,25 @@ describe('ProfileActivity', () => {
     ).toBeInTheDocument()
   })
 
+  it('uses singular copy and hides the sparkline note without recent activity', () => {
+    render(
+      <ProfileActivity
+        stats={{
+          created: 2,
+          published: 2,
+          likesReceived: 1,
+          createdSeries: new Array(14).fill(0),
+          publishedSeries: new Array(14).fill(0),
+        }}
+      />
+    )
+
+    expect(
+      screen.getByText((_, node) => node?.textContent === '1 like received')
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/sparklines show/i)).not.toBeInTheDocument()
+  })
+
   it('links list activity to list management', () => {
     render(
       <ProfileActivity

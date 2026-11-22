@@ -80,7 +80,7 @@ export function RequestPasswordResetForm() {
         <Input
           id="reset-email"
           type="email"
-          placeholder="you@example.com…"
+          placeholder="you@example.com"
           autoComplete="email"
           spellCheck={false}
           {...register('email')}

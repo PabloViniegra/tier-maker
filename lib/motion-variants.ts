@@ -100,11 +100,6 @@ export const sidebarVariants: Variants = {
   collapsed: { width: 56 },
 }
 
-export const sidebarLabelVariants: Variants = {
-  expanded: { opacity: 1, transition: { duration: 0.2, ease: EASE_SMOOTH } },
-  collapsed: { opacity: 0, transition: { duration: 0.1, ease: EASE_SMOOTH } },
-}
-
 export const cardLiftVariants = {
   hover: { y: -2, transition: springTransition },
   tap: { scale: 0.96, y: 0, transition: { duration: 0.1, ease: 'easeOut' } },
